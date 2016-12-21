@@ -1,0 +1,184 @@
+@import tags._
+
+@(user: User)
+
+@profileframe(user, 0){
+	<div class="dash-detail-header">
+		<p>个人信息</p>
+		<a id="personal-save" class="btn btn-success">保存</a>
+	</div>
+	
+	<div class="form-group">
+		<div id="avatar-wrap" class="form-label">	
+			<label>头像:</label>
+		</div>
+		<div id="avatar-uploader-wrap" class="uploader @if(user.avatars.size > 0){noborder}">
+			<a id="avatar-link" class="link-img" style="@if(user.avatars.size > 0){background-image:url('@routes.ProfileController.showAvatarThumbnail(user.avatars.get(0).thumbnailUUID)')} else{display: none;}"></a>
+			<div class="upload-wrap">
+				<i class="fa fa-picture-o" aria-hidden="true"></i>
+				<div class="upload-text">
+					<p>Drop photo here</p> 
+				  	<p class="small-p">or</p>
+				</div>
+				<a class="browse-btn @if(user.avatars.size > 0){hidden}">Browse Files</a>
+				<input id="avatar-uploader" class="file-input" type="file" name="avatar" data-url="@routes.ProfileController.uploadAvatar()"/>
+			  </div>
+		</div>
+	</div>
+	<form id="profile-personal-form">
+		<div class="form-group">
+			<div class="form-label">
+				<label>姓名:</label>
+			</div>
+			<div class="form-input">
+				<input class="form-control" name="username" value="@user.username"/>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="form-label">
+				<label>邮件地址:</label>
+			</div>
+			<div class="form-input">
+				<input class="form-control" name="email" value="@user.email" />
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="form-label">
+				<label>微信号码:</label>
+			</div>
+			<div class="form-input">
+				<input class="form-control" name="wechat" value="@user.wechat"/>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="form-label">
+				<label>QQ号码:</label>
+			</div>
+			<div class="form-input">
+				<input class="form-control" name="qq" value="@user.qq"/>
+			</div>
+		</div>	
+	</form>
+	<div class="alert alert-info profile-personal-info" role="alert">
+		<ul>
+			<li>支持jpg, png, jpeg格式的图片文件，每张图片大小不超过5M。</li>
+			<li>您可在报名成功后选择提供联系方式给机构获得更多教学服务，未经您的确认不会公开您的信息。</li>
+			<li>图片将上传到云端服务器，上传后会生成另外的一张小图，所以会需要一点时间，请耐心等待。</li>
+		</ul>
+	</div>
+	
+	<script src="@routes.Assets.versioned("javascripts/jquery.ui.widget.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/jquery.iframe-transport.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/jquery.fileupload.js")" type="text/javascript"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('#personal-save').on('click', function(){
+				$('form#profile-personal-form').submit();
+			});
+			
+			$('#avatar-uploader').fileupload({
+				dataType: 'json',
+				type: 'POST',
+				dropZone: $(this).parents('.uploader'),
+				maxFileSize: 1024 * 1024 * 5,
+				acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+				messages: {
+			        maxFileSize: 'File exceeds maximum allowed size of 5MB',
+			    },
+		        add: function (e, data) {
+		        	if (data.files && data.files[0]) {
+		                var reader = new FileReader();
+		                var inputEle = $(this);
+		                reader.onload = function(e) {
+		                	var uploaderEle = inputEle.closest('.uploader');
+		                	var uploadWrap = uploaderEle.find('.upload-wrap');
+		                	var avatarLink = uploaderEle.find('#avatar-link');
+		                	var browserLink = uploaderEle.find('.browse-btn');
+		                	var spinner = $('<i class=\'glyphicon glyphicon-refresh glyphicon-spinner\'></i>');
+		                	
+		                	uploaderEle.removeClass('noborder');
+		                	avatarLink.hide();
+		                	uploadWrap.hide();
+		                	browserLink.removeClass('hidden');
+		                	uploaderEle.append(spinner);
+		                }
+		                reader.readAsDataURL(data.files[0]);
+		                data.submit();
+		        	}
+		        },
+		        done: function (e, data) {
+		        	var uploaderEle = $(this).parents('.uploader');
+		        	var uploadWrap = uploaderEle.find('.upload-wrap');
+		        	var avatarLink = uploaderEle.find('#avatar-link');
+		        	var browserLink = uploaderEle.find('.browse-btn');
+		        	var spinner = uploaderEle.find('.glyphicon-spinner');
+		        	
+		        	uploaderEle.addClass('noborder');
+		        	avatarLink.css('background-image', 'url(\'/profile/show/avatar/thumbnail?thumbnailUUID='+ data.result.data.thumbnailUUID +'\')');
+		        	spinner.remove();
+		        	avatarLink.show();
+		        	uploadWrap.removeClass('hidden');
+		        	browserLink.hide();
+		      	},
+		        fail: function (e, data) {
+		        	console.log("Error: " + data.jqXHR.responseText);
+		        }
+		    });
+			
+			$("#profile-personal-form").validate({
+		        rules: {
+		            username:{
+		            	minlength: 3,
+		                maxlength: 50,
+		            	required:true
+		            },
+		            email:{
+		            	email:true
+		            },
+					qq:{
+						digits: true
+					}		            
+		        },
+		        highlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+		        },
+		        unhighlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+		        },
+		        submitHandler: function(form) {
+		        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+		        	$('#personal-save').append(spinner);
+		        	$('#personal-save').val('');
+		        	$('#personal-save').attr("disabled", true); 
+		        	
+		        	$.ajax({
+		                url: '@routes.ProfileController.updatePersonalProfile()',
+		                type: "POST",
+		                data: $(form).serialize(),
+		                success: function(response, status) {
+		                	var data = $.parseJSON(response);
+		                	if(data.code != 0){
+		                		showAlertToast(data.message, "alert-danger");
+		                	}else{
+		                		showAlertToast(data.message, "alert-success");
+		                	}
+		                	
+		                	spinner.remove();
+		                	$('#personal-save').attr("disabled", false);
+		                	$('#personal-save').val('保存');
+		                },
+		                error: function(request, status, err){
+		                	showAlertToast(err, "alert-danger");
+		                	spinner.remove();
+		                	$('#personal-save').attr("disabled", false);
+		                	$('#personal-save').val('保存');
+		                }
+	                });
+		        }
+		    });
+	   	});
+	</script>
+}

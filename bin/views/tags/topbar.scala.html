@@ -1,0 +1,45 @@
+@(account: Account)
+
+<div id="top-bar">
+   	<a id="logo_link">
+   		School Logo Image
+   	</a>
+   	<div id="js-mod-header-login" class="mod-header__wrap-login">
+    	@if(account == null) {
+		  	<a href="javascript:void(0)" class="mod-header__link-login js-login-op" id="js_login" data-toggle="modal" data-target="#entry-model">登录</a>
+		} else {
+			<div class="mod-header_wrap-user">
+				<i class="icon-red-circle" style="display:none;"></i>
+				<a style="background-image:url('https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQS0xA9MjnSvsaLL0rSP-M2qU_xTGlHTYxG-l6eVqBBb7gsCwfQiQ');" class="mod-header__user-img link-img"></a>
+				<p class="mod-header__user-name">
+					<a href="/user/index/index.html" class="mod-header__user-operation">个人中心</a>
+				</p>
+				<ul class="mod-header__user-operations">
+					<li><a href="@routes.ProfileController.personalProfile()">个人资料</a></li>
+					<li><a href="@routes.ProfileController.myLessons()">我的课程</a></li>
+					<li><a href="@routes.LessonController.editLesson(20)">收藏列表</a></li>
+					
+					<li><a href="@routes.LessonController.editLesson(20)">课程管理</a></li>
+					<li><a href="@routes.LessonController.editLesson(20)">学员管理</a></li>
+					<li><a href="@routes.HomeController.logout()" class="mod-header__link-logout">退出</a></li>	
+				</ul>
+			</div>
+		}
+		<div class="apply-entrance js-apply-entrance">
+				<p class="apply-tt">我要开课</p>
+				<ul class="apply-link-list">
+					<li>
+						<a href="javascript:void(0)" title="教育机构开课">教育机构开课</a>
+					</li>
+					<li>
+						@if(account != null && account.user.role.equals(Role.TEACHER)){
+							<a href="javascript:void(0)" title="个人老师开课" data-toggle="modal" data-target="#create-lesson-model">个人老师开课</a>
+						}else{
+							<a href="@routes.ProfileController.readTeacherAgreement()" title="个人老师开课">个人老师开课</a>
+						}
+					</li>
+				</ul>
+			</div>
+		<a id="js-help" href="javascript:void(0)" class="mod-header__link-help">帮助</a>
+	</div>
+</div>

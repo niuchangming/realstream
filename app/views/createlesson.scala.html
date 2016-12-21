@@ -1,0 +1,126 @@
+@import tags._
+
+@(lesson: Lesson, categories: List[Category])
+
+@createlessonframe(lesson, 0){
+	<script type="text/javascript">
+		$(function(){
+			var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+			
+			$('input.category').on('click', function(){
+				$('.category-lbl.selected').removeClass('selected');
+	       		$(this).parent().addClass('selected');
+	       	});
+			
+			$('#lesson-desc').editable({inlineMode: true});
+			
+			$("#lesson-basic-form").validate({
+		        rules: {
+		        	title:{
+		            	minlength: 5,
+		                maxlength: 50,
+		            	required:true
+		            },
+		        	description:{
+		        		required:true
+		            }
+		        },
+		        highlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+		        },
+		        unhighlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+		        },
+		        submitHandler: function(form, event) {
+		        	event.preventDefault();
+		        	
+		        	$('#lesson-desc-error').remove();
+		        	if (!$.trim($("#lesson-desc").val())) {
+		        		var errLbl = $('<label id="lesson-desc-error" class="error" for="lesson-desc">This field is required.</label>');
+			        	$('#lesson-desc').after(errLbl);
+			        	return;
+		        	}
+		        		
+		        	$('#save-lesson-btn').after(spinner);
+		        	$('#save-lesson-btn').attr("disabled", true);
+		        	$('#save-lesson-btn').text("");
+		        	
+		        	$.ajax({
+		                url: "@routes.LessonController.saveLessonBasicInfo()",
+		                type: "POST",
+		                data: $(form).serialize(),
+		                success: function(response, status) {
+		                	var data = $.parseJSON(JSON.stringify(response));
+		                	if(data.error){
+		                		showAlertToast(data.error, "alert-danger");
+		                	}else{
+		                		showAlertToast("Task has been saved successfully.", "alert-success");
+		                	}
+		                	spinner.remove();
+		                	$('#save-lesson-btn').attr("disabled", false);
+		                	$('#save-lesson-btn').text("修改保存");
+		                },
+		                error: function(request, status, err){
+		                	showAlertToast(err, "alert-danger");
+		                	spinner.remove();
+		                	$('#save-lesson-btn').attr("disabled", false);
+		                	$('#save-lesson-btn').text("修改保存");
+		                }
+		            });
+		        }
+		    });
+			
+	   	});
+	</script>
+	<div class="dash-detail-header">
+		<p class="lesson-sec-title">基本信息</p>
+	</div>
+	<form id="lesson-basic-form" action="@routes.LessonController.saveLessonBasicInfo()" method="POST">
+		<input type="hidden" name="id" value="@lesson.id"/>
+		<div class="form-group">
+			<div class="form-label">
+				<label for="lesson-title">课程名称:</label>
+			</div>
+			<div class="form-input">
+				<input id="lesson-title" type="text" class="form-control" name="title" placeholder="课程名称" value="@lesson.title">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="form-label">
+				<label for="lesson-desc">课程描述:</label>
+			</div>
+			<div class="form-input">
+				<textarea id="lesson-desc" class="form-control" name="description" rows="4" placeholder="您需要描述一下课程的具体内容">@lesson.description</textarea>
+			</div>
+		</div>
+		
+		<div id="lesson-category-wrap" class="form-group">
+			<div class="form-label">
+				<label>课程类型:</label>
+			</div>
+			
+			<div class="form-input">
+				@for(index <- 0 until categories.size) {
+					@if(index == 0 && lesson.category == null){
+				        <label class="category-lbl selected">
+				        <input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				    }else{
+				    	@if(lesson.category != null && lesson.category.id.equals(categories(index).id)){
+				    		<label class="category-lbl selected">
+				    		<input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				    	}else{
+				    		<label class="category-lbl">
+				    		<input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				    	}
+				    }
+						<a class="radio-box">@categories(index).name
+							<i class="icon-check"></i>
+						</a>
+					</label>				  
+				}
+			</div>
+		</div>
+	</form>
+	
+}

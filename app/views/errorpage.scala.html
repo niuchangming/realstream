@@ -1,0 +1,9 @@
+@(error: ResponseData)
+
+@main() {
+	<div class="error-body">
+		<p class="error-title">Opps!</p>
+		<p class="error-message pink">@error.message</p>
+		<a class="back-btn" href="@routes.HomeController.index()">Back</a>
+	</div>
+}

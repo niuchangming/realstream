@@ -1,0 +1,143 @@
+@(user: User, section: Integer)(content: Html)
+
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+}
+
+@main(scripts){
+	<div id="dash-content" class="dash-bg">
+		<div class="dash-block">
+			<div id="user-avatar-wrap">
+				<a style="background-image:url('https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQS0xA9MjnSvsaLL0rSP-M2qU_xTGlHTYxG-l6eVqBBb7gsCwfQiQ');" class="link-img"></a>
+				<div class="spacer" style="clear: both;"></div>
+				<div>
+					<p class="bold-style">金木头</p>
+					<p><span>新加坡国立大学教授</span></p>
+				</div>
+			</div>
+			<div class="achieve-wrap">
+				<div>
+					<p class="achieve-key orange">直播课时</p>
+					<p class="achieve-val orange">35</p>
+				</div>
+				<div>
+					<p class="achieve-key purple">全部资料</p>	
+					<p class="achieve-val purple">350</p>
+				</div>
+				<div>
+					<p class="achieve-key blue">学员</p>	
+					<p class="achieve-val blue">1350</p>
+				</div>
+				<div>
+					<p class="achieve-key pink">试题</p>	
+					<p class="achieve-val pink">350</p>
+				</div>
+				
+				<div class="hidden">
+					<p class="achieve-key orange">学习时长</p>	
+					<p class="achieve-val orange">310</p>
+				</div>
+				<div class="hidden">
+					<p class="achieve-key purple">收藏</p>	
+					<p class="achieve-val purple">3</p>
+				</div>
+				<div class="hidden">
+					<p class="achieve-key blue">学分</p>	
+					<p class="achieve-val blue">3500</p>
+				</div>
+				<div class="hidden">
+					<p class="achieve-key pink">完成试题</p>	
+					<p class="achieve-val pink">50</p>
+				</div>
+			</div>
+		</div>
+		
+		<div id="sidebar" class="dash-block">
+		   	<p>资料信息</p>
+		    <ul class="sidebar-menu">
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 0){class="active"} href="@routes.ProfileController.personalProfile()">
+		                <i class="fa fa-dashboard"></i>
+		                <span>个人信息</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 1){class="active"} href="＃">
+		                <i class="fa fa-dashboard"></i>
+		                <span>入驻信息</span>
+		            </a>
+		        </li>
+		
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 2){class="active"} href="＃">
+		                <i class="fa fa-picture-o"></i>
+		                <span>主页管理</span>
+		            	<span class="dcjq-icon"></span>
+		            </a>
+		        </li>
+		
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 2){class="active"} href="＃">
+		                <i class="fa fa-clock-o"></i>
+		                <span>学习进度</span>
+		            	<span class="dcjq-icon"></span>
+		            </a>
+		        </li>
+		    </ul>
+		    
+		    <p class="main-title">课程管理</p>
+		    <ul class="sidebar-menu" id="nav-accordion">
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 4){class="active"} href="@routes.ProfileController.myLessons(0)">
+		                <i class="fa fa-money"></i>
+		                <span>课程列表</span>
+		            </a>
+		        </li>
+		
+		        <li class="sub-menu dcjq-parent-li">
+		            <a href="javascript:;" class="dcjq-parent">
+		                <i class="fa fa-users"></i>
+		                <span>直播备份</span>
+		            	<span class="dcjq-icon"></span></a>
+		        </li>
+		
+		        <li class="sub-menu dcjq-parent-li">
+		            <a href="javascript:;" class="dcjq-parent">
+		                <i class="fa fa-graduation-cap"></i>
+		                <span>习题管理</span>
+		            <span class="dcjq-icon"></span></a>
+		        </li>
+		        <li class="sub-menu dcjq-parent-li">
+		            <a href="javascript:;" class="dcjq-parent">
+		                <i class="fa fa-graduation-cap"></i>
+		                <span>资料管理</span>
+		            <span class="dcjq-icon"></span></a>
+		        </li>
+		    </ul>
+		    
+		    <p class="main-title">学员管理</p>
+		    <ul class="sidebar-menu" id="nav-accordion">
+		        <li class="sub-menu dcjq-parent-li">
+		            <a href="index.html">
+		                <i class="fa fa-dashboard"></i>
+		                <span>学员列表</span>
+		            </a>
+		        </li>
+		
+		        <li class="sub-menu dcjq-parent-li">
+		            <a href="javascript:;" class="dcjq-parent">
+		                <i class="fa fa-desktop"></i>
+		                <span>订单查询</span>
+		            	<span class="dcjq-icon"></span></a>
+		        </li>
+		    </ul>
+		</div>
+	
+		<div id="dash-detail-wrap" class="profile-dash">
+			<div id="dash-detail" class="dash-block">
+				@content
+			</div>
+		</div>
+	</div>
+}

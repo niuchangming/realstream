@@ -1,0 +1,260 @@
+@import tags._
+
+@(lesson: Lesson)
+
+@createlessonframe(lesson, 1){
+	<div class="dash-detail-header">
+		<p>课程图片</p>
+	</div>
+	<div class="image-wrap">
+		@for(lessonImage <- lesson.lessonImages){
+			<div class="uploader hidden">
+				<div class="upload-wrap">
+					<i class="fa fa-picture-o"></i>
+					<div class="upload-text">
+						<p>Drop lesson image here</p> 
+					  	<p class="small-p">or</p>
+					</div>
+					<a class="browse-btn">Browse Files
+					  	<div>
+					  		<input class="file-input" type="file" name="lessonImage" data-url="@routes.LessonController.uploadLessonImage()"/>
+					  	</div> 
+					</a>
+				  </div>
+			</div>
+			<div class="file-item">
+				<div class="lesson-img link-img" style="background-image:url('@routes.LessonController.showLessonThumbnail(lessonImage.thumbnailUUID)')">
+					<div class="link-img-overlay">
+					</div>
+					<div class="action-btn-wraper">
+						<a class="edit-link" onclick="return showImageDialog('@lessonImage.uuid', '@lessonImage.title', '@Html(lessonImage.caption)', '@lessonImage.isCover');">
+							<img src="@routes.Assets.versioned("images/edit.png")" />
+						</a>
+						<a class="del-link" onclick="return deleteImage($(this), '@lessonImage.uuid');">
+							<img src="@routes.Assets.versioned("images/del.png")" />
+						</a>							
+					</div>
+				</div> 
+			</div>
+		}
+		@for(i <- lesson.lessonImages.size() to LessonImage.IMAGE_MAX - 1){
+			<div class="uploader">
+				<div class="upload-wrap">
+					<i class="fa fa-picture-o"></i>
+					<div class="upload-text">
+						<p>Drop lesson image here</p> 
+					  	<p class="small-p">or</p>
+					</div>
+					<a class="browse-btn">Browse Files
+					  	<div>
+					  		<input class="file-input" type="file" name="lessonImage" data-url="@routes.LessonController.uploadLessonImage()"/>
+					  	</div> 
+					</a>
+				  </div>
+			</div>
+			<div class="file-item hidden">
+				<div class="lesson-img link-img">
+					<div class="link-img-overlay">
+					</div>
+					<div class="action-btn-wraper">
+						<a class="edit-link" href="#">
+							<img src="@routes.Assets.versioned("images/edit.png")" />
+						</a>
+						<a class="del-link">
+							<img src="@routes.Assets.versioned("images/del.png")" />
+						</a>							
+					</div>
+				</div> 
+			</div>
+		}
+	</div>
+	<div class="alert alert-info img-upload-info" role="alert">
+		<ul>
+			<li>支持jpg, png, jpeg格式的图片文件，每张图片大小不超过5M，上传的图片不超过15张。</li>
+			<li>系统会将第一张图片默认设置成封面图片。</li>
+			<li>图片将上传到云端服务器，上传后会生成另外的一张小图，所以会需要一点时间，请耐心等待。</li>
+		</ul>
+	</div>
+	
+	<div class="modal fade" id="img-info-model" tabindex="-1" role="dialog" aria-hidden="true">
+	  <div class="modal-dialog modal-center">
+	    <div class="modal-content">
+	      <div class="modal-body">
+	      	<form id="img-info-form">
+	      		<input id="img-uuid" name="uuid" type="hidden"/>
+		    	<div class="form-group">
+		    		<label for="img-title">图片标题</label>
+		      		<input id="img-title" class="form-control" type="text" name="title" placeholder="图片标题"/>
+		      	</div>
+		      	<div class="form-group">
+		      		<label for="img-caption">图片描述</label>	
+		      		<textarea id="img-caption" class="form-control" name="caption" rows="2" placeholder="您需要描述一下图片的具体内容"></textarea>
+		      	</div>
+		      	<div class="form-group right">
+					<input id="upload-img-info" type="submit" class="btn btn-success" value="上传"/>
+				</div>
+				<div class="checkbox left">
+				    <label>
+				      <input id="cover-img" type="checkbox" > 设置为封面图片
+				      <input id="img-cover" type="hidden" name="isCover" value="0">
+				    </label>
+				</div>
+				<div class="spacer" style="clear: both;"></div>
+		    </form>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script src="@routes.Assets.versioned("javascripts/jquery.ui.widget.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/jquery.iframe-transport.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/jquery.fileupload.js")" type="text/javascript"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('#cover-img').change(function(){ 
+		        var v = $(this).is(':checked') ? 1 : 0;
+		        $(this).next('input[name="isCover"]').val(v);
+		    });
+			
+			$('#img-caption').editable({inlineMode: true});
+			
+			$('.uploader input[type=file]').each(function(index) {
+				$(this).fileupload({
+					dataType: 'json',
+					type: 'POST',
+					dropZone: $(this).parents('.uploader'),
+					maxFileSize: 1024 * 1024 * 5,
+					acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+					messages: {
+				        maxFileSize: 'File exceeds maximum allowed size of 5MB',
+				    },
+			        add: function (e, data) {
+			        	if (data.files && data.files[0]) {
+			                var reader = new FileReader();
+			                var inputEle = $(this);
+			                reader.onload = function(e) {
+			                	var uploaderEle = inputEle.closest('.uploader');
+			                	var fileItemEle = uploaderEle.next('.file-item');
+			                	var spinner = $('<i class=\'glyphicon glyphicon-refresh glyphicon-spinner\'></i>');
+			                	
+			                	uploaderEle.find('.upload-wrap').hide();
+			                	uploaderEle.append(spinner);
+			                }
+			                reader.readAsDataURL(data.files[0]);
+			                data.submit();
+			        	}
+			        },
+			        formData: {
+			        	lessonId: @lesson.id
+		         	},
+			        done: function (e, data) {
+			        	var uploaderEle = $(this).parents('.uploader');
+			        	var fileItemEle = uploaderEle.next();
+			        	
+			        	uploaderEle.find('.upload-wrap').removeClass('hidden');
+			        	uploaderEle.hide();
+			       
+			        	fileItemEle.removeClass('hidden');
+	                	fileItemEle.find('.lesson-img').css('background-image', 'url(\'/lesson/show/thumbnail?thumbnailUUID='+ data.result.data.thumbnailUUID +'\')');
+			        	fileItemEle.find('.del-link').on('click', function(){
+			        		deleteImage($(this), data.result.data.uuid);
+			        	});
+			        	
+			        	fileItemEle.find('.edit-link').on('click', function(){
+			        		showImageDialog(data.result.data.uuid, '', '', data.result.data.isCover);
+			        	});
+			      	},
+			        fail: function (e, data) {
+			        	console.log("Error: " + data.jqXHR.responseText);
+			        }
+			    });
+			});
+			
+			$("#img-info-form").validate({
+		        rules: {
+		            title:{
+		            	minlength: 3,
+		                maxlength: 20,
+		            	required:true
+		            }
+		        },
+		        highlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+		        },
+		        unhighlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+		        },
+		        submitHandler: function(form) {
+		        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+		        	$('#upload-img-info').after(spinner);
+		        	$('#upload-img-info').val('');
+		        	$('#upload-img-info').attr("disabled", true); 
+		        	
+		        	$.ajax({
+		                url: '@routes.LessonController.updateLessonImageInfo()',
+		                type: "POST",
+		                data: $(form).serialize(),
+		                success: function(response, status) {
+		                	 var data = $.parseJSON(JSON.stringify(response));
+		                	
+		                	if(data.code != 0){
+		                		showAlertToast(data.message, "alert-danger");
+		                	}
+		                	
+		                	spinner.remove();
+		                	$('#upload-img-info').attr("disabled", false);
+		                	$('#upload-img-info').val('上传');
+		                	$('#img-info-model').modal('hide');
+		                	window.location.reload();
+		                },
+		                error: function(request, status, err){
+		                	showAlertToast(err, "alert-danger");
+		                	spinner.remove();
+		                	$('#upload-img-info').attr("disabled", false);
+		                	$('#upload-img-info').val('上传');
+		                	$('#img-info-model').modal('hide');
+		                }
+	                });
+		        }
+		    });
+	   	});
+		
+		function showImageDialog(u, t, c, b){
+			var imgModal = $('#img-info-model');
+			imgModal.modal('show');
+			imgModal.find('input[type=text]').val(t);
+			imgModal.find('input[name=uuid]').val(u);
+			$('#img-caption').text(c);
+			$('#img-caption').editable("setHTML", c, true);
+			$('#img-caption').editable('sync');
+			
+			var cbx = imgModal.find('input[type=checkbox]');
+			if(b == 'true'){
+				cbx.prop('checked', true);
+			}else{
+				cbx.prop('checked', false)
+			}
+		}
+		
+		function deleteImage(e, v){
+			var fileItemEle = e.parents('.file-item');
+			var uploaderEle = fileItemEle.prev();
+			
+			uploaderEle.removeClass('hidden');
+			fileItemEle.addClass('hidden');
+			
+			$.ajax({
+		        url: '@routes.LessonController.deleteLessonImage()',
+		        type: 'POST',
+		        data: {
+		        	imageUUID: v
+				},
+		        success: function(response, status) {},
+		        error: function(request, status, err){
+	            	showAlertToast("Error: " + err, "alert-danger");
+	            }
+		    });
+			return false;
+		}
+	</script>
+}

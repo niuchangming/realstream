@@ -1,0 +1,39 @@
+<div class="modal fade" id="create-lesson-model" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-center">
+    <div class="modal-content">
+      <div class="modal-body">
+      	<div class="verify-page">
+		  <div class="entry-form-wrap">
+		    <form id="create-lesson-form" action="@routes.LessonController.createLesson()" method="POST">
+		    	<h3>课程名称</h3>
+		    	<div class="form-group">
+		    		<input type="text" name="title" />
+		    	</div>
+		    	<div class="form-group">
+					<input type="submit" value="创建"/>
+				</div>
+		    </form>
+		  </div>
+		</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		$("#create-lesson-form").validate({
+	        rules: {
+	            title:{
+	            	minlength: 5,
+	            	required:true
+	            }
+	        },
+	        highlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+	        },
+	        unhighlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+	        }
+	    });
+	});
+</script>
