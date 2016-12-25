@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -35,6 +37,7 @@ import views.html.broadcastlesson;
 import views.html.createlesson;
 import views.html.lessonimage;
 import views.html.lessonsession;
+import views.html.lessondetail;
 import actions.AuthAction;
 
 @SuppressWarnings("unchecked")
@@ -206,7 +209,7 @@ public class LessonController extends Controller{
 	}
 	
 	@Transactional
-	public Result showLessonCoverThumbnail(long lessonId){
+	public Result showLessonCover(long lessonId, boolean isLarge){
 		ResponseData responseData = new ResponseData();
 		Query coverQuery = jpaApi.em()
 				.createNativeQuery("select * from image where lesson_id=:lessonId and is_cover=:isCover", LessonImage.class)
@@ -223,7 +226,12 @@ public class LessonController extends Controller{
 						.setParameter("lessonId", lessonId);
 				lessonImage = (LessonImage) lessonImageQuery.getSingleResult();
 			}
-			InputStream imageStream = lessonImage.downloadThumbnail();
+			InputStream imageStream;
+			if(isLarge){
+				imageStream = lessonImage.download();
+			}else{
+				imageStream = lessonImage.downloadThumbnail();
+			}
 			return ok(imageStream);
 		}catch(NoResultException e){
 			responseData.message = "Image cannot be found.";
@@ -364,6 +372,25 @@ public class LessonController extends Controller{
     	return ok(Json.toJson(responseData));
 	}
 	
+	
+	@Transactional
+	public Result lessonDetail(long lessonId){
+		ResponseData responseData = new ResponseData();
+		
+		String token = ctx().session().get(AuthAction.LOGGED_KEY);
+		Account account = null;
+		if(!Utils.isBlank(token)){
+			account = Account.findByToken(token);
+		}
+
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+    	if(lesson == null){
+    		responseData.message = "Lesson cannot be found.";
+    		responseData.code = 4000;
+    	}
+    	
+		return ok(lessondetail.render(account, lesson));
+	}
 	
 	@With(AuthAction.class)
 	@Transactional

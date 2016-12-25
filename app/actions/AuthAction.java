@@ -9,7 +9,6 @@ import models.Account;
 import play.db.jpa.JPAApi;
 import play.mvc.Action;
 import play.mvc.Http.Context;
-import tools.Utils;
 import play.mvc.Result;
 
 public class AuthAction extends Action.Simple{

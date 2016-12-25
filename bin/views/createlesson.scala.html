@@ -51,6 +51,7 @@
 		                data: $(form).serialize(),
 		                success: function(response, status) {
 		                	var data = $.parseJSON(JSON.stringify(response));
+		                	
 		                	if(data.error){
 		                		showAlertToast(data.error, "alert-danger");
 		                	}else{

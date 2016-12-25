@@ -23,11 +23,12 @@ POST    /lesson/basic/save                				controllers.LessonController.saveL
 GET     /lesson/image                					controllers.LessonController.editLessonImages(lessonId: Long ?= 0)
 POST    /lesson/upload/image                			controllers.LessonController.uploadLessonImage
 GET     /lesson/show/thumbnail                			controllers.LessonController.showLessonThumbnail(thumbnailUUID: String ?= "")
-GET  	/lesson/show/cover                          	controllers.LessonController.showLessonCoverThumbnail(lessonId: Long ?= 0)
+GET  	/lesson/show/cover                          	controllers.LessonController.showLessonCover(lessonId: Long ?= 0, isLarge: Boolean ?= false)
 POST    /lesson/delete/image                			controllers.LessonController.deleteLessonImage
 POST    /lesson/update/imageinfo                		controllers.LessonController.updateLessonImageInfo
 GET     /lesson/session                					controllers.LessonController.lessonSession(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST    /lesson/session/save                			controllers.LessonController.saveLessonSession
+GET     /lesson                							controllers.LessonController.lessonDetail(lessonId: Long ?= 0)
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
 POST    /profile/update/personal                		controllers.ProfileController.updatePersonalProfile
