@@ -71,7 +71,7 @@ public class LessonController extends Controller{
 				.setHeader("X-OPENTOK-AUTH", Utils.getJWTString(5))
 				.setContentType("application/json")
 				.setMethod("POST")
-				.setRequestTimeout(30 * 1000)
+				.setRequestTimeout(10 * 1000)
 				.setBody(sessionIdJson.asText());
 		
 		CompletionStage<JsonNode> responsePromise = request.get().thenApply(WSResponse::asJson);

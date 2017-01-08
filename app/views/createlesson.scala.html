@@ -14,6 +14,10 @@
 			
 			$('#lesson-desc').editable({inlineMode: true});
 			
+			$('#save-lesson-btn').on('click', function(){
+				$('#lesson-basic-form').submit();
+			});
+			
 			$("#lesson-basic-form").validate({
 		        rules: {
 		        	title:{
@@ -52,10 +56,10 @@
 		                success: function(response, status) {
 		                	var data = $.parseJSON(JSON.stringify(response));
 		                	
-		                	if(data.error){
-		                		showAlertToast(data.error, "alert-danger");
+		                	if(data.code != 0){
+		                		showAlertToast(data.message, "alert-danger");
 		                	}else{
-		                		showAlertToast("Task has been saved successfully.", "alert-success");
+		                		showAlertToast(data.message, "alert-success");
 		                	}
 		                	spinner.remove();
 		                	$('#save-lesson-btn').attr("disabled", false);

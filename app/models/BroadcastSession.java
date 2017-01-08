@@ -3,9 +3,12 @@ package models;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -13,7 +16,7 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name="lesson_session")
+@Table(name="broadcast_session")
 public class BroadcastSession {
 	
 	@Id
@@ -30,10 +33,24 @@ public class BroadcastSession {
 	@Column(name="broadcast_id")
 	public String broadcastId;
 	
+	public String hls;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="creation_datetime")
 	public Date creationDateTime;
 	
 	public long duration;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "lesson_session_id")
+	public LessonSession lessonSession;
+	
+	public BroadcastSession(){}
+	
+	public BroadcastSession(LessonSession lessonSession){
+		this.lessonSession = lessonSession;
+		this.creationDateTime = new Date();
+		this.duration = lessonSession.duration;
+	}
 	
 }

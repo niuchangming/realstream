@@ -44,6 +44,10 @@ ul{
 	padding: 0;
 }
 
+ul:focus{
+	outline: 0;
+}
+
 .form-label b{
 	color: #FF3B30;
 }
@@ -62,6 +66,7 @@ ul{
 
 h4.modal-title{
 	text-align: center;
+	font-weight: 400;
 }
 
 .bold-style{
@@ -882,6 +887,18 @@ input.file-input{
 	min-width: 1200px;
 }
 
+.broadcast-btn{
+	background-color:#FF3A2D;
+	font-weight: 200;
+	font-size: 12px;
+	padding: 3px 10px;
+	border-color: #FF3B30;
+}
+
+.broadcast-btn:hover{
+	background-color:#c9302c;
+}
+
 /** Lesson Session End **/
 
 /** Profile Start **/
@@ -1285,8 +1302,8 @@ input.file-input{
     line-height: 30px;
     text-align: center;
     margin-top: 15px;
-    border: 1px solid #dedede;
-    background-color: #f4f5f7;
+    border: 1px solid #f3f3f3;
+    background-color: #eee;
 }
 
 #ic-link, #cert-link{
@@ -2147,6 +2164,148 @@ comment-item .item-right {
 }
 
 /** Lesson Detail End **/
+
+/** Lesson price Start **/
+
+#lesson-price-form .form-label{
+	width: 10%;
+	min-width: 50px;
+}
+
+#lesson-price-form .form-input{
+	width: 20%;
+	min-width: 200px;
+}
+
+.expand-cell-wrap {
+    width: 800px;
+    margin: 15px 0;
+    background-color: #f3f3f3;
+    position: relative;
+}
+
+.expand-cell-header {
+    height: 50px;
+    padding-left: 15px;
+    line-height: 50px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.expand-cell-wrap .icon {
+    float: left;
+    position: relative;
+    margin-right: 15px;
+}
+
+.expand-cell-wrap .icon > i{
+	font-size: 20px;
+}
+
+.expand-cell-header .section-title {
+    font-size: 16px;
+}
+
+.expand-cell-detail {
+    transition: all .2s linear;
+    height: 0;
+    background: #fff;
+    border: 0 solid #eee;
+    padding: 0 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.expand-cell-wrap.expend .expand-cell-detail {
+    padding: 15px;
+  	border: 1px solid #eee;
+ 	height: auto;
+} 
+
+.splitor{
+	margin: 0 10px;
+}
+
+.popover-select{
+	left: 50%;
+    bottom: 56px;
+    display: block;
+    position: absolute;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.42857143;
+    text-align: start;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+    border: 1px solid rgba(0, 0, 0, .2);
+    transform: translate(-50%, 0);
+}
+
+.popover-select > .arrow {
+    bottom: -11px;
+    left: 50%;
+    margin-left: -11px;
+    border-top-color: rgba(0, 0, 0, 0);
+    border-width: 11px;
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-bottom-width: 0;
+}
+
+.popover-select > .arrow:after {
+    bottom: 1px;
+    margin-left: -10px;
+    content: "";
+    border-width: 10px;
+    border-bottom-width: 0;
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-top-color: #fff;
+}
+
+.ms-container{
+	padding: 10px 0;
+}
+
+ul.ms-list{
+	max-height: 300px;
+}
+
+.ms-selectable li.ms-elem-selectable,
+.ms-selection li.ms-elem-selection{
+  border-bottom: 1px #eee solid;
+  padding: 5px 10px;
+  font-size: 16px;
+}
+
+.ms-selectable li:hover,
+.ms-selection li:hover{
+  cursor: pointer;
+  text-decoration: none;
+  background-color: #76abbf;
+}
+
+.ms-selectable li:hover span,
+.ms-selection li:hover span{
+	color: white;
+}
+
+.currency{
+	color: #777;
+}
+
+/** Lesson price End **/
 
 
 

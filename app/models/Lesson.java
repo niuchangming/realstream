@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -32,6 +33,18 @@ public class Lesson {
 
 	@Lob
 	public String description;
+	
+	public double price;
+	
+	public double offerPrice;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "offer_startdate")
+	public Date offerStartDate;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "offer_enddate")
+	public Date offerEndDate;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "start_datetime")
@@ -56,6 +69,7 @@ public class Lesson {
 	public List<LessonImage> lessonImages;
 	
 	@OneToMany(mappedBy = "lesson")
+	@OrderBy("startDatetime ASC")
 	public List<LessonSession> lessonSessions;
 	
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

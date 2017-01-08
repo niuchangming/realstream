@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Map;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -13,6 +15,11 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.opentok.Session;
+import com.opentok.exception.OpenTokException;
 
 import models.Account;
 import models.BroadcastSession;
@@ -27,17 +34,26 @@ import play.data.FormFactory;
 import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
+import play.libs.ws.WS;
+import play.libs.ws.WSClient;
+import play.libs.ws.WSRequest;
+import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.mvc.With;
+import tools.BroadcastManager;
+import tools.Constants;
 import tools.Utils;
 import views.html.broadcastlesson;
 import views.html.createlesson;
+import views.html.errorpage;
 import views.html.lessonimage;
 import views.html.lessonsession;
 import views.html.lessondetail;
+import views.html.lessonprice;
+import views.html.broadcaststream;
 import actions.AuthAction;
 
 @SuppressWarnings("unchecked")
@@ -47,6 +63,9 @@ public class LessonController extends Controller{
 	
 	@Inject
 	private JPAApi jpaApi;
+	
+	@Inject
+	private WSClient ws;
 	
 	@With(AuthAction.class)
 	@Transactional
@@ -324,7 +343,7 @@ public class LessonController extends Controller{
 		int pageIndex = (int) Math.ceil(offset / LessonSession.PAGE_SIZE) + 1;
 		
 		List<LessonSession> lessonSessions = jpaApi.em()
-				.createQuery("from LessonSession ls where ls.lesson = :lesson", LessonSession.class)
+				.createQuery("from LessonSession ls where ls.lesson = :lesson order by ls.startDatetime asc", LessonSession.class)
 				.setParameter("lesson", lesson)
 				.setFirstResult(offset)
 				.setMaxResults(LessonSession.PAGE_SIZE)
@@ -394,24 +413,167 @@ public class LessonController extends Controller{
 	
 	@With(AuthAction.class)
 	@Transactional
-	public Result broadcastLesson(){
+	public Result lessonPrice(long lessonId){
+		ResponseData responseData = new ResponseData();
 		
-//		Session tokSession = BroadcastManager.getInstance().createSession();
-//		String token = BroadcastManager.getInstance().createToken(tokSession, (System.currentTimeMillis() / 1000L) + (60 * 60));
-		
-		BroadcastSession broadcastSession = new BroadcastSession();
-//		broadcastSession.setCreationDateTime(new Date());
-//		broadcastSession.setSessionId(tokSession.getSessionId());
-//		broadcastSession.setToken(token);
-//		JPA.em().persist(broadcastSession);	
-		
-//		session("tokbox_session", tokSession.getSessionId());
-//		session("tokbox_token", token);
-		
-		return ok(broadcastlesson.render(broadcastSession));
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+    	if(lesson == null){
+    		responseData.message = "Lesson cannot be found.";
+    		responseData.code = 4000;
+    		return notFound(errorpage.render(responseData));
+    	}
+    	
+		return ok(lessonprice.render(lesson));
+	}
 	
+	@With(AuthAction.class)
+	@Transactional
+	public Result saveLessonPrice(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		Map<String, String[]> formMap = request().body().asFormUrlEncoded();
+		
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		double price = Double.parseDouble(requestData.get("price"));
+		double offerPrice = Double.parseDouble(requestData.get("offerPrice"));
+		String offerStartDate = requestData.get("offerStartDate") + " 00:00";
+		String offerEndDate = requestData.get("offerEndDate") + " 00:00";
+		String[] ids = formMap.get("lessonSessions[]");	
+		
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+    	if(lesson == null){
+    		responseData.message = "Lesson cannot be found.";
+    		responseData.code = 4000;
+    	}else{
+    		lesson.price = price;
+        	lesson.offerPrice = offerPrice;
+        	try {
+    			lesson.offerStartDate = Utils.parse(offerStartDate);
+    			lesson.offerEndDate = Utils.parse(offerEndDate);
+    			
+    			String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
+            	for(int i = 0; i < ids.length; i++){
+            		if(i == 0){
+            			updateQueryStr += "ls.id = " + ids[i];
+            		}else{
+            			updateQueryStr += " or ls.id = " + ids[i];
+            		}
+            	}
+            	
+            	jpaApi.em().createQuery("update LessonSession ls set ls.isTrial = false where ls.lesson=:lesson")
+            	.setParameter("lesson", lesson).executeUpdate(); //set all lesson session isTrail to false
+            	jpaApi.em().createQuery(updateQueryStr).executeUpdate();
+            	
+    		} catch (ParseException e) {
+    			responseData.code = 4001;
+    			responseData.message = e.getLocalizedMessage();
+    		}
+    	}
+    	
+    	return ok(Json.toJson(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result broadcastLessonSession(long lessonSessionId){
+		ResponseData responseData = new ResponseData();
+		
+		LessonSession lessonSession = jpaApi.em().find(LessonSession.class, lessonSessionId);
+		
+		if(lessonSession == null){
+			responseData.code = 4000;
+			responseData.message = "Lesson Session cannot be found.";
+		}else{
+			try {
+				Session tokSession = BroadcastManager.getInstance().createSession();
+				String token = BroadcastManager.getInstance().createToken(tokSession, (System.currentTimeMillis() / 1000L) + (4 * 60 * 60));
+				
+				BroadcastSession broadcastSession = new BroadcastSession(lessonSession);
+				broadcastSession.sessionId = tokSession.getSessionId();
+				broadcastSession.token = token;
+				
+				jpaApi.em().persist(broadcastSession);
+				return ok(broadcastlesson.render(broadcastSession));
+			} catch (OpenTokException e) {
+				responseData.code = 4001;
+				responseData.message = e.getLocalizedMessage();
+			}
+		}
+		
+		return notFound(errorpage.render(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result getBroadcastInfo(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		String sessionId = requestData.get("sessionId");
+		
+		try{
+			BroadcastSession broadcastSession = jpaApi.em()
+					.createQuery("from BroadcastSession bs where bs.sessionId=:sessionId", BroadcastSession.class)
+					.setParameter("sessionId", sessionId)
+					.getSingleResult();
+			
+			JsonNode result = startBroadcast(broadcastSession.sessionId);
+			if(!result.has("id")){
+				responseData.code = 4002;
+				responseData.message = result.get("message").asText();
+			}else{
+				broadcastSession.broadcastId = result.get("id").asText();
+				if(result.has("broadcastUrls")){
+					broadcastSession.hls = result.get("broadcastUrls").get("hls").asText();
+				}
+				jpaApi.em().persist(broadcastSession);
+				
+				responseData.message = "Publishing";
+				responseData.data = broadcastSession;
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lessonSession"));
+				
+				return ok(Json.toJson(jsonData));
+			}
+		}catch(NoResultException | InterruptedException | ExecutionException | IOException e){
+			responseData.code = 4001;
+			if(e instanceof NoResultException){
+				responseData.code = 4000;
+			}
+			responseData.message = "The lesson session does not exist.";
+		}
+		
+		return ok(Json.toJson(responseData));
 	}
 
+	@With(AuthAction.class)
+	@Transactional
+    public Result joinLesson(long broadcastSessionId) {
+		ResponseData responseData = new ResponseData();
+		
+		BroadcastSession broadcastSession = jpaApi.em().find(BroadcastSession.class, broadcastSessionId);
+		if(broadcastSession == null){
+			responseData.code = 4000;
+			responseData.message = "Broadcast Session cannot be found.";
+		}else{
+			return ok(broadcaststream.render(broadcastSession));
+		}
+		
+		return notFound(errorpage.render(responseData)); 
+    }
+	
+	public JsonNode startBroadcast(String sessionId) throws InterruptedException, ExecutionException{
+		JsonNode sessionIdJson = Json.newObject().put("sessionId", sessionId);
+		
+		CompletionStage<WSResponse> responsePromise = ws.url("https://api.opentok.com/v2/project/" + Constants.TOKBOX_API_KEY + "/broadcast/")
+				.setHeader("X-OPENTOK-AUTH", Utils.getJWTString(5))
+				.setContentType("application/json")
+				.post(sessionIdJson);
+		
+		return responsePromise.thenApply(WSResponse::asJson).toCompletableFuture().get();
+	}
 }
 
 

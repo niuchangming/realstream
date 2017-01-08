@@ -39,7 +39,7 @@ public class LessonImage extends Image{
 	@Column(name="thumbnail_uuid")
 	public String thumbnailUUID;
 	
-	@Column(name="is_cover")
+	@Column(name="is_cover", columnDefinition = "boolean default false")
 	public boolean isCover;
 
 	@Lob

@@ -87,7 +87,7 @@ public class ProfileController extends Controller{
 			user.qq = qq;
 			jpaApi.em().persist(user);
 			responseData.data = user;
-			return ok(Utils.toJson(User.class, responseData, "*.user"));
+			return ok(Utils.toJson(User.class, responseData, "*.user", "account", "lessons", "avatars", "workExperiences"));
 		}catch(NoResultException | JsonProcessingException e){
 			responseData.code = 4000;
 			responseData.message = "User does not exist.";

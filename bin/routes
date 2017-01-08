@@ -16,7 +16,9 @@ GET     /login                     						controllers.HomeController.login(dialCo
 GET     /signup           								controllers.HomeController.signup(dialCode: Integer ?= 0, mobile: String ?= "", password: String ?= "")
 GET     /verify                    						controllers.HomeController.verifyMobile(dialCode: Integer ?= 0, mobile: String ?= "", verifyCode: Integer ?= 0)
 GET     /logout                     					controllers.HomeController.logout
-GET     /broadcast                						controllers.LessonController.broadcastLesson
+GET     /broadcast/lesson/session                		controllers.LessonController.broadcastLessonSession(lessonSessionId: Long ?= 0)
+POST    /broadcast/info               					controllers.LessonController.getBroadcastInfo
+GET     /broadcast/lesson/join                			controllers.LessonController.joinLesson(broadcastSessionId: Long ?= 0)
 POST    /create                							controllers.LessonController.createLesson
 GET     /edit                							controllers.LessonController.editLesson(lessonId: Long ?= 0)
 POST    /lesson/basic/save                				controllers.LessonController.saveLessonBasicInfo
@@ -29,6 +31,8 @@ POST    /lesson/update/imageinfo                		controllers.LessonController.u
 GET     /lesson/session                					controllers.LessonController.lessonSession(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST    /lesson/session/save                			controllers.LessonController.saveLessonSession
 GET     /lesson                							controllers.LessonController.lessonDetail(lessonId: Long ?= 0)
+GET     /lesson/price                					controllers.LessonController.lessonPrice(lessonId: Long ?= 0)
+POST    /lesson/price/save                				controllers.LessonController.saveLessonPrice
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
 POST    /profile/update/personal                		controllers.ProfileController.updatePersonalProfile

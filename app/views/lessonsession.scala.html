@@ -1,6 +1,11 @@
 @import tags._
+@import tools.Utils
 
 @(lesson: Lesson, lessonSessions: List[LessonSession], pageIndex: Integer, totalAmount: Integer)
+
+@diff(d1: Date, d2: Date) = @{
+  	Utils.differentDateTimeByMins(d1, d2)
+}
 
 @createlessonframe(lesson, 2){
 	<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/simplePagination.css")">
@@ -22,17 +27,24 @@
 		        <th>课时标题</th>
 		        <th>开课时间</th>
 		        <th>时长</th>
-		        <th>交互直播</th>
+		        <th>状态</th>
 		      </tr>
 		    </thead>
 		    <tbody>
 		    	@for(index <- 0 until lessonSessions.size){
 				    <tr class="paginate">
-			          <th>@((pageIndex-1) * LessonSession.PAGE_SIZE + index+1)</th>
-			          <td>@lessonSessions(index).title</td>
-			          <td>@lessonSessions(index).startDatetime.format("hh:mm, dd MMM yyyy")</td>
-			          <td>@lessonSessions(index).duration 分钟</td>
-			          <td>@lessonSessions(index).interactive</td>
+						<th>@((pageIndex-1) * LessonSession.PAGE_SIZE + index+1)</th>
+						<td>@lessonSessions(index).title</td>
+						<td>@lessonSessions(index).startDatetime.format("hh:mm, dd MMM yyyy")</td>
+						<td>@lessonSessions(index).duration 分钟</td>
+						<td>
+							@diff(new Date(), lessonSessions(index).startDatetime) match {
+								case a if a <= -lessonSessions(index).duration => {<span>已结束</span>}
+								case a if a > -lessonSessions(index).duration && a <= 0 => {<span>直播中...</span>}
+								case a if a > 0 && a <= 30 => {<a class="btn broadcast-btn" href="@routes.LessonController.broadcastLessonSession(lessonSessions(index).id)">开始直播</a>}
+								case a if a > 30 => {<span>等待开课</span>}
+							}
+						</td>
 			        </tr>
 				}
 		    </tbody>
@@ -64,7 +76,7 @@
 		      	</div>
 		      	<div class="form-group">
 					<label for="start-datepicker">开课时间:</label>
-					<input type="text" id="start-datepicker" class="form-control" name="startDatetime" data-date-format="YYYY-MM-DD hh:mm">
+					<input type="text" id="start-datepicker" class="form-control" name="startDatetime" data-date-format="YYYY-MM-DD HH:mm">
 				</div>
 				<div class="form-group">
 					<label>直播时长:</label>
@@ -83,7 +95,9 @@
 				</div>
 		      </div>
 		      <div class="modal-footer">
-		        <input id="save-lesson-sec-btn" type="submit" class="btn btn-success" value="创建">
+		      	<div class="form-group">
+		        	<input id="save-lesson-sec-btn" type="submit" class="btn btn-success" value="创建课时">
+		        </div>
 		      </div>
 	      </form>
 	    </div>
@@ -121,9 +135,9 @@
 		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
 		        },
 		        submitHandler: function(form) {
-		        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+		        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
 		        	$('#save-lesson-sec-btn').after(spinner);
-		        	$('#save-lesson-sec-btn').val('');
+		        	$('#save-lesson-sec-btn').css('color', 'transparent');
 		        	$('#save-lesson-sec-btn').attr("disabled", true);
 		        	
 		        	form.submit();

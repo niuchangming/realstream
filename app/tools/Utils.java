@@ -20,8 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.joda.time.Days;
+import org.joda.time.Minutes;
+
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
@@ -94,9 +99,9 @@ public class Utils {
 	}
 	
 	public static String getJWTString(int mins){
-		final long iat = System.currentTimeMillis() / 1000L;
+		final long iat = System.currentTimeMillis() / 1000L - 60;
 		final long exp = iat + mins * 60L;
-
+		
 		JWTSigner signer = new JWTSigner(Constants.TOKBOX_SECRET);
 		final HashMap<String, Object> claims = new HashMap<String, Object>();
 		claims.put("iss", Constants.TOKBOX_API_KEY + "");
@@ -145,6 +150,11 @@ public class Utils {
 		return Integer.parseInt(String.format("%04d", codes.get(0)));
 	}
 	
+	public static long differentDateTimeByMins(Date d1, Date d2){
+		long diff = d2.getTime() - d1.getTime();
+		return TimeUnit.MILLISECONDS.toMinutes(diff); 
+	}
+	
 	public static String formatDateTime(Date date) {
 		return formatDateTime(null, date);
 	}
@@ -180,19 +190,6 @@ public class Utils {
 	public static boolean isValidDate(String str) {
 		return str != null ? str
 				.matches("^\\d{4}(\\-|\\/|\\.)\\d{1,2}\\1\\d{1,2}$") : false;
-	}
-
-	public static boolean isValidDateTime(String source) {
-		return isValidDateTime(source, "yyyy-MM-dd HH:mm:ss");
-	}
-
-	public static boolean isValidDateTime(String source, String format) {
-		try {
-			Date date = parse(format, source);
-			return date != null;
-		} catch (Throwable e) {
-			return false;
-		}
 	}
 
 	public static String percent(long a, long b) {

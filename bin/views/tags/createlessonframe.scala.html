@@ -26,7 +26,7 @@
 			</div>
 			<div class="btn-wrap">
 				<div>
-					<a id="save-lesson-btn" href="#" onclick="$('#lesson-basic-form').submit();" type="button" class="btn btn-info">保存修改</a>
+					<a id="save-lesson-btn" href="#" class="btn btn-info">保存修改</a>
 				</div>
 				<div>
 					<a type="button" class="btn btn-success">发布课程</a>
@@ -76,7 +76,7 @@
 		    <p class="main-title">课程设置</p>
 		    <ul class="sidebar-menu" id="nav-accordion">
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="index.html">
+		            <a @if(section == 5){class="active"} href="@routes.LessonController.lessonPrice(lesson.id)">
 		                <i class="fa fa-money"></i>
 		                <span>价格设置</span>
 		            </a>

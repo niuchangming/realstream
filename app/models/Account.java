@@ -42,6 +42,7 @@ public class Account{
 	
 	public String token;
 	
+	@Column(columnDefinition = "boolean default false")
 	public boolean active;
 	
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "account", cascade = CascadeType.ALL)
