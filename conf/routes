@@ -18,7 +18,8 @@ GET     /verify                    						controllers.HomeController.verifyMobile
 GET     /logout                     					controllers.HomeController.logout
 GET     /broadcast/lesson/session                		controllers.LessonController.broadcastLessonSession(lessonSessionId: Long ?= 0)
 POST    /broadcast/info               					controllers.LessonController.getBroadcastInfo
-GET     /broadcast/lesson/join                			controllers.LessonController.joinLesson(broadcastSessionId: Long ?= 0)
+GET     /broadcast/lessonSession/join                	controllers.LessonController.joinLessonSession(lessonSessionId: Long ?= 0)
+POST    /broadcast/lesson/archive						controllers.LessonController.openTokCallback
 POST    /create                							controllers.LessonController.createLesson
 GET     /edit                							controllers.LessonController.editLesson(lessonId: Long ?= 0)
 POST    /lesson/basic/save                				controllers.LessonController.saveLessonBasicInfo
@@ -30,9 +31,11 @@ POST    /lesson/delete/image                			controllers.LessonController.dele
 POST    /lesson/update/imageinfo                		controllers.LessonController.updateLessonImageInfo
 GET     /lesson/session                					controllers.LessonController.lessonSession(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST    /lesson/session/save                			controllers.LessonController.saveLessonSession
+POST	/lesson/sessions								controllers.LessonController.lessonSessions
 GET     /lesson                							controllers.LessonController.lessonDetail(lessonId: Long ?= 0)
 GET     /lesson/price                					controllers.LessonController.lessonPrice(lessonId: Long ?= 0)
 POST    /lesson/price/save                				controllers.LessonController.saveLessonPrice
+POST	/lesson/register								controllers.LessonController.registerLesson
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
 POST    /profile/update/personal                		controllers.ProfileController.updatePersonalProfile
@@ -43,6 +46,7 @@ GET     /profile/teacher/settle                			controllers.ProfileController.
 POST    /profile/teacher/submit                			controllers.ProfileController.submitteacherInfo
 GET     /profile/settle/review                			controllers.ProfileController.settleReview
 GET     /profile/lesson/list                			controllers.ProfileController.myLessons(offset: Integer ?= 0)
+GET		/profile/register/lesson/list					controllers.ProfileController.myRegisteredLessons
 
 
 GET     /api/joinLesson             					controllers.api.LessonController.joinLesson

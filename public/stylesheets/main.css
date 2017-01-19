@@ -7,8 +7,15 @@ body{
 }
 
 *{
-	color:#2b2b2b;
 	font-weight: 200;
+}
+
+.bootstrap-datetimepicker-widget a.btn{
+	color: #2b2b2b !important;
+}
+
+.bootstrap-datetimepicker-widget a.btn:hover{
+	color: #2b2b2b !important;
 }
 
 a{
@@ -24,6 +31,12 @@ a:hover{
 
 a.btn, a.btn:hover{
 	color: white !important
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
 }
 
 h1,h2,h3{
@@ -507,6 +520,7 @@ p.empty{
 }
 
 #sidebar {
+	position: absolute;
     width: 240px;
     min-height: 638px;
     margin: 10px;
@@ -524,6 +538,7 @@ p.empty{
 #sidebar ul li {
     position: relative;
 }
+
 ul.sidebar-menu li {
     margin-bottom: 5px;
     margin-left: 10px;
@@ -562,11 +577,8 @@ ul.sidebar-menu li a > span, i{
 }
 
 #dash-detail-wrap{
-	position: absolute;
-    top: 142px;
-    right: 0;
     width: 100%;
-    margin-left: 260px;
+    margin-top: 10px;
 }
 
 #dash-detail{
@@ -1088,7 +1100,7 @@ input.file-input{
     margin-top: 7px;
     background: #f3f3f3;
     position: relative;
-    color: #999;
+    color: #777;
     box-sizing: border-box;
     padding-left: 50px;
 }
@@ -1100,7 +1112,7 @@ input.file-input{
     width: 60px;
     text-align: center;
     font-size: 32px;
-    color: #999;
+    color: #777;
     line-height: 60px;
     z-index: 2;
 }
@@ -1134,7 +1146,7 @@ input.file-input{
 }
 
 .steps-nav li.active~li .steps-num {
-    color: #999;
+    color: #777;
     font-size: 30px;
 }
 
@@ -1492,7 +1504,7 @@ input.file-input{
     overflow: hidden;
     margin-top: 348px;
     bottom: 0;
-    color: #999;
+    color: #777;
 }
 
 .pay-policy li {
@@ -1572,7 +1584,7 @@ i.icon-replay{
     display: inline-block;
     vertical-align: middle;
     margin-right: 15px;
-    color: #999;
+    color: #777;
 }
 
 .line-item > i{
@@ -1709,6 +1721,11 @@ span.promt-info{
     line-height: 50px;
     font-size: 18px;
     border-radius: 2px;
+}
+
+.btn-join:hover{
+	color: white !important;
+	background-color: #6592A4;
 }
 
 .btn-blue {
@@ -2307,7 +2324,288 @@ ul.ms-list{
 
 /** Lesson price End **/
 
+/** Register Lesson List Start **/
 
+.tab-ctn {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.tab-ctn .tab-course-list {
+    width: 100%;
+    min-width: 750px;
+    height: 140px;
+}
+
+.tab-item-ctn {
+    width: 250px;
+    height: 120px;
+    margin-right: 2px;
+    background: #f8f8f8;
+    float: left;
+    padding: 30px 15px;
+    box-sizing: border-box;
+    border: 1px solid #f3f3fe;
+    position: relative;
+}
+
+.tab-item-ctn.active {
+    border-color: #188eee;
+    background: #188eee;
+    color: #fff;
+}
+
+.tab-item-ctn .tab-title {
+    font-size: 16px;
+    max-height: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.tab-item-ctn .process-ctn {
+    position: absolute;
+    left: 16px;
+    bottom: 20px;
+}
+
+.tab-item-ctn.active .process-ctn{
+	display: none;
+}
+
+.tab-item-ctn .process-full {
+    width: 140px;
+    height: 2px;
+    background: #a3d2f8;
+    float: left;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.tab-item-ctn .process-full .process-done {
+    height: 2px;
+    background: #188eee;
+}
+
+.tab-item-ctn .process-text {
+    font-size: 12px;
+    color: #a3d2f8;
+}
+
+.tab-item-ctn.active .course-date {
+    display: block;
+}
+
+.tab-item-ctn.active .course-date {
+    color: #a3def8;
+}
+
+.tab-item-ctn .course-date {
+    color: #777;
+}
+
+.tab-item-ctn.active:after {
+    left: 116px;
+    bottom: -10px;
+    position: absolute;
+    border-top: 10px solid #188eee;
+    border-left: 10px dashed transparent;
+    border-right: 10px dashed transparent;
+    border-top-width: 10px;
+}
+
+.tab-item-ctn.active:after {
+    content: "";
+    height: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.details-ctn {
+    padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.details-ctn i.loading-bar{
+	position: absolute;
+	font-size: 30px;
+	top: 60%;
+    left: 47%;
+}
+
+.term-ctn {
+    position: relative;
+    line-height: 30px;
+    height: 36px;
+    display: inline-block;
+    min-width: 175px;
+}
+
+.details-ctn .course-settings-ctn {
+    position: absolute;
+    top: 15px;
+}
+
+.course-settings-ctn .ctrl-item {
+    float: left;
+    margin-right: 10px;
+    line-height: 28px;
+    height: 28px;
+    color: #333;
+}
+
+.course-settings-ctn i{
+	font-size: 140%;
+	margin-right: 6px;
+}
+
+.course-settings-ctn .action-item {
+    cursor: pointer;
+}
+
+.course-settings-ctn .ctrl-item {
+    float: left;
+    margin-right: 10px;
+    line-height: 28px;
+    height: 28px;
+    color: #2b2b2b;
+}
+
+.course-settings-ctn .before-line:before {
+    position: relative;
+    display: inline-block;
+    top: 5px;
+    width: 10px;
+    height: 20px;
+    border-left: solid 1px #ccc;
+    content: "";
+}
+
+.comments-ctn {
+    display: inline-block;
+}
+
+.section-wrap {
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.section-wrap .title{
+	font-size: 18px;
+    font-weight: 400;
+    line-height: 40px;
+}
+
+.section-wrap .nums {
+    font-size: 14px;
+    font-weight: 200;
+}
+
+.detail-item-ctn {
+    width: 100%;
+    font-size: 16px;
+    background: #f8f8f8;
+}
+
+.detail-item-ctn .icon {
+    float: left;
+    margin-right: 10px;
+    position: relative;
+    width: 42px;
+    height: 42px;
+}
+
+.detail-item-ctn .icon > span{
+	font-size: 16px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.detail-item-ctn .icon .index {
+    position: absolute;
+    display: block;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    left: 3px;
+    top: 3px;
+    color: #188eee;
+}
+
+.detail-item-body {
+    transition: all .2s linear;
+    background: #fff;
+    border: 1px solid #eee;
+    margin-top: -1px;
+    height: auto;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.detail-item-body:before {
+    content: '';
+    width: 1px;
+    position: absolute;
+    /* top: 35px; */
+    bottom: 53px;
+    background: #a3d2f8;
+    left: 31px;
+}
+
+.task-item-ctn {
+    width: 100%;
+    font-size: 14px;
+    position: relative;
+}
+
+.task-title, .sub-title{
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sub-title {
+    color: #777;
+}
+
+.task-item-ctn .task-button-ctn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.task-button-ctn .task-btn.border {
+    border-width: 1px;
+    border-style: solid;
+}
+.task-button-ctn .task-btn.info {
+    border-color: #188eee;
+    background-color: transparent;
+}
+.task-button-ctn .task-btn {
+    min-width: 80px;
+    border-radius: 2px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.task-button-ctn .task-btn{
+    display: inline-block;
+    padding: 4px 0;
+    width: 100%;
+    color: #777;
+}
+/** Register Lesson List End **/
 
 
 

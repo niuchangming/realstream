@@ -42,7 +42,7 @@
 								case a if a <= -lessonSessions(index).duration => {<span>已结束</span>}
 								case a if a > -lessonSessions(index).duration && a <= 0 => {<span>直播中...</span>}
 								case a if a > 0 && a <= 30 => {<a class="btn broadcast-btn" href="@routes.LessonController.broadcastLessonSession(lessonSessions(index).id)">开始直播</a>}
-								case a if a > 30 => {<span>等待开课</span>}
+								case a if a > 30 => {<span>直播未开始</span>}
 							}
 						</td>
 			        </tr>

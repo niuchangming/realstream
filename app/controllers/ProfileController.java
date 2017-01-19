@@ -18,6 +18,7 @@ import models.LessonSession;
 import models.ResponseData;
 import models.Role;
 import models.User;
+import models.UserLesson;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
@@ -35,6 +36,7 @@ import views.html.teacheragreement;
 import views.html.settlereview;
 import views.html.errorpage;
 import views.html.profilelessons;
+import views.html.profileregisteredlessons;
 
 public class ProfileController extends Controller{
 	@Inject
@@ -87,7 +89,7 @@ public class ProfileController extends Controller{
 			user.qq = qq;
 			jpaApi.em().persist(user);
 			responseData.data = user;
-			return ok(Utils.toJson(User.class, responseData, "*.user", "account", "lessons", "avatars", "workExperiences"));
+			return ok(Utils.toJson(User.class, responseData, "*.user", "account", "studentLessons", "teacherLessons", "avatars", "workExperiences"));
 		}catch(NoResultException | JsonProcessingException e){
 			responseData.code = 4000;
 			responseData.message = "User does not exist.";
@@ -184,7 +186,6 @@ public class ProfileController extends Controller{
 					.setParameter("accountId", account.id);
 			User user = query.getSingleResult();
 			
-			
 			DynamicForm requestData = formFactory.form().bindFromRequest();
 			String realName = requestData.get("realName");
 			String brief = requestData.get("brief");
@@ -227,25 +228,25 @@ public class ProfileController extends Controller{
 			TypedQuery<User> query = jpaApi.em()
 					.createQuery("from User u where u.accountId = :accountId", User.class)
 					.setParameter("accountId", account.id);
-			User user = query.getSingleResult();
+			User teacher = query.getSingleResult();
 			
-			if(user.role != Role.TEACHER){
+			if(teacher.role != Role.TEACHER){
 				responseData.code = 4000;
 				responseData.message = "You don't have teacher permission.";
 			}else{
 				int totalAmount = ((Long)jpaApi.em()
-						.createQuery("select count(*) from Lesson ls where ls.user = :user")
-						.setParameter("user", user).getSingleResult()).intValue();
+						.createQuery("select count(*) from Lesson ls where ls.teacher = :teacher")
+						.setParameter("teacher", teacher).getSingleResult()).intValue();
 				int pageIndex = (int) Math.ceil(offset / Lesson.PAGE_SIZE) + 1;
 				
 				List<Lesson> lessons = jpaApi.em()
-						.createQuery("from Lesson ls where ls.user = :user", Lesson.class)
-						.setParameter("user", user)
+						.createQuery("from Lesson ls where ls.teacher = :teacher", Lesson.class)
+						.setParameter("teacher", teacher)
 						.setFirstResult(offset)
 						.setMaxResults(LessonSession.PAGE_SIZE)
 						.getResultList();
 				
-				return ok(profilelessons.render(user, lessons, pageIndex, totalAmount));
+				return ok(profilelessons.render(teacher, lessons, pageIndex, totalAmount));
 			}
     	}catch(NoResultException e){
     		responseData.code = 4000;
@@ -254,7 +255,36 @@ public class ProfileController extends Controller{
 		
 		return notFound(errorpage.render(responseData));
 	}
-
+	
+	
+	@With(AuthAction.class)
+	@Transactional
+	@SuppressWarnings("unchecked")
+	public Result myRegisteredLessons(){
+		ResponseData responseData = new ResponseData();
+		try{
+			Account account = (Account) ctx().args.get("account");
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			
+			User user = query.getSingleResult();
+			
+			List<Lesson> lessons = jpaApi.em()
+					.createNativeQuery("select * FROM lesson ls INNER JOIN user_lesson ul ON ls.id=ul.lesson_id WHERE ul.user_id=:userId AND ul.is_deleted=:isDeleted AND ul.is_completed=:isCompleted", Lesson.class)
+					.setParameter("userId", user.accountId)
+					.setParameter("isDeleted", false)
+					.setParameter("isCompleted", false)
+					.getResultList();
+				
+			return ok(profileregisteredlessons.render(user, lessons));
+    	}catch(NoResultException e){
+    		responseData.code = 4000;
+			responseData.message = "User does not exist.";
+    	}
+		
+		return notFound(errorpage.render(responseData));
+	}
 }
 
 

@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name="broadcast_session")
 public class BroadcastSession {
-	
 	@Id
 	@GeneratedValue	
 	@JsonIgnore
@@ -41,6 +40,14 @@ public class BroadcastSession {
 	
 	public long duration;
 	
+	@Column(name="archive_id")
+	public String archiveId;
+	
+	@Column(name="archive_url")	
+	public String archiveUrl;
+	
+	public String status;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lesson_session_id")
 	public LessonSession lessonSession;
@@ -50,7 +57,6 @@ public class BroadcastSession {
 	public BroadcastSession(LessonSession lessonSession){
 		this.lessonSession = lessonSession;
 		this.creationDateTime = new Date();
-		this.duration = lessonSession.duration;
 	}
 	
 }

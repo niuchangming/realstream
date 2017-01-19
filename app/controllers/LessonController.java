@@ -17,7 +17,6 @@ import javax.persistence.TypedQuery;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opentok.Session;
 import com.opentok.exception.OpenTokException;
 
@@ -29,14 +28,13 @@ import models.LessonImage;
 import models.LessonSession;
 import models.ResponseData;
 import models.User;
+import models.UserLesson;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
-import play.libs.ws.WS;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
@@ -58,14 +56,9 @@ import actions.AuthAction;
 
 @SuppressWarnings("unchecked")
 public class LessonController extends Controller{
-	@Inject
-    private FormFactory formFactory;
-	
-	@Inject
-	private JPAApi jpaApi;
-	
-	@Inject
-	private WSClient ws;
+	@Inject private FormFactory formFactory;
+	@Inject private JPAApi jpaApi;
+	@Inject private WSClient ws;
 	
 	@With(AuthAction.class)
 	@Transactional
@@ -84,9 +77,9 @@ public class LessonController extends Controller{
 				.createQuery("from User u where u.accountId = :accountId", User.class)
 				.setParameter("accountId", account.id);
 		
-		User user = userQuery.getSingleResult();
+		User teacher = userQuery.getSingleResult();
 		
-		Lesson lesson = new Lesson(user, lessonTitle);
+		Lesson lesson = new Lesson(teacher, lessonTitle);
 		jpaApi.em().persist(lesson);
 		
 		Query query = jpaApi.em().createQuery("from Category cg where cg.parent = null", Category.class);
@@ -135,14 +128,16 @@ public class LessonController extends Controller{
 			responseData.code = 4000;
 		}
 		
-		dbLesson.updateByBasic(lessonTitle, lessonDesc, category);	
+		dbLesson.updateByBasic(lessonTitle, lessonDesc, category);
 		jpaApi.em().persist(dbLesson);
 		
 		responseData.data = dbLesson;
 		
 		try {
-			return ok(Utils.toJson(ResponseData.class, responseData, "*.user", "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages"));
-		} catch (JsonProcessingException e) {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages"));
+			return ok(Json.toJson(jsonData));
+		} catch (IOException e) {
 			responseData.message = e.getLocalizedMessage();
 			responseData.code = 4001;
 		}
@@ -381,6 +376,21 @@ public class LessonController extends Controller{
 			lessonSession.interactive = interactive;
 			jpaApi.em().persist(lessonSession);
 			
+			boolean updateLesson = false;
+			if(lesson.startDatetime == null || lesson.startDatetime.after(lessonSession.startDatetime)){
+				lesson.startDatetime = lessonSession.startDatetime;
+				updateLesson = true;
+			}
+			
+			if(lesson.endDatetime == null || lesson.endDatetime.before(lessonSession.endDatetime)){
+				lesson.endDatetime = lessonSession.endDatetime;
+				updateLesson = true;
+			}
+			
+			if(updateLesson){
+				jpaApi.em().persist(lesson);
+			}
+			
 			flash().put("success", "An new lesson session created successfully.");
 			
 			return redirect(routes.LessonController.lessonSession(lessonId, 0));
@@ -391,6 +401,35 @@ public class LessonController extends Controller{
     	return ok(Json.toJson(responseData));
 	}
 	
+	@With(AuthAction.class)
+	@Transactional
+	public Result lessonSessions(){
+		ResponseData responseData = new ResponseData();
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		
+		List<LessonSession> lessonSessions = jpaApi.em()
+				.createNativeQuery("SELECT * FROM lesson_session ls WHERE ls.lesson_id=:lesson_id ORDER BY ls.start_datetime", LessonSession.class)
+				.setParameter("lesson_id", lessonId)
+				.getResultList();
+		
+		if(lessonSessions == null){
+			responseData.code = 4000;
+			responseData.message = "There is no any session found for this lesson.";
+		}else{
+			try {
+				responseData.data = lessonSessions;
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson", "*.broadcastSessions"));
+				return ok(Json.toJson(jsonData));
+			} catch (IOException e) {
+				responseData.code = 4001;
+				responseData.message = e.getLocalizedMessage();
+			} 
+		}
+		
+		return ok(Json.toJson(responseData));
+	}
 	
 	@Transactional
 	public Result lessonDetail(long lessonId){
@@ -452,25 +491,25 @@ public class LessonController extends Controller{
     			lesson.offerStartDate = Utils.parse(offerStartDate);
     			lesson.offerEndDate = Utils.parse(offerEndDate);
     			
-    			String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
-            	for(int i = 0; i < ids.length; i++){
-            		if(i == 0){
-            			updateQueryStr += "ls.id = " + ids[i];
-            		}else{
-            			updateQueryStr += " or ls.id = " + ids[i];
-            		}
-            	}
-            	
-            	jpaApi.em().createQuery("update LessonSession ls set ls.isTrial = false where ls.lesson=:lesson")
-            	.setParameter("lesson", lesson).executeUpdate(); //set all lesson session isTrail to false
-            	jpaApi.em().createQuery(updateQueryStr).executeUpdate();
-            	
+    			if(ids != null && ids.length > 0){
+    				String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
+                	for(int i = 0; i < ids.length; i++){
+                		if(i == 0){
+                			updateQueryStr += "ls.id = " + ids[i];
+                		}else{
+                			updateQueryStr += " or ls.id = " + ids[i];
+                		}
+                	}
+                	
+                	jpaApi.em().createQuery("update LessonSession ls set ls.isTrial = false where ls.lesson=:lesson")
+                	.setParameter("lesson", lesson).executeUpdate(); //set all lesson session isTrail to false
+                	jpaApi.em().createQuery(updateQueryStr).executeUpdate();
+    			}
     		} catch (ParseException e) {
     			responseData.code = 4001;
     			responseData.message = e.getLocalizedMessage();
     		}
     	}
-    	
     	return ok(Json.toJson(responseData));
 	}
 	
@@ -550,19 +589,74 @@ public class LessonController extends Controller{
 
 	@With(AuthAction.class)
 	@Transactional
-    public Result joinLesson(long broadcastSessionId) {
+    public Result joinLessonSession(long lessonSessionId) {
 		ResponseData responseData = new ResponseData();
 		
-		BroadcastSession broadcastSession = jpaApi.em().find(BroadcastSession.class, broadcastSessionId);
+		BroadcastSession broadcastSession = (BroadcastSession) jpaApi.em()
+				.createNativeQuery("SELECT * FROM broadcast_session bs WHERE bs.lesson_session_id=:lessonSessionId ORDER BY bs.creation_datetime DESC LIMIT 1", BroadcastSession.class)
+				.setParameter("lessonSessionId", lessonSessionId).getSingleResult();
+		
 		if(broadcastSession == null){
 			responseData.code = 4000;
 			responseData.message = "Broadcast Session cannot be found.";
 		}else{
-			return ok(broadcaststream.render(broadcastSession));
+			Lesson lesson = broadcastSession.lessonSession.lesson;
+			return ok(broadcaststream.render(lesson, broadcastSession));
 		}
 		
 		return notFound(errorpage.render(responseData)); 
     }
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result registerLesson(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		
+		Account account = (Account) ctx().args.get("account");
+		TypedQuery<User> query = jpaApi.em()
+				.createQuery("from User u where u.accountId = :accountId", User.class)
+				.setParameter("accountId", account.id);
+		try{
+			User user = query.getSingleResult();
+			Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+			if(lesson == null){
+				responseData.code = 4000;
+				responseData.message = "Lesson cannot be found.";
+			}else{
+				UserLesson userlesson = null;
+				try{
+					userlesson = jpaApi.em()
+							.createQuery("from UserLesson us where us.user = :user and us.lesson = :lesson", UserLesson.class)
+							.setParameter("user", user)	
+							.setParameter("lesson", lesson)
+							.getSingleResult();
+				}catch(NoResultException e){
+					e.printStackTrace();
+				}
+				
+				if(userlesson == null){
+					UserLesson userLesson = new UserLesson(user, lesson);
+					jpaApi.em().persist(userLesson);
+				}else if(userlesson.isDeleted){
+					responseData.code = 5000;
+					responseData.message = "The lesson already in your deleted lesson list.";
+				}else if(userlesson.isCompleted){
+					responseData.code = 5000;
+					responseData.message = "You completed this lesson.";
+				}else{
+					responseData.code = 5000;
+					responseData.message = "You already added this lesson.";
+				}
+			}
+		}catch(NoResultException e){
+			responseData.code = 4000;
+			responseData.message = e.getLocalizedMessage();
+		}
+		return ok(Json.toJson(responseData));
+	}
 	
 	public JsonNode startBroadcast(String sessionId) throws InterruptedException, ExecutionException{
 		JsonNode sessionIdJson = Json.newObject().put("sessionId", sessionId);
@@ -573,6 +667,37 @@ public class LessonController extends Controller{
 				.post(sessionIdJson);
 		
 		return responsePromise.thenApply(WSResponse::asJson).toCompletableFuture().get();
+	}
+	
+	@Transactional
+	public Result openTokCallback(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		String archiveId = requestData.get("id");
+		String sessionId = requestData.get("sessionId");
+		String status = requestData.get("status");
+		String archiveUrl = requestData.get("url");
+		long duration = Long.parseLong(requestData.get("duration"));
+	
+		try{
+			BroadcastSession broadcastSession = jpaApi.em()
+					.createQuery("from BroadcastSession bs where bs.sessionId=:sessionId", BroadcastSession.class)
+					.setParameter("sessionId", sessionId)
+					.getSingleResult();
+			
+			broadcastSession.archiveUrl = archiveUrl;
+			broadcastSession.status = status;
+			broadcastSession.archiveId = archiveId;
+			broadcastSession.duration = duration;
+			
+			jpaApi.em().persist(broadcastSession);
+		}catch(NoResultException e){
+			responseData.code = 4000;
+			responseData.message = "BroadcastSession cannot be found.";
+		}
+		
+		return ok(Json.toJson(responseData));
 	}
 }
 

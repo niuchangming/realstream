@@ -1,0 +1,77 @@
+@import tools.Constants
+
+@(lesson: Lesson, broadcastSession: BroadcastSession)
+
+<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/menu_sideslide.css")">
+<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/broadcaststream.css")">
+<link rel="stylesheet" href="//releases.flowplayer.org/6.0.5/skin/minimalist.css">
+<link rel="stylesheet" href="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.css">
+
+<script src="@routes.Assets.versioned("javascripts/jquery-1.12.4.min.js")" type="text/javascript"></script>
+<script src="//releases.flowplayer.org/6.0.5/flowplayer.min.js"></script>
+<script src="//releases.flowplayer.org/hlsjs/flowplayer.hlsjs.min.js"></script>
+<script src="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.min.js"></script>
+<script>
+	window.onload = function () {
+		flowplayer("#hlsjslive", {
+	    	splash: true,
+	    	embed: false,
+	    	ratio: 9/16,
+	    	clip: {
+	      		hlsQualities: [
+	        		{ level: 0, label: "563k" },
+	        		{ level: 1, label: "828k" },
+	        		{ level: 2, label: "2128k" }
+	      		],
+	      		hlsjs: {
+	        		smoothSwitching: false
+	      		},
+	      		live: true,
+	      		sources: [{ type: "application/x-mpegurl", src: "@broadcastSession.hls"}]
+    		}
+		});
+	};
+</script>
+
+<div class="menu-wrap">
+	<nav class="menu">
+		<h3><span>《</span>@lesson.title<span>》</span></h3>
+		<div class="session-list">
+			@for(index <- 0 until lesson.lessonSessions.size){
+				<a href="#" @if(lesson.lessonSessions(index).id == broadcastSession.lessonSession.id){class="active"}><span class="index">@index</span><span>@lesson.lessonSessions(index).title</span></a>
+			}
+		</div>
+	</nav>
+	<button class="close-button" id="close-button">Close Menu</button>
+</div>
+<button class="menu-button" id="open-button">Open Menu</button>
+<div class="content-wrap">
+	<div class="topbar">
+		<h4>@broadcastSession.lessonSession.title</h4>
+		<div class="right-item">
+			<a class="contact-link">联系老师</a>
+			<a class="feedback-link">反馈</a>
+		</div>
+	</div>
+	<div class="content">
+		<div id="hlsjslive" class="is-closeable"></div>
+	</div>
+	<div class="doc-wrap">
+		<ul>
+			<li>课时相关文件——1 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——2 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——3 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——4 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——5 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——6 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——7 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——8 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——9 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			<li>课时相关文件——10 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+		</ul>
+	</div>
+</div>
+
+<script src="@routes.Assets.versioned("javascripts/sidemenu/classie.js")" type="text/javascript"></script>
+<script src="@routes.Assets.versioned("javascripts/sidemenu/menu.js")" type="text/javascript"></script>

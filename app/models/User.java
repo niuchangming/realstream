@@ -6,13 +6,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import javax.persistence.JoinColumn;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -74,8 +77,11 @@ public class User{
 	@OneToMany(mappedBy = "user")
 	public List<WorkExperience>  workExperiences;
 	
+	@OneToMany(mappedBy = "teacher")
+	public List<Lesson> teacherLessons;
+	
 	@OneToMany(mappedBy = "user")
-	public List<Lesson> lessons;
+	public List<UserLesson> userLessons;
 	
 	public User(){}
 	

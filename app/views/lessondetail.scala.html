@@ -1,0 +1,344 @@
+@import tags._
+
+@(account: Account, lesson: Lesson)
+
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+    <script type="text/javascript">
+	$(function(){
+		$('.btn-join').on('click', function(){
+			var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+			
+			$(this).addClass('disabled');
+			$(this).text('');
+			$(this).append(spinner);
+			
+			$.ajax({
+                url: "@routes.LessonController.registerLesson()",
+                type: "POST",
+                data: {
+                	lessonId: '@lesson.id'
+                },
+                success: function(response, status) {
+                	var data = $.parseJSON(JSON.stringify(response));
+                	
+                	if(data.code >= 4000 && data.code < 5000){
+                		showAlertToast(data.message, "alert-danger");
+                	}else if(data.code >= 5000){
+                		showAlertToast(data.message, "alert-warning");
+                	}else{
+                		showAlertToast(data.message, "alert-success");
+                	}
+                	
+                	spinner.remove();
+                	$('.btn-join').removeClass("disabled");
+                	$('.btn-join').text("立即报名");
+                },
+                error: function(request, status, err){
+                	showAlertToast(err, "alert-danger");
+                	spinner.remove();
+                	$('.btn-join').removeClass("disabled");
+                	$('.btn-join').text("立即报名");
+                }
+            });
+		});
+	});
+</script>
+}
+
+@main(scripts) {
+	@topbar(account)
+	<nav class="bread-crumb inner-center">
+	    <a class="bread-crumb-item" href="/course/list">首页</a>
+	    <i class="fa fa-angle-right"></i>
+	    <a class="bread-crumb-item" href="/course/list?mt=1005">全部课程</a>
+	    <i class="fa fa-angle-right"></i>
+	    <a class="bread-crumb-item" href="/course/list?mt=1005&amp;st=2031">考试</a>
+	    <i class="fa fa-angle-right"></i>
+	    <a class="bread-crumb-item" href="/course/list?mt=1005&amp;st=2031&amp;tt=3178">A水准培训</a>
+	    <i class="fa fa-angle-right"></i>
+	    <a class="bread-crumb-item item-current" href="/course/173429">课程详情</a>
+	</nav>
+	
+	<div class="lesson-main">
+	    <div class="lesson-basic-wrap">
+	        <div class="lesson-basic">
+	            <div class="img-left-wrap">
+	                <img class="img-left" src="@routes.LessonController.showLessonCover(lesson.id, true)" alt="管理类联考数学救命夺分营">
+	                <a class="play-btn" href="">
+		      			<i class="fa fa-play"></i>播放
+		      		</a>
+	                <ul class="pay-policy">
+	                    <li class="pay-policy-title">服务承诺 :</li>
+	                    <li><a href="#" target="_blank"><i class="icon-policy"></i>支付保障</a></li>
+	                    <li><a href="#" target="_blank"><i class="icon-refund"></i>课前随时退</a></li>
+	                    <li><a class="js-videoreplay" href="#" target="_blank"><i class="icon-replay"></i>课后有回放</a></li>
+	                </ul>
+	                <div style="clear:both;"></div>
+	            </div>
+	            <div class="info-wrap">
+	                <h3 class="page-tt">管理类联考数学救命夺分营</h3>
+	                <div class="tt-below-line">
+	                    <span class="line-item statistics-apply">
+	                    	报名人数
+                    		<span class="apply-num js-apply-num">720</span>
+	                    </span>
+	                    <i class="icon-sep"></i>
+	                    <span class="line-item statistics-rate">
+		         			好评度 
+		         			<span class="rate-num"> 100% </span>
+	                    </span>
+	                    <i class="icon-sep"></i>
+	                    <div class="line-item item-share">
+	                        <i class="fa fa-share-alt"></i>分享
+	                        <div class="tips-share">
+	                            <ul class="share-list">
+	                                <li class="share-qq icon-qq" data-to="qq"></li>
+	                                <li class="share-qzone icon-qzone" data-to="qzone"></li>
+	                                <li class="share-weixin icon-weixin" data-to="weixin"></li>
+	                            </ul>
+	                        </div>
+	                    </div>
+	                    <span class="line-item btn-favorite">
+		         <i class="fa fa-heart"></i>收藏
+		         </span>
+	                </div>
+	                <div class="lesson-period">
+	                    <p>12月18日开课 至 12月24日结课</p>
+	                </div>
+	                <div class="lesson-price">
+	                    <p class="lesson-price-info">
+	                        <span class="price-current red">¥
+		            <span class="red">68.00</span>
+	                        </span>
+	                        <span class="price-orignal grey">¥
+		            <span class="grey">88.00</span>
+	                        </span>
+	                        <span class="promt-info">
+		            开课预售至! 还有30天     
+		            </span>
+	                    </p>
+	                    <div class="course-price-discount">
+	                        <div class="course-coupon js-coupon-wrap hide" style="display: none;"></div>
+	                    </div>
+	                </div>
+	                <div class="oper-bar">
+	                    <a class="btn-join btn-blue">立即报名</a>
+	                    <span class="btn-advice-wrap">
+			         		<span class="btn-advice-wording btn-outline">咨询</span>
+		                    <span class="btn-advice-qq btn-outline btn-advice hide">在线</span>
+		                    <span class="js-btn-advice-tel btn-advice-tel btn-outline btn-advice hide" data-tel="01052877654">电话</span>
+	                    </span>
+	                </div>
+	                <div style="clear:both;"></div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="lesson-detail-wrap">
+	        <div class="lesson-detail">
+	            <div class="content tabs">
+	                <div class="tabs-tt-bar js_tab js-tab-nav" id="js_tab">
+	                    <h2 class="tabs-tt active">课程概述</h2>
+	                    <h2 class="tabs-tt">课程目录</h2>
+	                    <h2 class="tabs-tt">学员评论<span class="num">(1816)</span></h2>
+	                </div>
+	
+	                <div class="tabs-content" id="js_basic_tab">
+	                    <h3 class="guide-tt js-teacher-location" data-teacherlocation="1">老师介绍</h3>
+	                    <div class="teacher-item">
+	                        <a href="#" class="link-img" target="_blank" style="background-image:url('//10.url.cn/eth/ajNVdqHZLLActBZJvCrdiblXdIgPK46da2yUicwNMpaBef4UgZxF1RGu41mq4mSomoukF4geA7hPw/');"></a>
+	                        <div class="teacher-summary">
+	                            <h4 class="text-tt"><a class="tt-link js-teacher-name" href="/teacher/2697535167" title="于磊Simon" target="_blank">于磊Simon</a></h4>
+	                            <div class="text-intro js-teacher-intro" title="TESOL; 口语九分达人作者；优酷网“Simon的雅思翻转课堂”和互联网金融平台“智能投”创始人；毕业于悉尼大学，悉尼科技大学和中央昆士兰大学；CA协会认证的澳大利亚会计师从业资格，曾供职于悉尼Trust留学中介和Clear Sky律师事务所；回国后供职于环球雅思和新航道，口语单项高分学员遍布全球">TESOL;&nbsp;口语九分达人作者；优酷网“Simon的雅思翻转课堂”和互联网金融平台“智能投”创始人；毕业于悉尼大学，悉尼.英国剑桥大学认证英语语言教师；资深雅思认证培训师：8年奋战雅，实战百场考试，完整透析雅思题库并提出“真题还原”学习法。</div>
+	                        </div>
+	                    </div>
+	                    <table class="tb-course">
+	                        <tbody>
+	                            <tr>
+	                                <th>简　　介</th>
+	                                <td>WHAT：所有你考雅思想要的，你需要的，你必须要有的！
+	                                    <br>WHO：雅思界高分达人，高实力，高颜值
+	                                    <br>WHOM：所有想和雅思小婊砸分手的同学们
+	                                    <br>OUR TARGET：6789总有一分是你想要，哥就帮你拿到！</td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+	                    <div class="lesson-gallery">
+	                        <div class="img-item">
+	                            <p class="img-tt">图片标题</p>
+	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
+	                        </div>
+	                        <div class="img-item">
+	                            <p class="img-tt">图片标题</p>
+	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
+	                        </div>
+	                        <div class="img-item">
+	                            <p class="img-tt">图片标题</p>
+	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
+	                        </div>
+	                    </div>
+	                </div>
+	
+	                <div class="tabs-content hide" id="js_dir_tab">
+	                    <div class="course-class-task" id="js_class_task">
+	                        <div class="task-schedule js-schedule task-schedule--no-begin">
+	                            <span class="schedule-start js-progress-start">12月20日开课</span>
+	                            <div class="schedule-progress-wrap">
+	                                <div class="schedule-progress js-progress-progress"><span class="percent js-percent" style="width: 0%;"></span></div>
+	                            </div>
+	                            <span class="schedule-end js-progress-end">17年01月结课</span>
+	                        </div>
+	                    </div>
+	                    <div class="task-chapter">
+	                        <div class="task-part-list">
+	                            <div class="task-part-item">
+	                                <div class="task-part-hd">
+	                                    <span class="tt-prefix">第1节</span>
+	                                    <h3 class="part-tt">part2技巧/结构/思路移植法 精炼素材搞定20%题目</h3>
+	                                </div>
+	                                <div class="task-task-list">
+	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
+	                                        <i class="fa fa-play-circle-o item-icon"></i>
+	                                        <span class="task-tt-text" title="【回放】part2技巧/结构/思路移植法">【回放】part2技巧/结构/思路移植法</span><span class="tt-suffix">(12月20日 20:30-22:30)</span>
+	                                    </a>
+	                                    <!-- end for -->
+	                                </div>
+	                            </div>
+	                            <div class="task-part-item">
+	                                <div class="task-part-hd">
+	                                    <span class="tt-prefix">第2节</span>
+	                                    <h3 class="part-tt">精炼素材搞定70%题目+课后锦囊任务2</h3>
+	                                </div>
+	                                <div class="task-task-list">
+	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
+	                                        <i class="fa fa-play-circle-o item-icon"></i>
+	                                        <span class="task-tt-text" title="【回放】精炼素材搞定70%题目+课后锦囊任务2">【回放】精炼素材搞定70%题目+课后锦囊任务2</span><span class="tt-suffix">(12月22日 20:30-22:30)</span>
+	                                    </a>
+	                                    <!-- end for -->
+	                                </div>
+	                            </div>
+	                            <div class="task-part-item">
+	                                <div class="task-part-hd">
+	                                    <span class="tt-prefix">第3节</span>
+	                                    <h3 class="part-tt">精炼素材搞定100%题目+课后锦囊任务3</h3>
+	                                </div>
+	                                <div class="task-task-list">
+	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
+	                                        <i class="fa fa-play-circle-o item-icon"></i>
+	                                        <span class="task-tt-text" title="【回放】精炼素材搞定100%题目+课后锦囊任务3">【回放】精炼素材搞定100%题目+课后锦囊任务3</span><span class="tt-suffix">(12月23日 20:30-22:30)</span>
+	                                    </a>
+	                                    <!-- end for -->
+	                                </div>
+	                            </div>
+	                            <div class="task-part-item">
+	                                <div class="task-part-hd">
+	                                    <span class="tt-prefix">第4节</span>
+	                                    <h3 class="part-tt">补丁课</h3>
+	                                </div>
+	                                <div class="task-task-list">
+	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
+	                                        <i class="fa fa-video-camera item-icon"></i>
+	                                        <span class="task-tt-text" title="【直播】补丁课">【直播】补丁课</span><span class="tt-suffix">(1月8日 15:30-17:30)</span>
+	                                    </a>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	                <div class="tabs-content hide" id="js_comment_tab">
+	                    <div class="mod-comments-list" id="js-comments-list">
+	                        <div class="section-comment-list grid-data">
+	                            <div class="comment-filter grid-row-1">
+	                                <div class="comment-statistics"> <span class="statistics-num">  <span style="color: red;">-</span> </span> 好评度 </div>
+	                                <div class="f-rc-list filter-comment-rank js-f-rc-list">
+	                                    <label class="f-radio checked" data-id="0"><i class="icon-radio"></i><span class="f-rc-text">全部评价(4)</span></label>
+	                                    <label class="f-radio " data-id="1"><i class="icon-radio"></i><span class="f-rc-text">好评(4)</span></label>
+	                                    <label class="f-radio " data-id="2"><i class="icon-radio"></i><span class="f-rc-text">中评(0)</span></label>
+	                                    <label class="f-radio " data-id="3"><i class="icon-radio"></i><span class="f-rc-text">差评(0)</span></label>
+	                                </div>
+	                            </div>
+	                            <div class="comment-list grid-row-2">
+	                                <div class="comment-item">
+	                                    <div class="item-left"> <img class="user-avatar" src="//q1.qlogo.cn/g?b=qq&amp;k=icJELcJM4K4ey5LeCRmH0BA&amp;s=140&amp;t=1470230110" width="40" height="40" alt="?****">
+	                                        <p class="user-name">?****</p>
+	                                    </div>
+	                                    <div class="item-right">
+	                                        <div class="star-list">
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                        </div>
+	                                        <div class="comment-bd">黄叔叔一直都是良心老师，超级棒，素材可以搞定大部分的话题，节省了很多时间。手动比心</div>
+	                                        <div class="comment-ft"> <span class="comment-where">学习进度50%时评价</span> <span class="comment-time">2016-12-23</span> </div>
+	                                        <div class="comment-reply"> </div>
+	                                    </div>
+	                                </div>
+	                                <div class="comment-item">
+	                                    <div class="item-left"> <img class="user-avatar" src="//wx.qlogo.cn/mmopen/aJJkJxOWJ7WthqjxN558awTtrU2JYSX22llicfbz52eIN4r9eNR9icpicbc5eXFPTgz47iaTuico0WPCPGiajYvjkQVyxQSKUZQIt6/0" width="40" height="40" alt="一****">
+	                                        <p class="user-name">一****</p>
+	                                    </div>
+	                                    <div class="item-right">
+	                                        <div class="star-list">
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                        </div>
+	                                        <div class="comment-bd">黄叔叔讲课非常的棒！满满都是干货！</div>
+	                                        <div class="comment-ft"> <span class="comment-where">学习进度1%时评价</span> <span class="comment-time">2016-12-23</span> </div>
+	                                        <div class="comment-reply"> </div>
+	                                    </div>
+	                                </div>
+	                                <div class="comment-item">
+	                                    <div class="item-left"> <img class="user-avatar" src="//q4.qlogo.cn/g?b=qq&amp;k=FNzdlnF6QjQE6VK8xHDS5Q&amp;s=140&amp;t=1439730695" width="40" height="40" alt="v****">
+	                                        <p class="user-name">v****</p>
+	                                    </div>
+	                                    <div class="item-right">
+	                                        <div class="star-list">
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                            <i class="fa fa-star"></i>
+	                                        </div>
+	                                        <div class="comment-bd">Frank讲课很棒，希望我能在雅思考试中给力！加油</div>
+	                                        <div class="comment-ft"> <span class="comment-where">学习进度25%时评价</span> <span class="comment-time">2016-12-20</span> </div>
+	                                        <div class="comment-reply"> </div>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	        
+	        <aside class="aside-right">
+				<h2 class="serv-tt">知名大学</h2>
+				<p class="serv-brief">成绩优异的学生我们将会提供一次免费国际知名大学的入学考试。合作大学列表如下：</p>
+				<ul class="univercity-list">
+					<li class="univercity-item">
+						<a class="link-img" style="background-image:url('https://yalenusblog.files.wordpress.com/2012/07/nus_shield1.gif');"></a>
+						<p>新加坡国立大学</p>
+					</li>
+					<li class="univercity-item">
+						<a class="link-img" style="background-image:url('http://www.sg-akc.com/images/CSR/CSR160503_img.jpg');"></a>
+						<p>新加坡南阳理工大学</p>
+					</li>
+					<li class="univercity-item">
+						<a class="link-img" style="background-image:url('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRRkq5lJo5DBQCFxdMDXnua6Cuxq6Gz9bKNSm-9aDdXBHABHOT7');"></a>
+						<p>英国剑桥大学</p>
+					</li>
+				</ul>
+				
+				<p>欢迎来电咨询：<span class="tel">0041-82938394</span></p>
+				
+	        </aside>
+	        
+	        <div style="clear:both;"></div>
+	    </div>
+	</div>
+}

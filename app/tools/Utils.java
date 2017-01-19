@@ -99,7 +99,7 @@ public class Utils {
 	}
 	
 	public static String getJWTString(int mins){
-		final long iat = System.currentTimeMillis() / 1000L - 60;
+		final long iat = System.currentTimeMillis() / 1000L - 90;
 		final long exp = iat + mins * 60L;
 		
 		JWTSigner signer = new JWTSigner(Constants.TOKBOX_SECRET);
@@ -320,6 +320,12 @@ public class Utils {
 
 	public static Date parse(String source) throws ParseException {
 		return parse("yyyy-MM-dd HH:mm", source);
+	}
+	
+	public static Date parse(long milliseconds){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliseconds);
+		return calendar.getTime();
 	}
 	
 	public static String upperFirst(String s) {

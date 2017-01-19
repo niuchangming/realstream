@@ -26,5 +26,6 @@ public class ResponseData {
 //4000 logical error
 //4001 server throws error
 //4002 opentok get broadcast info failed due to delay time, so have to wait 15-20 seconds
+//5000 warning
 
 
