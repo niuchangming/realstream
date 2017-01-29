@@ -9,6 +9,9 @@
 	
 	<div class="tab-ctn">
       <div class="tab-course-list clear-fix">
+      	<a id="prev-btn" class="tab-move-btn tab-prev-btn">
+			<i class="icon-font fa fa-angle-left"></i>
+		</a>
       	@for(index <- 0 until lessons.size){
 			<div class="tab-item-ctn @if(index == 0){active}" data-ID='@lessons(index).id'>
 	            <p class="tab-title" title="工业设计考研复试逆袭第一经验分享">@lessons(index).title</p>
@@ -25,6 +28,9 @@
 	            </div>
 	        </div>         	
         }
+        <a id="next-btn" class="tab-move-btn tab-next-btn">
+			<i class="icon-font fa fa-angle-right"></i>
+		</a>
       </div>
    </div>
    <div class="details-ctn">
@@ -53,11 +59,32 @@
 	<script>
 	$(function(){
 		lessonMap = {};
+		pageIndex = 0;
+		tabContainerWidth = $('.tab-ctn').width() - 62;
+		tabWidth = $('.tab-item-ctn').width();
+		tabCount = Math.floor(tabContainerWidth / tabWidth);
+		nextBtn = $('#next-btn');
+		prevBtn = $('#prev-btn');
+		lessonTabs = $('.tab-item-ctn');
+		totalLessonCount = lessonTabs.length;
+		
+		updatePage();
+		
+		nextBtn.on('click', function(){
+			pageIndex++;
+			updatePage();
+		});
+		
+		prevBtn.on('click', function(){
+			pageIndex--;
+			updatePage();
+		});
 		
 		$('.tab-item-ctn').on('click', function(){
 			$('.tab-item-ctn').each(function(){
 				$(this).removeClass('active');
 			});
+			
 			$(this).addClass('active');
 			  
 			var lessonId = $(this).attr('data-ID');
@@ -68,7 +95,7 @@
 				updateSessionView(lessonMap[lessonId]);
 			}
 		});
-		  
+		
 		loadLessonSession();
 	});
 	
@@ -118,7 +145,7 @@
 	        if(diff <= -lessonSession.duration){
 	        	lsView += '<div class="task-button-ctn">已结束</div>';
 	        }else if(diff > -lessonSession.duration && diff <= 0){
-	        	lsView += '<div class="task-button-ctn">直播中...</div>';
+	        	lsView += '<a class="btn task-button-ctn broadcast-btn" href="/broadcast/lessonSession/join?lessonSessionId='+ lessonSession.id +'">直播中...</a>';
 	        }else if(diff > 0 && diff <= 30){
 	        	lsView += '<a class="btn task-button-ctn broadcast-btn" href="/broadcast/lessonSession/join?lessonSessionId='+ lessonSession.id +'">开始直播</a>';
 	        }else{
@@ -139,6 +166,40 @@
 	function diffDate(d1, d2){
 		var hourDiff = d2.getTime() - d1.getTime();
 		return hourDiff / 60 / 1000; 
+	}
+	
+	function updatePage(){
+		if(pageIndex == 0){
+			prevBtn.addClass('hide');
+		}else{
+			prevBtn.removeClass('hide');
+		}
+		
+		if(tabCount * (1 + pageIndex) >= totalLessonCount){
+			nextBtn.addClass('hide');
+		}else{
+			nextBtn.removeClass('hide');
+		}
+		
+		$.each($('.tab-item-ctn'), function(index, e){
+			if(index >= tabCount * pageIndex && index < tabCount * (1 + pageIndex)){
+				$('.tab-item-ctn').eq(index).removeClass('hide');
+			}else{
+				$('.tab-item-ctn').eq(index).addClass('hide');
+			}
+			$(this).removeClass('active');
+		});
+		
+		var activeTab = $('.tab-item-ctn').eq(pageIndex * tabCount);
+		activeTab.addClass('active');
+		
+		var lessonId = activeTab.attr('data-ID');
+		
+		if (!(lessonId in lessonMap)){
+			loadLessonSession(lessonId);
+		}else{
+			updateSessionView(lessonMap[lessonId]);
+		}
 	}
 	
 	</script>

@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -56,6 +57,10 @@ public class LessonSession {
 	
 	@OneToMany(mappedBy = "lessonSession")
 	public List<BroadcastSession> broadcastSessions;
+	
+	@OneToMany(mappedBy = "lessonSession")
+	@OrderBy("startDatetime ASC")
+	public List<MediaFile> mediaFiles;
 	
 	public LessonSession(){}
 	

@@ -1,0 +1,154 @@
+@(lesson: Lesson)
+
+<div class="modal fade" id="file-upload-model" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">添加课程文件</h4>
+      </div>
+      <div class="modal-body">
+      	<form id="fileupload">
+      		<div class="form-group">
+	      	  	<div class="file-upload-wrapper">
+		            <a class="file-upload-link">
+		      	  		选择文件
+						<input id="file-uploader" type="file" name="file" data-url="@routes.FileController.uploadMediaFile()"/>      	  	
+		      	  	</a>
+		      	  	<label id="filename-lbl">未选择文件</label>
+		      	  	<p class="hide"><span>Uploading</span><span> </span><span class="progress">0%</span></p>
+		        </div>
+		        <label class="error hide"></label>
+		      </div>
+		      <div class="form-group">
+					<label>文件专属课时:</label>
+					<select class="form-control" name="lessonSessionId">
+						<option value="-1">选择课时</option>
+						@for(lessonSession <- lesson.lessonSessions){
+							<option value="@lessonSession.id">@lessonSession.title</option>
+						}
+					</select>
+			  </div>
+			  <input type="hidden" name="lessonId" value="@lesson.id">
+		      <input type="reset" style="display:none;" /> 
+	      </form>
+      </div>
+      <div class="modal-footer">
+      	<div class="form-group">
+        	<button id="file-confirm-btn" class="btn btn-success" disabled>
+        		上传
+        	</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="@routes.Assets.versioned("javascripts/jquery.ui.widget.js")" type="text/javascript"></script>
+<script src="@routes.Assets.versioned("javascripts/jquery.iframe-transport.js")" type="text/javascript"></script>
+<script src="@routes.Assets.versioned("javascripts/jquery.fileupload.js")" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function(){
+		spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+		uploadBtn = $('#file-confirm-btn');
+		
+		$('#file-uploader').fileupload({
+			dataType: 'json',
+			type: 'POST',
+			progressInterval: 100,
+            limitConcurrentUploads: 1,
+            maxNumberOfFiles: 1,
+	        add: function (e, data) {
+	        	if (data.files && data.files[0]) {
+	        		//PDF, DOC, DOCX, XLS, XLSX, PPTX
+	        		var acceptFileTypes = /(\.|\/)(pdf|msword|vnd.openxmlformats-officedocument.wordprocessingml.document|vnd.ms-excel|vnd.openxmlformats-officedocument.spreadsheetml.sheet|vnd.openxmlformats-officedocument.presentationml.presentation)$/i;
+	        		if(data.originalFiles[0]['type'].length && !acceptFileTypes.test(data.originalFiles[0]['type'])) {
+	        			$('#fileupload .error').removeClass('hide');
+	        			$('#fileupload .error').text('Lesson file can only be PDF, DOC or XLS');
+	                }else{
+	                	$('#fileupload .error').addClass('hide');
+	                	
+	                	var reader = new FileReader();
+		                var inputEle = $(this);
+		                
+		                $('#filename-lbl').text(data.files[0].name);
+		                $('.file-upload-wrapper > p').removeClass('hide');
+		                uploadBtn.attr('disabled', false);
+		                uploadBtn.on('click', function(){
+		                	data.submit();
+		                	$('.progress').text('0%');
+		                	uploadBtn.text('');
+		                	uploadBtn.append(spinner);
+		                	uploadBtn.attr('disabled', true);
+		                	uploadBtn.off('click');
+		                });
+	                }
+	        	}
+	        },
+	        formData: $('#fileupload').serializeArray(),
+         	progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('.progress').text(progress + '%');
+            },
+	        done: function (e, response) {
+	        	resetModal();
+	        	var sizeInMB = (response.result.data.size / (1024*1024)).toFixed(2);
+	        	
+	        	var lastTrIndexStr = $("tbody > tr:last-child > td:first-child").text();
+	        	var lastTrIndex;
+	    		if(lastTrIndexStr === ''){
+	    			lastTrIndexStr = 0;
+	    			lastTrIndex = lastTrIndexStr;
+	    		}else{
+	    			lastTrIndex = parseInt(lastTrIndexStr);
+	    		}
+	        	
+	        	var rowItem = '<tr class="paginate">';
+	        	rowItem += '<td>' + (lastTrIndex + 1) + '</td>';
+	        	
+	        	if(response.result.data.fileType == "PDF"){
+	        		rowItem += '<td><i class="fa fa-file-pdf-o"></i><p>' + response.result.data.name + '</p></td>';
+				}else if(response.result.data.fileType == "XLSX" || response.result.data.fileType == "XLS"){
+					rowItem += '<td><i class="fa fa-file-excel-o"></i><p>' + response.result.data.name + '</p></td>';
+				}else if(response.result.data.fileType == "PPTX" || response.result.data.fileType == "PPT"){
+					rowItem += '<td><i class="fa fa-file-powerpoint-o"></i><p>' + response.result.data.name + '</p></td>';
+				}else{
+					rowItem += '<td><i class="fa fa-file-word-o"></i><p>' + response.result.data.name + '</p></td>';
+				}
+	        	
+	        	rowItem += '<td><p>' + sizeInMB + 'M</p></td>'
+	        	rowItem += '<td><p>' + response.result.data.fileType + '</p></td>';
+	        	rowItem += '<td>';
+	        	rowItem += '<a class="link-btn download-btn" href="/lesson/file/download?mediaFileUUID='+response.result.data.uuid+'">点击下载</a>';
+	        	rowItem += '<a class="link-btn del-btn" data-uuid="'+ response.result.data.uuid + '">删除</a>';
+	        	rowItem += '</td>';
+	        	rowItem += '</tr>';
+	        	
+	        	$('tbody').append(rowItem);
+	      	},
+	        fail: function (e, data) {
+	        	resetModal();
+	        	showAlertToast(data.jqXHR.responseText, "alert-danger");
+	        }
+	    });
+		
+		$('#file-upload-model').on('hide.bs.modal', function () {
+			$('#fileupload .error').addClass('hide');
+		});
+			
+	});
+	
+	function resetModal(){
+		$('#fileupload .error').addClass('hide');
+		$("input[type=reset]").trigger("click");
+    	$('#filename-lbl').text('未选择文件');	
+    	$('.file-upload-wrapper > p').addClass('hide');
+    	$('.progress').text('0%');
+    	spinner.remove();
+    	uploadBtn.attr('disabled', true);
+    	uploadBtn.text('上传');
+    	
+    	$('#file-upload-model').modal('hide');
+	}
+
+</script>

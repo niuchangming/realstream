@@ -1,5 +1,8 @@
 package services;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -7,7 +10,10 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;import com.amazonaws.services.s3.model.Region;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.Region;
 
 import play.Application;
 
@@ -47,5 +53,13 @@ public class S3Plugin {
         return (application.configuration().keys().contains(AWS_ACCESS_KEY) &&
                 application.configuration().keys().contains(AWS_SECRET_KEY) &&
                 application.configuration().keys().contains(AWS_S3_BUCKET));
+    }
+    
+    public static void createFolder(String bucketName, String folderName, AmazonS3 client) {
+    	ObjectMetadata metadata = new ObjectMetadata();
+    	metadata.setContentLength(0);
+    	InputStream emptyContent = new ByteArrayInputStream(new byte[0]);
+    	PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName,folderName, emptyContent, metadata);
+    	client.putObject(putObjectRequest);
     }
 }

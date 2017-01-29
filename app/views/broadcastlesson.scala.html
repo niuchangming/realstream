@@ -30,7 +30,7 @@
     		  } else {
     			  session.publish(publisher, function(error) {
     					if (error) {
-    						alert("Error: " + error);
+    						alert("Error: " + JSON.stringify(error));	
     					} else {
     						getBroadcastInfo();
     					}

@@ -175,24 +175,24 @@ public class LessonController extends Controller{
 				if(lesson == null){
 					responseData.message = "The lesson cannot be found.";
 					responseData.code = 4000;
+				}else{
+					int imageCount = lesson.lessonImages.size();
+					if(imageCount >= LessonImage.IMAGE_MAX){
+						responseData.message = "Lesson image count exceeds 15.";
+						responseData.code = 4000;
+					}else{
+						LessonImage lessonImage = new LessonImage(lesson, imageFile.getFile());
+						if(imageCount == 0){
+							lessonImage.isCover = true;
+						}
+						
+						jpaApi.em().persist(lessonImage);
+						
+						responseData.data = lessonImage;
+						
+						return ok(Utils.toJson(ResponseData.class, responseData, "*.lesson"));
+					}
 				}
-				
-				int imageCount = lesson.lessonImages.size();
-				if(imageCount >= LessonImage.IMAGE_MAX){
-					responseData.message = "Lesson image count exceeds 15.";
-					responseData.code = 4000;
-				}
-				
-				LessonImage lessonImage = new LessonImage(lesson, imageFile.getFile());
-				if(imageCount == 0){
-					lessonImage.isCover = true;
-				}
-				
-				jpaApi.em().persist(lessonImage);
-				
-				responseData.data = lessonImage;
-				
-				return ok(Utils.toJson(ResponseData.class, responseData, "*.lesson"));
 		    }else{
 		    	responseData.message = "Image file cannot be empty.";
 		    	responseData.code = 4000;
@@ -699,6 +699,7 @@ public class LessonController extends Controller{
 		
 		return ok(Json.toJson(responseData));
 	}
+	
 }
 
 

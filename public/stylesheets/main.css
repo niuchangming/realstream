@@ -67,6 +67,7 @@ ul:focus{
 
 .form-group{
 	position: relative !important;
+	clear: both;
 }
 
 .form-control{
@@ -2327,15 +2328,42 @@ ul.ms-list{
 /** Register Lesson List Start **/
 
 .tab-ctn {
-    width: 100%;
     position: relative;
+    margin: 0 15px;
     z-index: 1;
 }
 
+tab-ctn .tab-prev-btn {
+    left: -24px;
+}
+
+.tab-ctn .tab-next-btn {
+    right: -23px;
+}
+
+.tab-ctn .tab-move-btn {
+    position: absolute;
+    height: 42px;
+    width: 24px;
+    line-height: 42px;
+    font-size: 20px;
+    top: 39px;
+    text-align: center;
+}
+
+#prev-btn{
+	left: -26px;
+}
+
+.tab-ctn .tab-move-btn i {
+    font-size: 26px;
+}
+
 .tab-ctn .tab-course-list {
-    width: 100%;
     min-width: 750px;
     height: 140px;
+    display: inline-block;
+    position: relative;
 }
 
 .tab-item-ctn {
@@ -2605,7 +2633,94 @@ ul.ms-list{
     width: 100%;
     color: #777;
 }
+
 /** Register Lesson List End **/
+
+/** Lesson File Mangement Start **/
+
+.file-table p{
+	display: inline-block;
+}
+
+.file-table i{
+	font-size: 130%;
+	margin-right: 5px;
+}
+
+.file-upload-wrapper{
+	background-color: #F1F1F1;
+	position: relative;
+}
+
+.file-upload-wrapper label{
+	font-size: 90%;
+	margin-left: 5px;
+	color: #777;
+}
+
+.file-upload-link{
+	width: 120px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	display: inline-block;
+	position: relative;
+	color: white;
+	background-color: #76abbf;
+}
+
+.file-upload-link[disabled]{
+	background-color: #A3C7D5;
+	color: white !important;
+}
+
+.file-upload-link:hover{
+	background-color: #A3C7D5;
+	color: white !important;
+}
+
+.file-upload-link > input{
+	position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+#fileupload p{
+	font-size: 90%;
+	position: absolute;	
+    right: 10px;
+    top: 50%;
+    color: #777;
+    transform: translate(0, -50%);
+}
+
+#file-confirm-btn{
+	position: relative;
+	min-width: 54px;
+	min-height: 34px;
+}
+
+#file-confirm-btn > i{
+	position: absolute;
+	color: white;
+	top: 10px;
+	left: 18px;
+	display: inline-block;
+}
+
+.file-table a.link-btn{
+	margin: 0 5px;
+	color: #76abbf !important;
+	text-decoration:underline;
+}	
+
+.file-table a.link-btn:hover{
+	color: #577C89 !important;
+}
+
+/** Lesson File Mangement End **/
 
 
 

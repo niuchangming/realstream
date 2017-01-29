@@ -6,10 +6,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,35 +15,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.joda.time.Days;
-import org.joda.time.Minutes;
-
 import com.auth0.jwt.JWTSigner;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.JWTVerifyException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.monitorjbl.json.JsonView;
 import com.monitorjbl.json.JsonViewSerializer;
 import com.monitorjbl.json.Match;
-
-import models.Account;
-import play.api.cache.Cache;
-import play.libs.Json;
-import scala.util.parsing.json.JSONObject;
 
 public class Utils {
 	public static String md5(final String input) {
@@ -99,7 +80,7 @@ public class Utils {
 	}
 	
 	public static String getJWTString(int mins){
-		final long iat = System.currentTimeMillis() / 1000L - 90;
+		final long iat = System.currentTimeMillis() / 1000L - 120;
 		final long exp = iat + mins * 60L;
 		
 		JWTSigner signer = new JWTSigner(Constants.TOKBOX_SECRET);
@@ -148,6 +129,12 @@ public class Utils {
 		    codes.add(x);
 		}
 		return Integer.parseInt(String.format("%04d", codes.get(0)));
+	}
+	
+	public static String convertByteToMB(long bytes){
+		DecimalFormat df = new DecimalFormat("#.##"); 
+		double d = (double)bytes / 1024 / 1024;
+		return df.format(d); 
 	}
 	
 	public static long differentDateTimeByMins(Date d1, Date d2){
