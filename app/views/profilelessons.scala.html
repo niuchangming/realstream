@@ -51,7 +51,7 @@
 			          	<a class="link-img" style="background-image:url('@routes.LessonController.showLessonCover(lesson.id, false)')"></a>
 			          	<p>@lesson.title</p>
 			          </td>
-			          <td><p>49人</p></td>
+			          <td><p>@lesson.userLessons.size() 人</p></td>
 			          <td><p>报名中</p></td>
 			          <td>
 			          	<a class="link-btn" href="@routes.LessonController.lessonDetail(lesson.id)">查看</a>

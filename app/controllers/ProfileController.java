@@ -188,9 +188,11 @@ public class ProfileController extends Controller{
 			
 			DynamicForm requestData = formFactory.form().bindFromRequest();
 			String realName = requestData.get("realName");
+			String bestInstitution = requestData.get("institution");
 			String brief = requestData.get("brief");
 			
 		    user.realName = realName;
+		    user.bestInstitution = bestInstitution;
 		    user.brief = brief;
 		    user.role = Role.TEACHER;
 		    

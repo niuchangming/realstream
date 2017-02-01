@@ -109,18 +109,17 @@ public class FileController extends Controller{
 			    	return ok(Json.toJson(responseData));
 			    }
 				
-				if(lessonSession == null){
+				if(lessonSession != null){
 					mediaFile.lessonSession = lessonSession;
 				}
 				
 				jpaApi.em().persist(mediaFile);
 				
 				responseData.data = mediaFile;
-				
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode jsonData;
 				try {
-					jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson"));
+					jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson", "*.lessonSession"));
 					return ok(Json.toJson(jsonData));
 				} catch (IOException e) {
 					responseData.message = e.getLocalizedMessage();

@@ -1278,6 +1278,10 @@ input.file-input{
 	color: #777;
 }
 
+.institution-tip{
+	line-height: 34px;
+}
+
 .form-join{
 	margin: 0 5px;
 }
@@ -1364,7 +1368,6 @@ input.file-input{
 }
 
 /** Teacher Settle End ---- review **/
-
 
 /** Error Start **/
 
@@ -2298,6 +2301,7 @@ comment-item .item-right {
 
 ul.ms-list{
 	max-height: 300px;
+	overflow: scroll;
 }
 
 .ms-selectable li.ms-elem-selectable,

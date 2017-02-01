@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -26,11 +27,13 @@ import models.Category;
 import models.Lesson;
 import models.LessonImage;
 import models.LessonSession;
+import models.PublishedLesson;
 import models.ResponseData;
 import models.User;
 import models.UserLesson;
 import play.data.DynamicForm;
 import play.data.FormFactory;
+import play.db.jpa.JPA;
 import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
@@ -135,7 +138,8 @@ public class LessonController extends Controller{
 		
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages"));
+			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, 
+					"*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages", "*.userLessons", "*.mediaFiles"));
 			return ok(Json.toJson(jsonData));
 		} catch (IOException e) {
 			responseData.message = e.getLocalizedMessage();
@@ -364,40 +368,50 @@ public class LessonController extends Controller{
     	if(lesson == null){
     		responseData.message = "Lesson cannot be found.";
     		responseData.code = 4000;
+    	}else{
+    		LessonSession lessonSession = new LessonSession(lesson);
+        	try {
+    	    	lessonSession.title = title;
+    	    	lessonSession.brief = brief;
+    	    	lessonSession.duration = Integer.parseInt(duration);
+    			lessonSession.startDatetime = Utils.parse(startDatetime);
+    			lessonSession.endDatetime = Utils.addMinute(lessonSession.startDatetime, lessonSession.duration);
+    			lessonSession.interactive = interactive;
+    			jpaApi.em().persist(lessonSession);
+    			
+    			boolean updateLesson = false;
+    			if(lesson.startDatetime == null || lesson.startDatetime.after(lessonSession.startDatetime)){
+    				lesson.startDatetime = lessonSession.startDatetime;
+    				updateLesson = true;
+    			}
+    			
+    			if(lesson.endDatetime == null || lesson.endDatetime.before(lessonSession.endDatetime)){
+    				lesson.endDatetime = lessonSession.endDatetime;
+    				updateLesson = true;
+    			}
+    			
+    			if(updateLesson){
+    				jpaApi.em().persist(lesson);
+    			}
+    			
+    			//update lesson session count for publish lesson object
+    			if(lesson.isPublish){
+    	    		jpaApi.em()
+    	    		.createQuery("update PublishedLesson pl set pl.lessonSessionCount = :lessonSessionCount where li.lesson = :lesson")
+    	    		.setParameter("lessonSessionCount", lesson.lessonSessions.size())
+    				.setParameter("lesson", lesson).executeUpdate();
+    			}
+    			
+    			flash().put("success", "An new lesson session created successfully.");
+    			
+    			return redirect(routes.LessonController.lessonSession(lessonId, 0));
+    		} catch (ParseException e) {
+    			responseData.code = 4001;
+    			responseData.message = e.getLocalizedMessage();
+    		}
     	}
     	
-    	LessonSession lessonSession = new LessonSession(lesson);
-    	try {
-	    	lessonSession.title = title;
-	    	lessonSession.brief = brief;
-	    	lessonSession.duration = Integer.parseInt(duration);
-			lessonSession.startDatetime = Utils.parse(startDatetime);
-			lessonSession.endDatetime = Utils.addMinute(lessonSession.startDatetime, lessonSession.duration);
-			lessonSession.interactive = interactive;
-			jpaApi.em().persist(lessonSession);
-			
-			boolean updateLesson = false;
-			if(lesson.startDatetime == null || lesson.startDatetime.after(lessonSession.startDatetime)){
-				lesson.startDatetime = lessonSession.startDatetime;
-				updateLesson = true;
-			}
-			
-			if(lesson.endDatetime == null || lesson.endDatetime.before(lessonSession.endDatetime)){
-				lesson.endDatetime = lessonSession.endDatetime;
-				updateLesson = true;
-			}
-			
-			if(updateLesson){
-				jpaApi.em().persist(lesson);
-			}
-			
-			flash().put("success", "An new lesson session created successfully.");
-			
-			return redirect(routes.LessonController.lessonSession(lessonId, 0));
-		} catch (ParseException e) {
-			responseData.code = 4001;
-			responseData.message = e.getLocalizedMessage();
-		}
+    	
     	return ok(Json.toJson(responseData));
 	}
 	
@@ -420,7 +434,7 @@ public class LessonController extends Controller{
 			try {
 				responseData.data = lessonSessions;
 				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson", "*.broadcastSessions"));
+				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson", "*.broadcastSessions", "*.mediaFiles"));
 				return ok(Json.toJson(jsonData));
 			} catch (IOException e) {
 				responseData.code = 4001;
@@ -488,8 +502,10 @@ public class LessonController extends Controller{
     		lesson.price = price;
         	lesson.offerPrice = offerPrice;
         	try {
-    			lesson.offerStartDate = Utils.parse(offerStartDate);
-    			lesson.offerEndDate = Utils.parse(offerEndDate);
+        		if(Utils.isBlank(offerStartDate) && Utils.isBlank(offerEndDate)){
+        			lesson.offerStartDate = Utils.parse(offerStartDate);
+        			lesson.offerEndDate = Utils.parse(offerEndDate);
+        		}
     			
     			if(ids != null && ids.length > 0){
     				String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
@@ -510,6 +526,49 @@ public class LessonController extends Controller{
     			responseData.message = e.getLocalizedMessage();
     		}
     	}
+    	return ok(Json.toJson(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result publishLesson(){
+		ResponseData responseData = new ResponseData();
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+    	if(lesson == null){
+    		responseData.message = "Lesson cannot be found.";
+    		responseData.code = 4000;
+    	}else if(Utils.isBlank(lesson.title)){
+    		responseData.message = "Title must be set.";
+    		responseData.code = 5000;
+    	}else if(Utils.isBlank(lesson.description)){
+    		responseData.message = "Description must be set.";
+    		responseData.code = 5000;
+    	}else if(lesson.price == 0){
+    		responseData.message = "Price must be set.";
+    		responseData.code = 5000;
+    	}else if(lesson.isPublish){
+    		responseData.message = "The lesson already published.";
+    		responseData.code = 5000;
+    	}else if(lesson.lessonImages == null || lesson.lessonImages.size() == 0){
+    		responseData.message = "Lesson image must be set.";
+    		responseData.code = 5000;
+    	}else if(lesson.lessonSessions == null || lesson.lessonSessions.size() == 0){
+    		responseData.message = "There is no any lesson session in this lesson.";
+    		responseData.code = 5000;
+    	}else{
+    		lesson.isPublish = true;
+    		lesson.publishDatetime = new Date();
+    		jpaApi.em().persist(lesson);
+    		
+    		PublishedLesson publishLesson = new PublishedLesson(lesson);
+    		jpaApi.em().persist(publishLesson);
+    		
+    		responseData.message = "The lesson was published successfully.";
+    	}
+		
     	return ok(Json.toJson(responseData));
 	}
 	

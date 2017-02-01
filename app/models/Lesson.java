@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class Lesson {
 	@Lob
 	public String description;
 	
+	@Column(columnDefinition = "double default 0")
 	public double price;
 	
 	public double offerPrice;

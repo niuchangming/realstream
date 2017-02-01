@@ -11,7 +11,7 @@
 		} else {
 			<div class="mod-header_wrap-user">
 				<i class="icon-red-circle" style="display:none;"></i>
-				<a style="background-image:url('https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQS0xA9MjnSvsaLL0rSP-M2qU_xTGlHTYxG-l6eVqBBb7gsCwfQiQ');" class="mod-header__user-img link-img"></a>
+				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="mod-header__user-img link-img"></a>
 				<p class="mod-header__user-name">
 					<a href="/user/index/index.html" class="mod-header__user-operation">个人中心</a>
 				</p>

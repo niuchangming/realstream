@@ -21,7 +21,6 @@ import play.db.jpa.JPAApi;
 @Singleton
 public class StartingJobs {
 	
-	
 	@Inject
 	public StartingJobs(JPAApi jpaApi) {
 		jpaApi.withTransaction(() -> {

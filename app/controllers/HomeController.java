@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -8,6 +9,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import models.Account;
+import models.Lesson;
 import models.ResponseData;
 import models.User;
 import actions.AuthAction;
@@ -38,11 +40,13 @@ public class HomeController extends Controller {
 			try{
 				account = query.getSingleResult();
 			}catch(NoResultException e){
-				ok(index.render(account));
+				e.printStackTrace();
 			}
 		}
 		
-		return ok(index.render(account));
+		List<Lesson> lessons = JPA.em().createQuery("from Lesson", Lesson.class).getResultList();
+		
+		return ok(index.render(account, lessons));
     }
 	
 	@Transactional
