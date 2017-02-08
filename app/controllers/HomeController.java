@@ -9,7 +9,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import models.Account;
-import models.Lesson;
+import models.Category;
 import models.ResponseData;
 import models.User;
 import actions.AuthAction;
@@ -44,9 +44,8 @@ public class HomeController extends Controller {
 			}
 		}
 		
-		List<Lesson> lessons = JPA.em().createQuery("from Lesson", Lesson.class).getResultList();
-		
-		return ok(index.render(account, lessons));
+		List<Category> categories = JPA.em().createQuery("from Category where parent is null", Category.class).getResultList();
+		return ok(index.render(account, categories));
     }
 	
 	@Transactional

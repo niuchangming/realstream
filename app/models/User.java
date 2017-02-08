@@ -81,6 +81,9 @@ public class User{
 	
 	@OneToMany(mappedBy = "user")
 	public List<UserLesson> userLessons;
+
+	@OneToMany(mappedBy = "user")
+	public List<Payment> payments;
 	
 	public User(){}
 	

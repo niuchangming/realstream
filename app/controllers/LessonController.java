@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -33,7 +32,6 @@ import models.User;
 import models.UserLesson;
 import play.data.DynamicForm;
 import play.data.FormFactory;
-import play.db.jpa.JPA;
 import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
@@ -180,7 +178,7 @@ public class LessonController extends Controller{
 					responseData.message = "The lesson cannot be found.";
 					responseData.code = 4000;
 				}else{
-					int imageCount = lesson.lessonImages.size();
+					int imageCount = lesson.lessonImages == null ? 0 : lesson.lessonImages.size();
 					if(imageCount >= LessonImage.IMAGE_MAX){
 						responseData.message = "Lesson image count exceeds 15.";
 						responseData.code = 4000;
@@ -191,9 +189,7 @@ public class LessonController extends Controller{
 						}
 						
 						jpaApi.em().persist(lessonImage);
-						
 						responseData.data = lessonImage;
-						
 						return ok(Utils.toJson(ResponseData.class, responseData, "*.lesson"));
 					}
 				}
@@ -218,6 +214,24 @@ public class LessonController extends Controller{
 		try{
 			LessonImage lessonImage = query.getSingleResult();
 			InputStream imageStream = lessonImage.downloadThumbnail();
+			return ok(imageStream);
+		}catch(NoResultException e){
+			responseData.message = "Image cannot be found.";
+	    	responseData.code = 4000;
+		}
+		return ok(Json.toJson(responseData));
+	}
+	
+	@Transactional
+	public Result showLessonImage(String uuid){
+		ResponseData responseData = new ResponseData();
+		TypedQuery<LessonImage> query = jpaApi.em()
+				.createQuery("from LessonImage li where li.uuid = :uuid", LessonImage.class)
+				.setParameter("uuid", uuid);
+		
+		try{
+			LessonImage lessonImage = query.getSingleResult();
+			InputStream imageStream = lessonImage.download();
 			return ok(imageStream);
 		}catch(NoResultException e){
 			responseData.message = "Image cannot be found.";
@@ -410,8 +424,6 @@ public class LessonController extends Controller{
     			responseData.message = e.getLocalizedMessage();
     		}
     	}
-    	
-    	
     	return ok(Json.toJson(responseData));
 	}
 	
@@ -459,6 +471,7 @@ public class LessonController extends Controller{
     	if(lesson == null){
     		responseData.message = "Lesson cannot be found.";
     		responseData.code = 4000;
+    		return notFound(errorpage.render(responseData));
     	}
     	
 		return ok(lessondetail.render(account, lesson));
@@ -560,7 +573,6 @@ public class LessonController extends Controller{
     		responseData.code = 5000;
     	}else{
     		lesson.isPublish = true;
-    		lesson.publishDatetime = new Date();
     		jpaApi.em().persist(lesson);
     		
     		PublishedLesson publishLesson = new PublishedLesson(lesson);
@@ -570,6 +582,34 @@ public class LessonController extends Controller{
     	}
 		
     	return ok(Json.toJson(responseData));
+	}
+	
+	@Transactional
+	public Result pubishedLessonsByCategory(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		String categoryId = requestData.get("categoryId");
+		int offset = requestData.get("offset") == null ? 0 : Integer.parseInt(requestData.get("offset"));
+		
+		List<PublishedLesson> publishLessons = jpaApi.em()
+				.createNativeQuery("SELECT * FROM publish_lesson pl WHERE pl.category_id = :categoryId ORDER BY pl.published_datetime DESC", PublishedLesson.class)
+				.setParameter("categoryId", categoryId)
+				.setFirstResult(offset)
+				.setMaxResults(PublishedLesson.PAGE_SIZE)
+				.getResultList();
+		responseData.data = publishLessons;
+		
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lesson"));
+			return ok(jsonData);
+		} catch (IOException e) {
+			responseData.message = e.getLocalizedMessage();
+    		responseData.code = 4001;
+		} 
+		
+		return ok(Json.toJson(responseData));
 	}
 	
 	@With(AuthAction.class)

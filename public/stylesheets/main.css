@@ -61,6 +61,10 @@ ul:focus{
 	outline: 0;
 }
 
+.col{
+	padding: 0;
+}
+
 .form-label b{
 	color: #FF3B30;
 }
@@ -2725,6 +2729,191 @@ tab-ctn .tab-prev-btn {
 }
 
 /** Lesson File Mangement End **/
+
+/** Payment Review Start **/
+
+#pay-content{
+	width: 100%;
+	height: 100%;
+	padding: 20px;
+}
+
+#lesson-summary{
+	width: 640px;
+	margin: auto;
+	position: relative;
+}
+
+#lesson-summary .link-img{
+	width: 240px;
+	height: 160px;
+}
+
+#lesson-summary .right-block{
+	float: right;
+    width: 355px;
+    display: inline-block;
+}
+
+#lesson-summary .start{
+	float: left;
+}
+
+#lesson-summary .amount{
+	float: right;
+}
+
+.block-item{
+	margin-bottom: 15px;
+	border-bottom: 1px solid #eee;
+}
+
+.right-block .label{
+	color: #777;
+	padding: 0;
+	font-size:10px;
+	font-weight: 200;
+}
+
+.right-block .value{
+	font-size: 16px;
+	padding: 5px 0;
+}
+
+#total-price{
+	color: #777;
+	position: absolute;	
+	top: 155px;
+	right: 15px;
+	font-size: 16px
+}
+
+#total-price .currency{
+	font-size: 10px;
+}
+
+#total-price .prefix{
+	font-size: 10px;
+}
+
+#card-form{
+	margin-top: 30px;
+}
+
+#card-form .left, #card-form .right{
+	width: 300px;
+	font-size: 0;
+}
+
+#card-form .left{
+	padding-right: 15px;
+}
+
+#card-form .right{
+	padding-left: 15px;
+}
+
+#card-form label{
+	width: 100%;
+	color: #777;
+	font-size: 10px;
+    font-weight: 200;
+}
+
+#card-form input{
+	display:inline-block;
+}
+
+#card-form .exp-group{
+	width: 205px;	
+	display: inline-block;
+}
+
+#card-form .cvv-group{
+	width: 80px;
+	display: inline-block;
+}
+
+#card-num{
+	width: 100%;
+}
+
+#exp-month, #exp-year{
+	width: 80px;
+	display: inline-block;
+}
+
+#cvv{
+	width: 100%;
+}
+
+#card-form .splitor{
+	margin: 0 4px 0 6px;
+	font-size: 14px;
+}
+
+#pay-btn{
+	width: 130px;
+	height: 34px;
+	float: right;
+	margin-top: 17px;
+}
+
+#card-form .spinner{
+	right: 55px;
+    top: 50%;
+    font-size: 16px;
+}
+
+ul.pay-method-list li {
+	margin-bottom: 30px;
+	margin-right: 20px;
+    position: relative;
+    font-size: 0;
+    display: block;
+    float: left;
+    width: 130px;
+    height: 44px;
+    line-height: 42px;
+    text-align: center;
+    box-sizing: border-box;
+    border: 1px solid #dedede;
+    cursor: pointer;
+    transition: border-color .1s ease-in,color .1s ease-in;
+}
+
+ul.pay-method-list li span {
+    display: inline-block;
+    color: #707070;
+    font-size: 14px;
+    line-height: 25px;
+    vertical-align: middle;
+}
+
+.ep-icon{
+	font-size: 18px !important;
+	margin-right: 5px;
+    vertical-align: middle;
+}
+
+ul.pay-method-list li.selected .icon-check {
+    visibility: visible;
+    background-position: -112px -72px;
+}
+
+ul.pay-method-list li.selected {
+    border: 2px solid #a5c85b;
+}
+
+#success-model h4.title{
+	color: #777;
+}
+
+#success-model .message{
+	margin-top: 15px;
+}
+
+/** Payment Review End **/
 
 
 

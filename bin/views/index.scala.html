@@ -1,255 +1,79 @@
 @import tags._
 
-@(account: Account, lessons: List[Lesson])
+@(account: Account, categories: List[Category])
 
 @scripts = {
     <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/index.css")">
+    <script type="text/javascript">
+		$(function(){
+			
+			$('.category-section').each(function(){
+				var sectionEle = $(this);
+				var categoryId = sectionEle.attr('data-cate');
+				$.ajax({
+	                url: "@routes.LessonController.pubishedLessonsByCategory()",
+	                type: "POST",
+	                data: {
+	                	categoryId: categoryId
+	                },
+	                success: function(response, status) {
+	                	var respData = $.parseJSON(JSON.stringify(response));
+	                	
+	                	if(respData.code != 0){s
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		if(respData.data.length > 0){
+                				for(var i = 0; i < respData.data.length; i++){
+                					var itemHtml = '<div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">';
+                					itemHtml += '<article class="post-wrap">';
+                					itemHtml += '<div class="post-header">';
+                					itemHtml += '<div class="post-cate-info">';
+                					itemHtml += '<p><span class="cate-info-cell"><span class="cate-text-first">' + respData.data[i].lessonKeyName + '</span><span class="cate-text-remain">' + respData.data[i].institution + '</span></span><span class="total-text">' + respData.data[i].lessonSessionCount + '节课</span></p>';                   												
+                					itemHtml += '</div></div>';
+                					itemHtml += '<div class="post-thumb">';
+                					itemHtml += '<a class="link-img" style="background-image:url(/lesson/show/cover?lessonId=' + respData.data[i].lessonId + ')"></a>';
+                					itemHtml += '</div>';
+                					itemHtml += '<div class="post-footer">';
+                					itemHtml += '<div class="post-desc">' + respData.data[i].lessonTitle + '</div>';
+                					itemHtml += '<div><a class="detail-btn" target="_blank" href="/lesson?lessonId=' + respData.data[i].lessonId + '">查看详情</a><span class="cate-info-price">¥' + respData.data[i].lessonPrice + '</span></div>';
+                					itemHtml += '</div></article></div>';
+									
+									sectionEle.append(itemHtml);
+	                			}
+	                		}else{
+	                			sectionEle.remove();
+	                		}
+	                	}
+	                },
+	                error: function(request, status, err){
+	                }
+	            });	
+			});
+	   	});
+	</script>
 }
  
 @main(scripts) {
 	@topbar(account)
 	<div class="page-content">    
-	    <div class="category-section row">
-	    	<div class="col-xs-12">
-	    		<div class="post-header-info">
-	    			<div class="cate-text">
-	   					<span>剑桥 A 水准</span>
-	   				</div>
-				</div>
+	    @for(category <- categories){
+	    	<div class="category-section row" data-cate="@category.id">
+		    	<div class="col col-xs-12">
+		    		<div class="post-header-info">
+		    			<div class="cate-text">
+		   					<span>@category.name</span>
+		   				</div>
+					</div>
+					
+					<div class="post-body">
+				         
+			    	</div>
+			    </div>
 	    	</div>
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	         
-	         <div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
-	            <article class="post-wrap">
-	            	<div class="post-header">
-	            		<div class="post-cate-info">
-	            			<p>
-	            				<span class="cate-info-cell">
-	            					<span class="cate-text-first">教授</span>
-	            					<span class="cate-text-remain">新加坡国立大学</span>
-	            				</span>
-	            				<span class="total-text">10节课</span>
-	            			</p>
-	            		</div>
-					</div>
-						
-	               	<div class="post-thumb">
-	               		<a href="http://demo.themeruby.com/innovation_fashion/top-fun-summer-activities-checklist-for-couples-in-this-year/">
-	                     	<img width="350" height="200" src="http://demo.themeruby.com/innovation_fashion/wp-content/uploads/2016/01/753-350x200.jpg">
-	                    </a>
-	               	</div>
-	               	<div class="post-footer">
-	                  	<div class="post-desc">Word培训第一讲，通配符及相关知识</div>
-	                  	<div>
-	                  		<a class="more-btn">进入课堂</a>
-	                  		<span class="cate-info-price">¥3990</span>
-	                  	</div>
-	               	</div>
-	            </article>
-	         </div>
-	    </div>
+	    }
     </div>
     @entry(account)
     @modalcreatelesson()
 }
+
+

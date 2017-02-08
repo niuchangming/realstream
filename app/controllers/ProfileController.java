@@ -1,6 +1,8 @@
 package controllers;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -18,7 +20,6 @@ import models.LessonSession;
 import models.ResponseData;
 import models.Role;
 import models.User;
-import models.UserLesson;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
@@ -144,26 +145,30 @@ public class ProfileController extends Controller{
 	
 	@Transactional
 	public Result showAvatarThumbnail(String thumbnailUUID){
-		ResponseData responseData = new ResponseData();
 		TypedQuery<Avatar> query = jpaApi.em()
 				.createQuery("from Avatar a where a.thumbnailUUID = :thumbnailUUID", Avatar.class)
 				.setParameter("thumbnailUUID", thumbnailUUID);
 		
+		InputStream imageStream = null;
 		try{
 			Avatar avatar = query.getSingleResult();
-			InputStream imageStream = avatar.downloadThumbnail();
-			return ok(imageStream);
+			imageStream = avatar.downloadThumbnail();
 		}catch(NoResultException e){
-			responseData.message = "Image cannot be found.";
-	    	responseData.code = 4000;
+			File defaultAvatar = new File("public/images/default_avatar.png");
+			try {
+				imageStream = new FileInputStream(defaultAvatar);
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} 
 		}
-		return ok(Json.toJson(responseData));
+		return ok(imageStream);
 	}
 	
 	@With(AuthAction.class)
 	@Transactional
 	public Result readTeacherAgreement(){
 		Account account = (Account) ctx().args.get("account");
+		account = jpaApi.em().find(Account.class, account.id);
 		return ok(teacheragreement.render(account));
 	}
 	
@@ -171,6 +176,7 @@ public class ProfileController extends Controller{
 	@Transactional
 	public Result teacherSettle(){
 		Account account = (Account) ctx().args.get("account");
+		account = jpaApi.em().find(Account.class, account.id);
 		return ok(teachersettle.render(account));
 	}
 	
@@ -218,6 +224,7 @@ public class ProfileController extends Controller{
 	@Transactional
 	public Result settleReview(){
 		Account account = (Account) ctx().args.get("account");
+		account = jpaApi.em().find(Account.class, account.id);
 		return ok(settlereview.render(account));
 	}
 	

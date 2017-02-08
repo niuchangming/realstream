@@ -8,7 +8,11 @@
 	<div id="dash-content" class="dash-bg">
 		<div class="dash-block">
 			<div id="user-avatar-wrap">
-				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(user.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+				@if(user.avatars.size() > 0){
+					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(user.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+				}else{
+					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="mod-header__user-img link-img"></a>
+				}
 				<div class="spacer" style="clear: both;"></div>
 				<div>
 					<p class="bold-style">金木头</p>

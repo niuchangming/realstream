@@ -11,7 +11,11 @@
 		} else {
 			<div class="mod-header_wrap-user">
 				<i class="icon-red-circle" style="display:none;"></i>
-				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="mod-header__user-img link-img"></a>
+				@if(account.user.avatars.size() > 0){
+					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="mod-header__user-img link-img"></a>
+				}else{
+					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="mod-header__user-img link-img"></a>
+				}
 				<p class="mod-header__user-name">
 					<a href="/user/index/index.html" class="mod-header__user-operation">个人中心</a>
 				</p>
@@ -40,7 +44,7 @@
 					</li>
 				</ul>
 			</div>
-		<a id="js-help" href="javascript:void(0)" class="mod-header__link-help">帮助</a>
+			<a id="js-help" href="javascript:void(0)" class="mod-header__link-help">帮助</a>
+		</div>
 	</div>
-</div>
 </div>

@@ -23,8 +23,12 @@
     		@if(flash.containsKey("error")) {
     			showAlertToast('@flash.get("error")', 'alert-danger');
 			}else{
-				@if(flash.containsKey("success")){
-					showAlertToast('@flash.get("success")', 'alert-success');
+				@if(flash.containsKey("warning")){
+					showAlertToast('@flash.get("warning")', 'alert-warning');
+				}else{
+					@if(flash.containsKey("success")){
+						showAlertToast('@flash.get("success")', 'alert-success');
+					}
 				}
 			}
     		

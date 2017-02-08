@@ -1,6 +1,5 @@
 package models;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,6 +39,9 @@ public class Lesson {
 	
 	public double offerPrice;
 	
+	@Column(name="lesson_key", columnDefinition = "double default 0")
+	public LessonKey lessonKey;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "offer_startdate")
 	public Date offerStartDate;
@@ -55,10 +57,6 @@ public class Lesson {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "end_datetime")
 	public Date endDatetime;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "published_datetime")
-	public Date publishDatetime;
 
 	@Column(name = "is_publish")
 	public boolean isPublish;
@@ -89,6 +87,7 @@ public class Lesson {
 	public Lesson(User teacher, String title) {
 		this.title = title;
 		this.teacher = teacher;
+		this.lessonKey = LessonKey.NEW;
 	}
 	
 	public void updateByBasic(String title, String description,  Category category){

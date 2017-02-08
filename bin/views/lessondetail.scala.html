@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
     <script type="text/javascript">
 	$(function(){
-		$('.btn-join').on('click', function(){
+		/* $('.btn-join').on('click', function(){
 			var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
 			
 			$(this).addClass('disabled');
@@ -41,7 +41,7 @@
                 	$('.btn-join').text("立即报名");
                 }
             });
-		});
+		}); */
 	});
 </script>
 }
@@ -109,21 +109,21 @@
 	                <div class="lesson-price">
 	                    <p class="lesson-price-info">
 	                        <span class="price-current red">¥
-		            <span class="red">68.00</span>
+		            			<span class="red">@lesson.offerPrice</span>
 	                        </span>
 	                        <span class="price-orignal grey">¥
-		            <span class="grey">88.00</span>
+		            			<span class="grey">@lesson.price.intValue()</span>
 	                        </span>
 	                        <span class="promt-info">
-		            开课预售至! 还有30天     
-		            </span>
+				            	开课预售至! 还有30天     
+				            </span>
 	                    </p>
 	                    <div class="course-price-discount">
 	                        <div class="course-coupon js-coupon-wrap hide" style="display: none;"></div>
 	                    </div>
 	                </div>
 	                <div class="oper-bar">
-	                    <a class="btn-join btn-blue">立即报名</a>
+	                    <a class="btn-join btn-blue" href="@routes.PaymentController.paymentReview(lesson.id)">立即报名</a>
 	                    <span class="btn-advice-wrap">
 			         		<span class="btn-advice-wording btn-outline">咨询</span>
 		                    <span class="btn-advice-qq btn-outline btn-advice hide">在线</span>
@@ -163,20 +163,18 @@
 	                            </tr>
 	                        </tbody>
 	                    </table>
-	                    <div class="lesson-gallery">
-	                        <div class="img-item">
-	                            <p class="img-tt">图片标题</p>
-	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
-	                        </div>
-	                        <div class="img-item">
-	                            <p class="img-tt">图片标题</p>
-	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
-	                        </div>
-	                        <div class="img-item">
-	                            <p class="img-tt">图片标题</p>
-	                            <img src="https://10.url.cn/qqke_course_info/ajNVdqHZLLAztT0RiabbxTe2rjET7ING2IFRicWlNko4jnWREnMqKDJkZwomxJiaTOS58xcCCSjddc/">
-	                        </div>
-	                    </div>
+	                    @if(lesson.lessonImages.size() > 0){
+	                    	<div class="lesson-gallery">
+	                    		@for(lessonImage <- lesson.lessonImages){
+	                    			<div class="img-item">
+	                    				@if(lessonImage.title != null){
+	                    					<p class="img-tt">@lessonImage.title</p>
+	                    				}
+			                            <img src="/lesson/show/image?uuid=@lessonImage.uuid&isLarge=true">
+			                        </div>
+	                    		}
+		                    </div>
+	                    }
 	                </div>
 	
 	                <div class="tabs-content hide" id="js_dir_tab">

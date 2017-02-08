@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "com.auth0" % "java-jwt" % "2.2.1",
   "com.monitorjbl" % "json-view" % "0.12",
   "com.amazonaws" % "aws-java-sdk-s3" % "1.11.57",
-  "net.coobird" % "thumbnailator" % "[0.4, 0.5)"
+  "net.coobird" % "thumbnailator" % "[0.4, 0.5)",
+  "com.paypal.sdk" % "rest-api-sdk" % "1.13.1"
 )
 
 // Running Play in development mode while using JPA will work fine, 
