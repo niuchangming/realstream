@@ -8,10 +8,24 @@
 		$(function(){
 			spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
 			
+			@if(flash.containsKey("success")) {
+				$('#success-model').modal('show');
+			}
+			
 			$('.pay-method-list > li').on('click', function(){
+				var payMethod = $(this).attr('data-type');
+				
 				$('li.selected').removeClass('selected');
 	       		$(this).addClass('selected');
-	       		$('#card-form').find('input[name="cardType"]').val($(this).attr('data-type'));
+	       		$('#card-form').find('input[name="cardType"]').val(payMethod);
+	       		
+	       		if(payMethod === 'paypal'){
+	       			$('.credit-block').addClass('hide');
+	       			$('.paypal-block').removeClass('hide');
+	       		}else{
+	       			$('.credit-block').removeClass('hide');
+	       			$('.paypal-block').addClass('hide');
+	       		}
 	       	});
 			
 			$("#card-form").validate({
@@ -155,52 +169,58 @@
 					</ul>
 					<div style="clear:both;"></div>	
 				</div>
-				<div class="left">
-					<div class="form-group name-group">
-						<label>
-					    	<span>FIRST NAME</span><span> </span><span class="required red">*</span>
-					    </label>
-					    <input class="form-control" type="text" name="firstname" required />
+				<div class="credit-block">
+					<div class="left">
+						<div class="form-group name-group">
+							<label>
+						    	<span>FIRST NAME</span><span> </span><span class="required red">*</span>
+						    </label>
+						    <input class="form-control" type="text" name="firstname" required />
+						</div>
+						<div class="form-group name-group">
+							<label>
+						    	<span>LAST NAME</span><span> </span><span class="required red">*</span>
+						    </label>
+						    <input class="form-control" type="text" name="lastname" required />
+						</div>
 					</div>
-					<div class="form-group name-group">
-						<label>
-					    	<span>LAST NAME</span><span> </span><span class="required red">*</span>
-					    </label>
-					    <input class="form-control" type="text" name="lastname" required />
+					
+					<div class="right">
+						<div class="form-group">
+							<label>
+						    	<span>CREDIT/DEBIT CARD NUMBER</span><span> </span><span class="required red">*</span>
+						    </label>
+						    <input id="card-num" class="form-control" type="text" name="cardNumber" value="" autocomplete="off" required />
+						</div>
+					  	<div class="form-group exp-group">
+						    <label>
+								<span>EXPIRED DATE (MM/YYYY)</span><span> </span><span class="required red">*</span>
+						    </label>
+						    <div id="exp-month">
+						    	<input class="form-control" type="text" name="expMonth" size="2" required />
+						    </div>
+					    	<span class="splitor"> / </span>
+					    	<div id="exp-year">
+					    		<input class="form-control" type="text" name="expYear" size="4" required />
+					    	</div>
+					  	</div>
+					  	<div class="form-group cvv-group">
+						    <label>
+								<span>CVC</span><span> </span><span class="required red">*</span>
+						    </label>
+						    <input id="cvv" class="form-control" type="text" name="cvv" value="" autocomplete="off" required />
+					  	</div>
+					  	<div class="form-group">
+					  		<input id="pay-btn" type="submit" class="btn btn-success" value="Submit Payment"/>
+					  		<div style="clear: both;"></div>
+					  	</div>				
 					</div>
+					<div style="clear: both;"></div>
 				</div>
-				
-				<div class="right">
-					<div class="form-group">
-						<label>
-					    	<span>CREDIT/DEBIT CARD NUMBER</span><span> </span><span class="required red">*</span>
-					    </label>
-					    <input id="card-num" class="form-control" type="text" name="cardNumber" value="" autocomplete="off" required />
-					</div>
-				  	<div class="form-group exp-group">
-					    <label>
-							<span>EXPIRED DATE (MM/YYYY)</span><span> </span><span class="required red">*</span>
-					    </label>
-					    <div id="exp-month">
-					    	<input class="form-control" type="text" name="expMonth" size="2" required />
-					    </div>
-				    	<span class="splitor"> / </span>
-				    	<div id="exp-year">
-				    		<input class="form-control" type="text" name="expYear" size="4" required />
-				    	</div>
-				  	</div>
-				  	<div class="form-group cvv-group">
-					    <label>
-							<span>CVC</span><span> </span><span class="required red">*</span>
-					    </label>
-					    <input id="cvv" class="form-control" type="text" name="cvv" value="" autocomplete="off" required />
-				  	</div>
-				  	<div class="form-group">
-				  		<input id="pay-btn" type="submit" class="btn btn-success" value="Submit Payment"/>
-				  		<div style="clear: both;"></div>
-				  	</div>				
+				<div class="paypal-block hide">
+					<p class="note">By using PAYPAL, Please press 'Payment via Paypal' button below to enter your PAYPAL account information and compete the payment.</p>
+					<a class="btn btn-success" href="@routes.PaymentController.requestPaypal(lesson.id)">Payment via Paypal</a>
 				</div>
-				<div style="clear: both;"></div>
 			</form>
 		</div>
 	</div>

@@ -2959,6 +2959,19 @@ ul.pay-method-list li.selected {
 	margin-top: 15px;
 }
 
+.paypal-block{
+	min-height: 182px;
+	text-align: center;
+}
+
+.paypal-block > .note{
+	width: 420px;
+	color: #777;
+	text-align: center;
+	display: block;
+	margin:20px auto;
+}
+
 /** Payment Review End **/
 
 /** Comment Start **/

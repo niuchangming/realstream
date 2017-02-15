@@ -59,6 +59,10 @@ GET		/profile/register/lesson/list					controllers.ProfileController.myRegistere
 
 GET		/payment/review									controllers.PaymentController.paymentReview(lessonId: Long ?= 0)
 POST	/payment/submit									controllers.PaymentController.submitCardInfo
+GET 	/payment/request/paypal							controllers.PaymentController.requestPaypal(lessonId: Long ?= 0)
+GET 	/payment/execute								controllers.PaymentController.executePaypal(userId: Long ?= 0, lessonId: Long ?= 0)
+
+
 
 POST 	/comment/create									controllers.CommentController.createComment
 

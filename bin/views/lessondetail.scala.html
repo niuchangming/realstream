@@ -13,7 +13,6 @@
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
     <script type="text/javascript">
 		$(function(){
-			
 			$('.tabs-tt').on('click', function(){
 				$('.tabs-tt.active').removeClass('active');
 				$(this).addClass('active');
@@ -75,7 +74,7 @@
                 				commentHtml += '<i class="fa fa-star ' + (value.point == 5 ? 'active' : '') + '"></i>';
                 				commentHtml += '</div>';
                 				commentHtml += '<div class="comment-bd">' + value.comment + '</div>';
-                				commentHtml += '<div class="comment-ft"><span class="comment-where">Commented On:</span><span> </span><span class="comment-time">2016-12-23</span></div>';
+                				commentHtml += '<div class="comment-ft"><span class="comment-where">Commented On:</span><span> </span><span class="comment-time">' + new Date(value.createDatetime).toISOString().substr(0, 10) + '</span></div>';
                 				commentHtml += '</div></div>';
                 				
                 				$('.comment-list').append(commentHtml);
@@ -124,11 +123,11 @@
 	                <div style="clear:both;"></div>
 	            </div>
 	            <div class="info-wrap">
-	                <h3 class="page-tt">管理类联考数学救命夺分营</h3>
+	                <h3 class="page-tt">@lesson.title</h3>
 	                <div class="tt-below-line">
 	                    <span class="line-item statistics-apply">
 	                    	报名人数
-                    		<span class="apply-num js-apply-num">@lesson.lessonSessions.size()</span>
+                    		<span class="apply-num js-apply-num">@lesson.userLessons.size()</span>
 	                    </span>
 	                    <i class="icon-sep"></i>
 	                    <span class="line-item statistics-rate">
@@ -236,11 +235,11 @@
 	                <div class="tabs-content hide" id="dir_tab">
 	                    <div class="course-class-task" id="js_class_task">
 	                        <div class="task-schedule js-schedule task-schedule--no-begin">
-	                            <span class="schedule-start js-progress-start">12月20日开课</span>
+	                            <span class="schedule-start">@lesson.startDatetime.format("MMM dd, yyyy")</span>
 	                            <div class="schedule-progress-wrap">
-	                                <div class="schedule-progress js-progress-progress"><span class="percent js-percent" style="width: 0%;"></span></div>
+	                                <div class="schedule-progress"><span class="percent" style="width: 0%;"></span></div>
 	                            </div>
-	                            <span class="schedule-end js-progress-end">17年01月结课</span>
+	                            <span class="schedule-end">@lesson.endDatetime.format("MMM dd, yyyy")</span>
 	                        </div>
 	                    </div>
 	                    <div class="task-chapter">
@@ -310,9 +309,7 @@
 						<p>英国剑桥大学</p>
 					</li>
 				</ul>
-				
 				<p>欢迎来电咨询：<span class="tel">0041-82938394</span></p>
-				
 	        </aside>
 	        
 	        <div style="clear:both;"></div>

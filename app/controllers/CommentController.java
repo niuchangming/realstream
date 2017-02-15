@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,27 +87,26 @@ public class CommentController extends Controller{
 
 		DynamicForm requestData = formFactory.form().bindFromRequest();
 		long lessonId = Long.parseLong(requestData.get("lessonId"));
-		
-		Query query = jpaApi.em()
-				.createNativeQuery("SELECT cm.comment, cm.point, im.thumbnail_uuid, ur.user_name FROM comment cm INNER JOIN image im ON cm.user_id = im.user_id INNER JOIN user ur ON cm.user_id=ur.account_id WHERE cm.lesson_id=:lessonId ORDER BY cm.create_datetime")
-				.setParameter("lessonId", lessonId);
-		
-		List<CommentVO> commentVOs = null;
-		List<Object[]> resultList = query.getResultList();
-		if(resultList != null){
-			commentVOs = new ArrayList<>();
-			for(Object[] result : resultList){
-				CommentVO commentVO = new CommentVO(result[0].toString(), Integer.parseInt(result[1].toString()), result[2].toString(), result[3].toString());
-				commentVOs.add(commentVO);
-			}
-		}
-		responseData.data = commentVOs;
-		
 		try {
+			Query query = jpaApi.em()
+					.createNativeQuery("SELECT cm.comment, cm.point, cm.create_datetime, im.thumbnail_uuid, ur.user_name FROM comment cm INNER JOIN image im ON cm.user_id = im.user_id INNER JOIN user ur ON cm.user_id=ur.account_id WHERE cm.lesson_id=:lessonId ORDER BY cm.create_datetime")
+					.setParameter("lessonId", lessonId);
+			
+			List<CommentVO> commentVOs = null;
+			List<Object[]> resultList = query.getResultList();
+			if(resultList != null){
+				commentVOs = new ArrayList<>();
+				for(Object[] result : resultList){
+					CommentVO commentVO = new CommentVO(result[0].toString(), Integer.parseInt(result[1].toString()), Utils.parse(result[2].toString()), result[3].toString(), result[4].toString());
+					commentVOs.add(commentVO);
+				}
+			}
+			responseData.data = commentVOs;
+		
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, ""));
 			return ok(Json.toJson(jsonData));
-		} catch (IOException e) {
+		} catch (IOException | NumberFormatException | ParseException e) {
 			responseData.message = e.getLocalizedMessage();
 			responseData.code = 4001;
 		}

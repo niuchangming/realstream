@@ -3,6 +3,7 @@ package controllers;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -13,9 +14,13 @@ import javax.persistence.TypedQuery;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.CreditCard;
-import com.paypal.api.payments.Details;
 import com.paypal.api.payments.FundingInstrument;
+import com.paypal.api.payments.Item;
+import com.paypal.api.payments.ItemList;
+import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payer;
+import com.paypal.api.payments.PaymentExecution;
+import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.Constants;
 import com.paypal.base.rest.APIContext;
@@ -229,6 +234,133 @@ public class PaymentController extends Controller{
 		
 		return null;
 	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result requestPaypal(long lessonId) throws PayPalRESTException{
+		ResponseData responseData = new ResponseData();
+		
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+		if(lesson != null){
+			Amount amount = new Amount();
+			amount.setCurrency("USD");
+			
+			DecimalFormat df = new DecimalFormat("#.00");  
+			Date now = new Date();
+			if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
+				amount.setTotal(df.format(lesson.offerPrice));
+			}else{
+				amount.setTotal(df.format(lesson.price));
+			}
+			
+			Item item = new Item();
+			item.setName(lesson.title).setQuantity("1").setCurrency(amount.getCurrency()).setPrice(amount.getTotal());
+			ItemList itemList = new ItemList();
+			List<Item> items = new ArrayList<Item>();
+			items.add(item);
+			itemList.setItems(items);
+			
+			Transaction transaction = new Transaction();
+			transaction.setAmount(amount);
+			transaction.setItemList(itemList);
+			transaction.setDescription("Above is the lesson transaction description.");
+
+			List<Transaction> transactions = new ArrayList<Transaction>();
+			transactions.add(transaction);
+			
+			Payer payer = new Payer();
+			payer.setPaymentMethod("paypal");
+			
+			Account account = (Account) ctx().args.get("account");
+			RedirectUrls redirectUrls = new RedirectUrls();
+			redirectUrls.setCancelUrl("http://localhost:9000/");
+			redirectUrls.setReturnUrl("http://localhost:9000/payment/execute?userId=" + account.id + "&lessonId=" + lessonId);
+
+			com.paypal.api.payments.Payment payment = new com.paypal.api.payments.Payment();
+			payment.setIntent("sale");
+			payment.setPayer(payer);
+			payment.setTransactions(transactions);
+			payment.setRedirectUrls(redirectUrls);
+			
+			APIContext apiContext = new APIContext(Payment.CLIENT_ID, Payment.SECRET, Constants.SANDBOX);
+			com.paypal.api.payments.Payment createdPayment = payment.create(apiContext);
+			if(createdPayment.getState().equals("created")){
+				Iterator<Links> links = createdPayment.getLinks().iterator();
+				while (links.hasNext()) {
+					Links link = links.next();
+					if (link.getRel().equalsIgnoreCase("approval_url")) {
+						return redirect(link.getHref());
+					}
+				}
+			}else{
+				responseData.code = 4000;
+				responseData.message = "Something goes wrong with paypal flow.";
+			}
+		}else{
+			responseData.code = 4000;
+			responseData.message = "The lesson does not exist.";
+		}
+		
+		return notFound(errorpage.render(responseData));
+	}
+	
+	@Transactional
+	public Result executePaypal(long userId, long lessonId){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		String PayerID = requestData.get("PayerID");
+		String paymentId = requestData.get("paymentId");
+		
+		com.paypal.api.payments.Payment payment = new com.paypal.api.payments.Payment();
+		payment.setId(paymentId);
+		
+		PaymentExecution paymentExecution = new PaymentExecution();
+		paymentExecution.setPayerId(PayerID);
+		
+		try {
+			APIContext apiContext = new APIContext(Payment.CLIENT_ID, Payment.SECRET, Constants.SANDBOX);
+			com.paypal.api.payments.Payment createdPayment = payment.execute(apiContext, paymentExecution);
+			
+			if(createdPayment.getState().equals("approved")){
+				User user = jpaApi.em().find(User.class, userId);
+				Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+
+				if(user == null){
+					responseData.code = 4000;
+					responseData.message = "User does not exist.";
+				}else if(lesson == null){
+					responseData.code = 4000;
+					responseData.message = "Lesson does not exist.";
+				}else{
+					Payment paymentObj = new Payment(user);
+					
+					paymentObj.transactionId = createdPayment.getId();
+					paymentObj.firstName = createdPayment.getPayer().getPayerInfo().getFirstName();
+					paymentObj.lastName = createdPayment.getPayer().getPayerInfo().getLastName();
+					paymentObj.state = createdPayment.getState();
+					paymentObj.amount = createdPayment.getTransactions().get(0).getAmount().getTotal();
+					paymentObj.currency = createdPayment.getTransactions().get(0).getAmount().getCurrency();
+					jpaApi.em().persist(paymentObj);
+					
+					UserLesson userLesson = new UserLesson(user, lesson);
+					jpaApi.em().persist(userLesson);
+					
+					flash("success", "Payment completed successfully.");
+					return redirect(routes.PaymentController.paymentReview(lessonId));
+				}
+			}else{
+				responseData.code = 4000;
+				responseData.message = "Payment failed.";
+			}
+		} catch (PayPalRESTException e) {
+			responseData.code = 4001;
+			responseData.message = e.getLocalizedMessage();
+		}
+		
+		return notFound(errorpage.render(responseData));
+	}
+	
 }
 
 
