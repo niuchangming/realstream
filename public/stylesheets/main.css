@@ -82,6 +82,10 @@ ul:focus{
 	text-align: center; 
 }
 
+.line-through{
+	text-decoration: line-through;
+}
+
 h4.modal-title{
 	text-align: center;
 	font-weight: 400;
@@ -473,16 +477,19 @@ p.empty{
 	background-color: #F5FAFC;
 }
 
-.dash-block{
+.dash-block, .modal-block{
 	border-radius: 4px;
 	background-color: white;
 	margin: 0 10px;
-	padding: 15px;
 	position: relative;
+}
+
+.dash-block{
+	padding: 15px;
 	border:1px solid #E0F4FE;
 }
 
-.dash-block > a{
+.dash-block > a, .modal-block > a{
 	width: 150px;
 	height: 80px; 	
 	vertical-align: middle;
@@ -1692,9 +1699,17 @@ span.price-orignal{
 	vertical-align: top;
 }
 
+span.price-orignal.orange{
+	font-size: 16px;
+}
+
 span.price-orignal > span{
 	vertical-align: top;
-	text-decoration: line-through;
+}
+
+span.price-orignal > span.orange{
+	font-size: 20px;
+	font-weight: 400;
 }
 
 span.promt-info{
@@ -1717,6 +1732,10 @@ span.promt-info{
 	height:40px;
 	line-height: 40px;
 	margin-left: 10px;
+}
+
+.lesson-period span{
+	color: #777;
 }
 
 .oper-bar {
@@ -1820,6 +1839,10 @@ span.promt-info{
     padding: 0 20px 30px;
     border-radius: 4px;
     border: 1px solid #E0F4FE;
+}
+
+.tabs-content{
+	min-height: 300px;
 }
 
 .tabs-tt-bar {
@@ -1970,12 +1993,32 @@ span.promt-info{
 }
 
 .task-part-hd {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     height: 40px;
     line-height: 40px;
     height: 40px;
     background: #f3f3f3;
     position: relative;
+}
+
+.task-part-hd .title{
+	max-width: 500px;
+	margin-left: 20px;
+}
+
+.task-part-hd .time{
+	font-size: 16px;
+    float: right;
+    margin-right: 15px;	
+    color: #777;
+}
+
+.task-part-hd .item-icon{
+	color: #a3d2f8;
+    font-size: 25px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .task-task-list {
@@ -2008,7 +2051,7 @@ span.promt-info{
     box-sizing: border-box;
 }
 
-.task-task-item .item-icon {
+.task-task-item .item-icon{
     position: absolute;
     left: 30px;
     top: 50%;
@@ -2096,10 +2139,13 @@ span.promt-info{
 
 .comment-item .user-avatar {
     border-radius: 50%;
+    width: 40px;
+    height: 40px;
 }
 
-comment-item .item-right {
+.comment-item .item-right {
     position: relative;
+    margin-left: 20px;
 }
 
 .comment-item .star-list {
@@ -2914,6 +2960,81 @@ ul.pay-method-list li.selected {
 }
 
 /** Payment Review End **/
+
+/** Comment Start **/
+
+#comment-form .f-item {
+    margin-bottom: 20px;
+    clear: both;
+    position: relative;
+}
+
+#comment-form .f-label {
+    width: 80px;
+    text-align: left;
+	font-size: 16px;
+	float: left;
+}
+
+#comment-form .f-field {
+    margin-left: 80px;
+}
+
+#comment-form .comment-textarea{
+	width: 100%;
+	display: inline-block;
+}
+
+.star-list {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 0
+}
+
+.star-list .fa-star {
+	color: #ffb200;
+	margin-right: 5px;
+	font-size: 18px
+}
+
+.star-list .fa-star.active~.fa-star {
+	color: #999
+}
+
+.star-list .fa-star {
+	cursor: pointer;
+	padding-right: 5px;
+	margin-right: 0
+}
+
+.star-list .fa-star:hover~.fa-star {
+	color: #999
+}
+
+.star-list-intro {
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 20px
+	font-size: 16px;
+}
+
+.star-list-intro .star-num {
+	color: #ffb200;
+	margin-right: 5px
+}
+
+#save-comment-btn{
+	width: 136px;
+	height: 34px;
+}
+
+#comment-form i.spinner{
+	top: 10px;
+    right: 58px;
+}
+/** Comment End **/
+
+
 
 
 

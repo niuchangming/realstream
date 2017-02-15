@@ -411,9 +411,9 @@ public class LessonController extends Controller{
     			//update lesson session count for publish lesson object
     			if(lesson.isPublish){
     	    		jpaApi.em()
-    	    		.createQuery("update PublishedLesson pl set pl.lessonSessionCount = :lessonSessionCount where li.lesson = :lesson")
-    	    		.setParameter("lessonSessionCount", lesson.lessonSessions.size())
-    				.setParameter("lesson", lesson).executeUpdate();
+    	    		.createNativeQuery("update publish_lesson pl set pl.lesson_session_count = :lessonSessionCount where pl.lesson_id = :lessonId")
+    	    		.setParameter("lessonSessionCount", lesson.lessonSessions.size() + 1)
+    				.setParameter("lessonId", lesson.id).executeUpdate();
     			}
     			
     			flash().put("success", "An new lesson session created successfully.");
@@ -705,58 +705,7 @@ public class LessonController extends Controller{
 		
 		return notFound(errorpage.render(responseData)); 
     }
-	
-	@With(AuthAction.class)
-	@Transactional
-	public Result registerLesson(){
-		ResponseData responseData = new ResponseData();
 		
-		DynamicForm requestData = formFactory.form().bindFromRequest();
-		long lessonId = Long.parseLong(requestData.get("lessonId"));
-		
-		Account account = (Account) ctx().args.get("account");
-		TypedQuery<User> query = jpaApi.em()
-				.createQuery("from User u where u.accountId = :accountId", User.class)
-				.setParameter("accountId", account.id);
-		try{
-			User user = query.getSingleResult();
-			Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
-			if(lesson == null){
-				responseData.code = 4000;
-				responseData.message = "Lesson cannot be found.";
-			}else{
-				UserLesson userlesson = null;
-				try{
-					userlesson = jpaApi.em()
-							.createQuery("from UserLesson us where us.user = :user and us.lesson = :lesson", UserLesson.class)
-							.setParameter("user", user)	
-							.setParameter("lesson", lesson)
-							.getSingleResult();
-				}catch(NoResultException e){
-					e.printStackTrace();
-				}
-				
-				if(userlesson == null){
-					UserLesson userLesson = new UserLesson(user, lesson);
-					jpaApi.em().persist(userLesson);
-				}else if(userlesson.isDeleted){
-					responseData.code = 5000;
-					responseData.message = "The lesson already in your deleted lesson list.";
-				}else if(userlesson.isCompleted){
-					responseData.code = 5000;
-					responseData.message = "You completed this lesson.";
-				}else{
-					responseData.code = 5000;
-					responseData.message = "You already added this lesson.";
-				}
-			}
-		}catch(NoResultException e){
-			responseData.code = 4000;
-			responseData.message = e.getLocalizedMessage();
-		}
-		return ok(Json.toJson(responseData));
-	}
-	
 	public JsonNode startBroadcast(String sessionId) throws InterruptedException, ExecutionException{
 		JsonNode sessionIdJson = Json.newObject().put("sessionId", sessionId);
 		

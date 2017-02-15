@@ -74,7 +74,7 @@ public class User{
 	public String brief;
 	
 	@OneToMany(mappedBy = "user")
-	public List<WorkExperience>  workExperiences;
+	public List<WorkExperience> workExperiences;
 	
 	@OneToMany(mappedBy = "teacher")
 	public List<Lesson> teacherLessons;
@@ -84,6 +84,9 @@ public class User{
 
 	@OneToMany(mappedBy = "user")
 	public List<Payment> payments;
+	
+	@OneToMany(mappedBy = "user")
+	public List<Comment> comments;
 	
 	public User(){}
 	

@@ -38,12 +38,12 @@ GET     /lesson                							controllers.LessonController.lessonDetail(
 POST 	/lesson/publish/category						controllers.LessonController.pubishedLessonsByCategory
 GET     /lesson/price                					controllers.LessonController.lessonPrice(lessonId: Long ?= 0)
 POST    /lesson/price/save                				controllers.LessonController.saveLessonPrice
-POST	/lesson/register								controllers.LessonController.registerLesson
 POST    /lesson/publish              					controllers.LessonController.publishLesson
 GET 	/lesson/file/management							controllers.FileController.fileManagement(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST 	/lesson/file/upload								controllers.FileController.uploadMediaFile
 GET     /lesson/file/download                			controllers.FileController.downloadFile(mediaFileUUID: String ?= "")
 POST    /lesson/file/delete                				controllers.FileController.deleteFile
+POST 	/lesson/comments								controllers.CommentController.commentsByLesson()
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
 POST    /profile/update/personal                		controllers.ProfileController.updatePersonalProfile
@@ -59,6 +59,8 @@ GET		/profile/register/lesson/list					controllers.ProfileController.myRegistere
 
 GET		/payment/review									controllers.PaymentController.paymentReview(lessonId: Long ?= 0)
 POST	/payment/submit									controllers.PaymentController.submitCardInfo
+
+POST 	/comment/create									controllers.CommentController.createComment
 
 
 

@@ -82,6 +82,9 @@ public class Lesson {
 	@OneToMany(mappedBy = "lesson")
 	public List<MediaFile> mediaFiles;
 	
+	@OneToMany(mappedBy = "lesson")
+	public List<Comment> comments;
+	
 	public Lesson(){}
 
 	public Lesson(User teacher, String title) {

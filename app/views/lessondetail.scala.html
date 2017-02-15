@@ -1,49 +1,96 @@
 @import tags._
+@import tools.Utils
 
 @(account: Account, lesson: Lesson)
+
+@now = @{new Date()}
+
+@diff(d1: Date, d2: Date) = @{
+  	Utils.differentDateTimeByMins(d1, d2)
+}
 
 @scripts = {
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
     <script type="text/javascript">
-	$(function(){
-		/* $('.btn-join').on('click', function(){
-			var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner"></i>');
+		$(function(){
 			
-			$(this).addClass('disabled');
-			$(this).text('');
-			$(this).append(spinner);
+			$('.tabs-tt').on('click', function(){
+				$('.tabs-tt.active').removeClass('active');
+				$(this).addClass('active');
+				
+				$('.tabs-content').addClass('hide');
+				if($(this).text() === 'SUMMARY'){
+					$('#basic_tab').removeClass('hide');
+				}else if($(this).text() === 'CATALOG'){
+					$('#dir_tab').removeClass('hide');
+				}else if($(this).text() === 'COMMENTS'){
+					$('#comment_tab').removeClass('hide');
+				}
+			});
+			
+			$('.f-radio').on('click', function(){
+				$('.f-radio.checked').removeClass('checked');
+				$(this).addClass('checked');
+				
+				$('.comment-item.hide').removeClass('hide');
+				
+				var id = $(this).attr('data-id');
+				if(id === "1"){
+					$('.comment-item.point1').addClass('hide');
+					$('.comment-item.point2').addClass('hide');
+					$('.comment-item.point3').addClass('hide');
+				}else if(id === "2"){
+					$('.comment-item.point1').addClass('hide');
+					$('.comment-item.point2').addClass('hide');
+					$('.comment-item.point4').addClass('hide');
+					$('.comment-item.point5').addClass('hide');
+				}else if(id === "3"){
+					$('.comment-item.point3').addClass('hide');
+					$('.comment-item.point4').addClass('hide');
+					$('.comment-item.point5').addClass('hide');
+				}
+			});
 			
 			$.ajax({
-                url: "@routes.LessonController.registerLesson()",
+                url: "@routes.CommentController.commentsByLesson()",
                 type: "POST",
                 data: {
-                	lessonId: '@lesson.id'
+                	lessonId: @lesson.id
                 },
                 success: function(response, status) {
                 	var data = $.parseJSON(JSON.stringify(response));
                 	
-                	if(data.code >= 4000 && data.code < 5000){
-                		showAlertToast(data.message, "alert-danger");
-                	}else if(data.code >= 5000){
-                		showAlertToast(data.message, "alert-warning");
+                	if(data.code == 0 && data.data != ''){
+                		$.each(data.data, function (index, value) {
+                			var commentHtml = '<div class="comment-item point' + value.point + '">';
+                				commentHtml += '<div class="item-left"> <img class="user-avatar" src="/profile/show/avatar/thumbnail?thumbnailUUID='+value.authorAvatar+'">';
+                				commentHtml += '<p class="user-name">' + value.author + '</p>';
+                				commentHtml += '</div>';
+                				commentHtml += '<div class="item-right">';
+                				commentHtml += '<div class="star-list">';
+                				commentHtml += '<i class="fa fa-star ' + (value.point == 1 ? 'active' : '') + '"></i>';
+                				commentHtml += '<i class="fa fa-star ' + (value.point == 2 ? 'active' : '') + '"></i>';
+                				commentHtml += '<i class="fa fa-star ' + (value.point == 3 ? 'active' : '') + '"></i>';
+                				commentHtml += '<i class="fa fa-star ' + (value.point == 4 ? 'active' : '') + '"></i>';
+                				commentHtml += '<i class="fa fa-star ' + (value.point == 5 ? 'active' : '') + '"></i>';
+                				commentHtml += '</div>';
+                				commentHtml += '<div class="comment-bd">' + value.comment + '</div>';
+                				commentHtml += '<div class="comment-ft"><span class="comment-where">Commented On:</span><span> </span><span class="comment-time">2016-12-23</span></div>';
+                				commentHtml += '</div></div>';
+                				
+                				$('.comment-list').append(commentHtml);
+                		});
                 	}else{
-                		showAlertToast(data.message, "alert-success");
+                		var emptyHtml = '<p class="empty">There is no any comment.～</p>';
+                		$('.comment-list').append(emptyHtml);
                 	}
-                	
-                	spinner.remove();
-                	$('.btn-join').removeClass("disabled");
-                	$('.btn-join').text("立即报名");
                 },
                 error: function(request, status, err){
-                	showAlertToast(err, "alert-danger");
-                	spinner.remove();
-                	$('.btn-join').removeClass("disabled");
-                	$('.btn-join').text("立即报名");
+                	console.log(err);
                 }
             });
-		}); */
-	});
-</script>
+		});
+	</script>
 }
 
 @main(scripts) {
@@ -81,7 +128,7 @@
 	                <div class="tt-below-line">
 	                    <span class="line-item statistics-apply">
 	                    	报名人数
-                    		<span class="apply-num js-apply-num">720</span>
+                    		<span class="apply-num js-apply-num">@lesson.lessonSessions.size()</span>
 	                    </span>
 	                    <i class="icon-sep"></i>
 	                    <span class="line-item statistics-rate">
@@ -104,19 +151,29 @@
 		         </span>
 	                </div>
 	                <div class="lesson-period">
-	                    <p>12月18日开课 至 12月24日结课</p>
+	                    <p>
+	                    	@lesson.startDatetime.format("dd-MMM-yyyy") 
+	                    	<span> </span>TO<span> </span> 
+	                    	@lesson.endDatetime.format("dd-MMM-yyyy")
+                    	</p>
 	                </div>
 	                <div class="lesson-price">
 	                    <p class="lesson-price-info">
-	                        <span class="price-current red">¥
-		            			<span class="red">@lesson.offerPrice</span>
-	                        </span>
-	                        <span class="price-orignal grey">¥
-		            			<span class="grey">@lesson.price.intValue()</span>
-	                        </span>
-	                        <span class="promt-info">
-				            	开课预售至! 还有30天     
-				            </span>
+	                    	@if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
+								<span class="price-current red">¥
+			            			<span class="red">@lesson.offerPrice.intValue()</span>
+		                        </span>
+		                        <span class="price-orignal grey">¥
+			            			<span class="grey line-through">@lesson.price.intValue()</span>
+		                        </span>
+		                        <span class="promt-info">
+					            	开课预售至! 还有30天     
+					            </span>
+							}else{
+								<span class="price-orignal orange">¥
+			            			<span class="orange">@lesson.price.intValue()</span>
+		                        </span>
+							}
 	                    </p>
 	                    <div class="course-price-discount">
 	                        <div class="course-coupon js-coupon-wrap hide" style="display: none;"></div>
@@ -137,29 +194,28 @@
 	    <div class="lesson-detail-wrap">
 	        <div class="lesson-detail">
 	            <div class="content tabs">
-	                <div class="tabs-tt-bar js_tab js-tab-nav" id="js_tab">
-	                    <h2 class="tabs-tt active">课程概述</h2>
-	                    <h2 class="tabs-tt">课程目录</h2>
-	                    <h2 class="tabs-tt">学员评论<span class="num">(1816)</span></h2>
+	                <div class="tabs-tt-bar">
+	                    <h2 class="tabs-tt active">SUMMARY</h2>
+	                    <h2 class="tabs-tt">CATALOG</h2>
+	                    <h2 class="tabs-tt">COMMENTS</h2>
 	                </div>
 	
-	                <div class="tabs-content" id="js_basic_tab">
+	                <div class="tabs-content" id="basic_tab">
 	                    <h3 class="guide-tt js-teacher-location" data-teacherlocation="1">老师介绍</h3>
 	                    <div class="teacher-item">
 	                        <a href="#" class="link-img" target="_blank" style="background-image:url('//10.url.cn/eth/ajNVdqHZLLActBZJvCrdiblXdIgPK46da2yUicwNMpaBef4UgZxF1RGu41mq4mSomoukF4geA7hPw/');"></a>
 	                        <div class="teacher-summary">
-	                            <h4 class="text-tt"><a class="tt-link js-teacher-name" href="/teacher/2697535167" title="于磊Simon" target="_blank">于磊Simon</a></h4>
-	                            <div class="text-intro js-teacher-intro" title="TESOL; 口语九分达人作者；优酷网“Simon的雅思翻转课堂”和互联网金融平台“智能投”创始人；毕业于悉尼大学，悉尼科技大学和中央昆士兰大学；CA协会认证的澳大利亚会计师从业资格，曾供职于悉尼Trust留学中介和Clear Sky律师事务所；回国后供职于环球雅思和新航道，口语单项高分学员遍布全球">TESOL;&nbsp;口语九分达人作者；优酷网“Simon的雅思翻转课堂”和互联网金融平台“智能投”创始人；毕业于悉尼大学，悉尼.英国剑桥大学认证英语语言教师；资深雅思认证培训师：8年奋战雅，实战百场考试，完整透析雅思题库并提出“真题还原”学习法。</div>
+	                            <h4 class="text-tt"><a class="tt-link js-teacher-name" href="/teacher/2697535167" title="于磊Simon" target="_blank">@lesson.teacher.realName</a></h4>
+	                            <div class="text-intro js-teacher-intro">@Html(lesson.teacher.brief)</div>
 	                        </div>
 	                    </div>
 	                    <table class="tb-course">
 	                        <tbody>
 	                            <tr>
 	                                <th>简　　介</th>
-	                                <td>WHAT：所有你考雅思想要的，你需要的，你必须要有的！
-	                                    <br>WHO：雅思界高分达人，高实力，高颜值
-	                                    <br>WHOM：所有想和雅思小婊砸分手的同学们
-	                                    <br>OUR TARGET：6789总有一分是你想要，哥就帮你拿到！</td>
+	                                <td>
+	                                	@Html(lesson.description)
+	                                </td>
 	                            </tr>
 	                        </tbody>
 	                    </table>
@@ -177,7 +233,7 @@
 	                    }
 	                </div>
 	
-	                <div class="tabs-content hide" id="js_dir_tab">
+	                <div class="tabs-content hide" id="dir_tab">
 	                    <div class="course-class-task" id="js_class_task">
 	                        <div class="task-schedule js-schedule task-schedule--no-begin">
 	                            <span class="schedule-start js-progress-start">12月20日开课</span>
@@ -189,124 +245,47 @@
 	                    </div>
 	                    <div class="task-chapter">
 	                        <div class="task-part-list">
-	                            <div class="task-part-item">
-	                                <div class="task-part-hd">
-	                                    <span class="tt-prefix">第1节</span>
-	                                    <h3 class="part-tt">part2技巧/结构/思路移植法 精炼素材搞定20%题目</h3>
-	                                </div>
-	                                <div class="task-task-list">
-	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
-	                                        <i class="fa fa-play-circle-o item-icon"></i>
-	                                        <span class="task-tt-text" title="【回放】part2技巧/结构/思路移植法">【回放】part2技巧/结构/思路移植法</span><span class="tt-suffix">(12月20日 20:30-22:30)</span>
-	                                    </a>
-	                                    <!-- end for -->
-	                                </div>
-	                            </div>
-	                            <div class="task-part-item">
-	                                <div class="task-part-hd">
-	                                    <span class="tt-prefix">第2节</span>
-	                                    <h3 class="part-tt">精炼素材搞定70%题目+课后锦囊任务2</h3>
-	                                </div>
-	                                <div class="task-task-list">
-	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
-	                                        <i class="fa fa-play-circle-o item-icon"></i>
-	                                        <span class="task-tt-text" title="【回放】精炼素材搞定70%题目+课后锦囊任务2">【回放】精炼素材搞定70%题目+课后锦囊任务2</span><span class="tt-suffix">(12月22日 20:30-22:30)</span>
-	                                    </a>
-	                                    <!-- end for -->
-	                                </div>
-	                            </div>
-	                            <div class="task-part-item">
-	                                <div class="task-part-hd">
-	                                    <span class="tt-prefix">第3节</span>
-	                                    <h3 class="part-tt">精炼素材搞定100%题目+课后锦囊任务3</h3>
-	                                </div>
-	                                <div class="task-task-list">
-	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
-	                                        <i class="fa fa-play-circle-o item-icon"></i>
-	                                        <span class="task-tt-text" title="【回放】精炼素材搞定100%题目+课后锦囊任务3">【回放】精炼素材搞定100%题目+课后锦囊任务3</span><span class="tt-suffix">(12月23日 20:30-22:30)</span>
-	                                    </a>
-	                                    <!-- end for -->
-	                                </div>
-	                            </div>
-	                            <div class="task-part-item">
-	                                <div class="task-part-hd">
-	                                    <span class="tt-prefix">第4节</span>
-	                                    <h3 class="part-tt">补丁课</h3>
-	                                </div>
-	                                <div class="task-task-list">
-	                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
-	                                        <i class="fa fa-video-camera item-icon"></i>
-	                                        <span class="task-tt-text" title="【直播】补丁课">【直播】补丁课</span><span class="tt-suffix">(1月8日 15:30-17:30)</span>
-	                                    </a>
-	                                </div>
-	                            </div>
+	                       		@for(index <- 0 until lesson.lessonSessions.size){
+	                       			<div class="task-part-item">
+		                                <div class="task-part-hd">
+		                                    <span class="tt-prefix">第@(index + 1)节</span>
+		                                    <h3 class="part-tt">
+		                                    <i class="fa fa-play-circle-o item-icon"></i>
+		                                    	<span class="title">
+				                                    @diff(new Date(), lesson.lessonSessions(index).startDatetime) match {
+														case a if a <= -lesson.lessonSessions(index).duration => {【回放】@lesson.lessonSessions(index).title}
+														case a if (a > -lesson.lessonSessions(index).duration && a <= 0) || (a > 0 && a <= 30) => {【直播中】@lesson.lessonSessions(index).title}
+														case a if a > 30 => {【直播】@lesson.lessonSessions(index).title}
+													}
+												</span>
+												<span class="time">@lesson.lessonSessions(index).startDatetime.format("hh:mm dd-MMM-yyyy")</span>
+											</h3>
+		                                </div>
+		                                <!-- <div class="task-task-list">
+		                                    <a class="task-task-item task-item-nojump" href="javascript:void(0);">
+		                                        <i class="fa fa-play-circle-o item-icon"></i>
+		                                        <span class="task-tt-text" title="【回放】part2技巧/结构/思路移植法">【回放】part2技巧/结构/思路移植法</span><span class="tt-suffix">(12月20日 20:30-22:30)</span>
+		                                    </a>
+		                                </div> -->
+		                            </div>
+	                       		} 
 	                        </div>
 	                    </div>
 	                </div>
-	                <div class="tabs-content hide" id="js_comment_tab">
+	                
+	                <div class="tabs-content hide" id="comment_tab">
 	                    <div class="mod-comments-list" id="js-comments-list">
 	                        <div class="section-comment-list grid-data">
 	                            <div class="comment-filter grid-row-1">
 	                                <div class="comment-statistics"> <span class="statistics-num">  <span style="color: red;">-</span> </span> 好评度 </div>
 	                                <div class="f-rc-list filter-comment-rank js-f-rc-list">
 	                                    <label class="f-radio checked" data-id="0"><i class="icon-radio"></i><span class="f-rc-text">全部评价(4)</span></label>
-	                                    <label class="f-radio " data-id="1"><i class="icon-radio"></i><span class="f-rc-text">好评(4)</span></label>
-	                                    <label class="f-radio " data-id="2"><i class="icon-radio"></i><span class="f-rc-text">中评(0)</span></label>
-	                                    <label class="f-radio " data-id="3"><i class="icon-radio"></i><span class="f-rc-text">差评(0)</span></label>
+	                                    <label class="f-radio " data-id="1"><i class="icon-radio"></i><span class="f-rc-text">好评(4-5)</span></label>
+	                                    <label class="f-radio " data-id="2"><i class="icon-radio"></i><span class="f-rc-text">中评(3)</span></label>
+	                                    <label class="f-radio " data-id="3"><i class="icon-radio"></i><span class="f-rc-text">差评(1-2)</span></label>
 	                                </div>
 	                            </div>
 	                            <div class="comment-list grid-row-2">
-	                                <div class="comment-item">
-	                                    <div class="item-left"> <img class="user-avatar" src="//q1.qlogo.cn/g?b=qq&amp;k=icJELcJM4K4ey5LeCRmH0BA&amp;s=140&amp;t=1470230110" width="40" height="40" alt="?****">
-	                                        <p class="user-name">?****</p>
-	                                    </div>
-	                                    <div class="item-right">
-	                                        <div class="star-list">
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                        </div>
-	                                        <div class="comment-bd">黄叔叔一直都是良心老师，超级棒，素材可以搞定大部分的话题，节省了很多时间。手动比心</div>
-	                                        <div class="comment-ft"> <span class="comment-where">学习进度50%时评价</span> <span class="comment-time">2016-12-23</span> </div>
-	                                        <div class="comment-reply"> </div>
-	                                    </div>
-	                                </div>
-	                                <div class="comment-item">
-	                                    <div class="item-left"> <img class="user-avatar" src="//wx.qlogo.cn/mmopen/aJJkJxOWJ7WthqjxN558awTtrU2JYSX22llicfbz52eIN4r9eNR9icpicbc5eXFPTgz47iaTuico0WPCPGiajYvjkQVyxQSKUZQIt6/0" width="40" height="40" alt="一****">
-	                                        <p class="user-name">一****</p>
-	                                    </div>
-	                                    <div class="item-right">
-	                                        <div class="star-list">
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                        </div>
-	                                        <div class="comment-bd">黄叔叔讲课非常的棒！满满都是干货！</div>
-	                                        <div class="comment-ft"> <span class="comment-where">学习进度1%时评价</span> <span class="comment-time">2016-12-23</span> </div>
-	                                        <div class="comment-reply"> </div>
-	                                    </div>
-	                                </div>
-	                                <div class="comment-item">
-	                                    <div class="item-left"> <img class="user-avatar" src="//q4.qlogo.cn/g?b=qq&amp;k=FNzdlnF6QjQE6VK8xHDS5Q&amp;s=140&amp;t=1439730695" width="40" height="40" alt="v****">
-	                                        <p class="user-name">v****</p>
-	                                    </div>
-	                                    <div class="item-right">
-	                                        <div class="star-list">
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                            <i class="fa fa-star"></i>
-	                                        </div>
-	                                        <div class="comment-bd">Frank讲课很棒，希望我能在雅思考试中给力！加油</div>
-	                                        <div class="comment-ft"> <span class="comment-where">学习进度25%时评价</span> <span class="comment-time">2016-12-20</span> </div>
-	                                        <div class="comment-reply"> </div>
-	                                    </div>
-	                                </div>
 	                            </div>
 	                        </div>
 	                    </div>
