@@ -3,7 +3,6 @@ package models;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -26,6 +25,10 @@ import tools.Utils;
 @Entity
 @DiscriminatorValue("lesson")
 public class LessonImage extends Image{
+	@Transient
+	@JsonIgnore
+	public static final String PLACEHOLDER = "public/images/image_placeholder.png";
+	
 	@Transient
 	@JsonIgnore
 	public static final int IMAGE_MAX = 15;

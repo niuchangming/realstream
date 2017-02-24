@@ -8,15 +8,28 @@
 	<div id="dash-content" class="dash-bg">
 		<div class="dash-block">
 			<div id="user-avatar-wrap">
-				@if(user.avatars.size() > 0){
+				@if(user.avatars != null && user.avatars.size() > 0){
 					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(user.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
 				}else{
 					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="mod-header__user-img link-img"></a>
 				}
 				<div class="spacer" style="clear: both;"></div>
 				<div>
-					<p class="bold-style">金木头</p>
-					<p><span>新加坡国立大学教授</span></p>
+					@if(user.role.equals(Role.TEACHER)){
+						<p class="bold-style">
+							@user.realName
+						</p>
+						<p class="grey"><span>@user.bestInstitution</span></p>
+					}else{
+						<p class="bold-style">
+							if(tools.Utils.isBlank(@user.username)){
+								You
+							}else{
+								@user.username
+							}
+						</p>
+						<p class="grey"><span>Learning point:<span> </span>@user.point</span></p>
+					}
 				</div>
 			</div>
 			<div class="achieve-wrap">
@@ -67,14 +80,7 @@
 		        </li>
 		        
 		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 1){class="active"} href="＃">
-		                <i class="fa fa-handshake-o"></i>
-		                <span>入驻信息</span>
-		            </a>
-		        </li>
-		
-		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 2){class="active"} href="＃">
+		            <a @if(section == 1){class="active"} href="@routes.ProfileController.personalMain()">
 		                <i class="fa fa-picture-o"></i>
 		                <span>主页管理</span>
 		            	<span class="dcjq-icon"></span>
@@ -82,7 +88,7 @@
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 3){class="active"} href="@routes.ProfileController.myRegisteredLessons()">
+		            <a @if(section == 2){class="active"} href="@routes.ProfileController.myRegisteredLessons()">
 		                <i class="fa fa-clock-o"></i>
 		                <span>学习进度</span>
 		            	<span class="dcjq-icon"></span>
@@ -93,9 +99,16 @@
 		    <p class="main-title">课程管理</p>
 		    <ul class="sidebar-menu" id="nav-accordion">
 		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 4){class="active"} href="@routes.ProfileController.myLessons(0)">
+		            <a @if(section == 3){class="active"} href="@routes.ProfileController.myLessons(0)">
 		                <i class="fa fa-list-alt"></i>
 		                <span>课程列表</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 4){class="active"} href="@routes.ProfileController.myFavoriteLessons(0)">
+		                <i class="fa fa-list-alt"></i>
+		                <span>我的收藏</span>
 		            </a>
 		        </li>
 		

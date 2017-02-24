@@ -2,7 +2,7 @@
 
 @(user: User, lessons: List[Lesson])
 
-@profileframe(user, 3){
+@profileframe(user, 2){
 	<div class="dash-detail-header">
 		<p>学习进度</p>
 	</div>
@@ -147,7 +147,7 @@
 	        lsView += '<div class="task-item-ctn">';
 	        lsView += '<div class="icon"><span>' + key + '</span></div>';
 	        lsView += '<div class="task-title">' + lessonSession.title + '</div>';
-	        lsView += '<div class="sub-title">' + $.format.date(new Date(lessonSession.startDatetime), 'hh:mm, d MMM yyyy') + '</div>';
+	        lsView += '<div class="sub-title">' + $.format.date(new Date(lessonSession.startDatetime), 'HH:mm, d MMM yyyy') + '</div>';
 
 	        var diff = diffDate(new Date(), new Date(lessonSession.startDatetime));
 	        if(diff <= -lessonSession.duration){

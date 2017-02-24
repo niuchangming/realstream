@@ -30,7 +30,7 @@ public class PublishedLesson {
 	@Column(name="offer_price")
 	public double offerPrice;
 	
-	@Column(name="lesson_id", unique=true) 
+	@Column(name="lesson_id") 
 	public long lessonId;
 	
 	@Column(name="category_id", columnDefinition = "double default 0")

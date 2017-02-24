@@ -35,7 +35,7 @@
 				    <tr class="paginate">
 						<th>@((pageIndex-1) * LessonSession.PAGE_SIZE + index+1)</th>
 						<td>@lessonSessions(index).title</td>
-						<td>@lessonSessions(index).startDatetime.format("hh:mm, dd MMM yyyy")</td>
+						<td>@lessonSessions(index).startDatetime.format("HH:mm, dd MMM yyyy")</td>
 						<td>@lessonSessions(index).duration 分钟</td>
 						<td>
 							@diff(new Date(), lessonSessions(index).startDatetime) match {

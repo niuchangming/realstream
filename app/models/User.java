@@ -11,11 +11,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.JoinColumn;
 import org.hibernate.annotations.Parameter;
 
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -26,6 +29,8 @@ import services.S3Plugin;
 import tools.Utils;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Table(name="user")
@@ -52,7 +57,7 @@ public class User{
 	
 	public String qq;
 	
-	public int point;
+	public int point; //0-100 学童
 	
 	public int credit;
 	
@@ -76,10 +81,17 @@ public class User{
 	@OneToMany(mappedBy = "user")
 	public List<WorkExperience> workExperiences;
 	
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "favorite_lesson", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "lesson_id"))
+	@LazyCollection(LazyCollectionOption.EXTRA)
+	public List<Lesson> favoriteLessons;
+	
 	@OneToMany(mappedBy = "teacher")
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	public List<Lesson> teacherLessons;
 	
 	@OneToMany(mappedBy = "user")
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	public List<UserLesson> userLessons;
 
 	@OneToMany(mappedBy = "user")
@@ -127,6 +139,13 @@ public class User{
 	    }
 	    
 	    int size =  Math.max(Math.max(fromDateMap.size(), toDateMap.size()), workExperienceMap.size());
+	    
+	    //if update teacher info, we have to delete all work experience first and then add the new uploaded data.
+	    if(this.workExperiences != null && this.workExperiences.size() > 0){
+	    	for(WorkExperience workExp : this.workExperiences){
+	    		JPA.em().remove(workExp);
+	    	}
+	    }
 	    
 	    for(int i = 0; i < size; i++){
 	    	WorkExperience workExperience = new WorkExperience(this);

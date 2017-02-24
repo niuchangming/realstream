@@ -13,52 +13,39 @@
 	<script>
 		$(function(){
 			$('#publish-lesson-btn').on('click', function(){
+				var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
 				
-				if('@lesson.title' === ''){
-					showAlertToast('Lesson title cannot be empty.', "alert-warning");
-				}else if('@lesson.description' === ''){
-					showAlertToast('Lesson description cannot be empty.', "alert-warning");
-				}else if(@lesson.price <= 0){
-					showAlertToast('Lesson pirce cannot be 0.', "alert-warning");					
-				}else if('@lesson.lessonImages' === '[]'){
-					showAlertToast('Lesson must have 1 image at least.', "alert-warning");
-				}else if('@lesson.lessonSessions' === '[]'){
-					showAlertToast('Lesson must have 1 lesson session at least.', "alert-warning");
-				}else{
-					var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
-					
-					$('#publish-lesson-btn').after(spinner);
-		        	$('#publish-lesson-btn').attr("disabled", true);
-		        	$('#publish-lesson-btn').text("");
-		        	
-					$.ajax({
-		                url: "@routes.LessonController.publishLesson()",
-		                type: "POST",
-		                data: {
-		                	lessonId: @lesson.id
-		                },
-		                success: function(response, status) {
-		                	var data = $.parseJSON(JSON.stringify(response));
-		                	
-		                	if(data.code == 0){
-		                		showAlertToast(data.message, "alert-success");
-		                	}else if(data.code == 5000){
-		                		showAlertToast(data.message, "alert-warning");
-		                	}else{
-		                		showAlertToast(data.message, "alert-danger");
-		                	}
-		                	spinner.remove();
-		                	$('#publish-lesson-btn').attr("disabled", false);
-		                	$('#publish-lesson-btn').text("发布课程");
-		                },
-		                error: function(request, status, err){
-		                	showAlertToast(err, "alert-danger");
-		                	spinner.remove();
-		                	$('#publish-lesson-btn').attr("disabled", false);
-		                	$('#publish-lesson-btn').text("发布课程");
-		                }
-		            });
-				}
+				$('#publish-lesson-btn').after(spinner);
+	        	$('#publish-lesson-btn').attr("disabled", true);
+	        	$('#publish-lesson-btn').text("");
+	        	
+				$.ajax({
+	                url: "@routes.LessonController.publishLesson()",
+	                type: "POST",
+	                data: {
+	                	lessonId: @lesson.id
+	                },
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	
+	                	if(data.code == 0){
+	                		showAlertToast(data.message, "alert-success");
+	                	}else if(data.code == 5000){
+	                		showAlertToast(data.message, "alert-warning");
+	                	}else{
+	                		showAlertToast(data.message, "alert-danger");
+	                	}
+	                	spinner.remove();
+	                	$('#publish-lesson-btn').attr("disabled", false);
+	                	$('#publish-lesson-btn').text("发布课程");
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	spinner.remove();
+	                	$('#publish-lesson-btn').attr("disabled", false);
+	                	$('#publish-lesson-btn').text("发布课程");
+	                }
+	            });
 				
 			});
 		});
@@ -78,9 +65,11 @@
 				</p>
 			</div>
 			<div class="btn-wrap">
-				<div>
-					<a id="save-lesson-btn" class="btn btn-info">保存修改</a>
-				</div>
+				@if(section == 0 || section == 5){
+					<div>
+						<a id="save-lesson-btn" class="btn btn-info">保存修改</a>
+					</div>				
+				}
 				<div>
 					<a id="publish-lesson-btn" class="btn btn-success">发布课程</a>
 				</div>

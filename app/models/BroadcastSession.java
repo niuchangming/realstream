@@ -1,6 +1,8 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -38,19 +41,12 @@ public class BroadcastSession {
 	@Column(name="creation_datetime")
 	public Date creationDateTime;
 	
-	public long duration;
-	
-	@Column(name="archive_id")
-	public String archiveId;
-	
-	@Column(name="archive_url")	
-	public String archiveUrl;
-	
-	public String status;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lesson_session_id")
 	public LessonSession lessonSession;
+	
+	@OneToMany(mappedBy = "broadcastSession")
+	public List<Archive> archives;
 	
 	public BroadcastSession(){}
 	

@@ -1,7 +1,7 @@
 package models;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,20 +11,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import play.db.jpa.JPA;
-
 @Entity
 @Table(name="category")
 public class Category {
-	@Transient
-	private static final String categoryJsonPath = "public/raws/category.json";
 	
 	@Id
 	@GeneratedValue	
@@ -50,11 +45,11 @@ public class Category {
 		this.name = name;
 	}
 	
-	public static List<Category> initCategoryByJson(){
+	public static List<Category> initCategoryByJson(InputStream in){
 		List<Category> categories = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			categories = mapper.readValue(new File(categoryJsonPath),
+			categories = mapper.readValue(in,
 					TypeFactory.defaultInstance().constructCollectionType(List.class, Category.class));
 		} catch (IOException e) {
 			e.printStackTrace();

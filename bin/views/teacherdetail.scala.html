@@ -1,0 +1,140 @@
+@import tags._
+
+@(account: Account)
+
+@now = @{new Date()}
+
+@sortLessonByUserAmount = @{
+	models.Lesson.sortByUserAmount(account.user.teacherLessons)
+}
+
+@scripts = {
+    <script type="text/javascript">
+		$(function(){
+			'@sortLessonByUserAmount'
+			@for(index <- 0 until account.user.teacherLessons.size){
+			    @if(index < 3){
+			    	var ppLesView = '<li class="mod">';
+			    		ppLesView += '<div class="bm-menu-more">';
+			    		ppLesView += '<div class="bm-menu-img">';
+			    		ppLesView += '<a class="a-parent link-img" href="/lesson?lessonId=@account.user.teacherLessons(index).id" style="background-image:url(/lesson/show/cover?lessonId=@account.user.teacherLessons(index).id)" target="_blank"></a>';
+			    		ppLesView += '</div>';
+			    		ppLesView += '<div class="bm-menu-info">';
+			    		ppLesView += '<p class="bm-menu-info-top">';
+			    		ppLesView += '<a target="_blank" href="/lesson?lessonId=@account.user.teacherLessons(index).id">@account.user.teacherLessons(index).title</a>';
+			    		ppLesView += '</p>';
+			    		ppLesView += '<p class="bm-menu-info-bottom">';
+			    		
+			    		@if(account.user.teacherLessons(index).offerPrice > 0 && (account.user.teacherLessons(index).offerStartDate == null || account.user.teacherLessons(index).offerEndDate == null) || (account.user.teacherLessons(index).offerPrice > 0 && !account.user.teacherLessons(index).offerStartDate.before(now) && !account.user.teacherLessons(index).offerEndDate.after(now))){
+			    			ppLesView += '<span class="bm-menu-price">$@account.user.teacherLessons(index).offerPrice.intValue()</span>';
+						}else{
+							ppLesView += '<span class="bm-menu-price">$@account.user.teacherLessons(index).price.intValue()</span>';
+						}
+			    		
+			    		ppLesView += '<span>@account.user.teacherLessons(index).userLessons.size()<span> </span>students</span>';
+			    		ppLesView += '</p></div><div class="clear"></div></div></li>';
+					    
+			    		$('.r-side ul').append(ppLesView);
+			    }
+			}
+	   	});
+	</script>
+}
+ 
+@main(scripts) {
+	@topbar(account)
+	<section class="teacher-banner">
+		<div class="inner-center clearfix">
+			<div class="l-side">
+				<div class="l-side-info">
+					<div class="info-text">
+						<div class="face-ct">
+							@if(account.user.avatars != null && account.user.avatars.size() > 0){
+								<img src="@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)">
+							}else{
+								<img src="@routes.ProfileController.showAvatarThumbnail()">
+							}
+							<div class="face-border"></div>
+						</div>
+						<h1>@account.user.realName</h1>
+						<p>@account.user.bestInstitution</p>
+					</div>
+					<ul class="treeres">
+					    <li class="treeres-item">
+					      <div class="treeres-num">@if(account.user.teacherLessons != null){@account.user.teacherLessons.size()}else{0}</div>
+					      <div class="treeres-cat">课程</div>
+					    </li>
+				  	</ul>
+				</div>
+				<div class="l-side-ctrl clearfix">
+					<div class="summary">
+						@Html(account.user.brief)
+					</div>
+				</div>
+			</div>
+			<div class="r-side">
+				<div class="r-side-cont">
+					<div class="ls-bd sm-bm-style">
+						<div class="bm-menu mt20 mrl15">
+							<h2 class="bm-menu-hd" style="margin-bottom:0;">最受欢迎课程</h2>
+							<ul class="bm-menu-bd teacher-course-popular">
+								
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	
+	<div class="teacher-lesson-lbl">
+		<h4>MORE LESSONS</h4>
+	</div>
+	<section class="teacher-lesson-list row">
+		@if(account.user.teacherLessons != null){
+			@for(lesson <- account.user.teacherLessons){
+				@if(lesson.isPublish){
+					<div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
+						<article class="post-wrap">
+							<div class="post-thumb">
+								<a class="link-img" style="background-image:url(/lesson/show/cover?lessonId=@lesson.id)"></a>
+							</div>
+							<div class="post-footer">
+								<div class="post-desc">A Level Chinese</div>
+								<div>
+									<a class="detail-btn" target="_blank" href="/lesson?lessonId=@lesson.id">查看详情</a>
+									@if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
+										<span class="cate-info-price">@lesson.offerPrice.intValue()</span>
+									}else{
+										<span class="cate-info-price">@lesson.price.intValue()</span>
+									}
+								</div>
+							</div>
+						</article>
+					</div>
+				}
+			}
+		}
+		
+	</section>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

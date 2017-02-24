@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -11,17 +13,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "lesson")
 public class Lesson {
+	
+	@Transient
 	public final static int PAGE_SIZE = 5;
 	
 	@Id
@@ -77,7 +87,11 @@ public class Lesson {
 	public User teacher; 
 
 	@OneToMany(mappedBy = "lesson")
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	public List<UserLesson> userLessons;
+	
+	@ManyToMany(mappedBy = "favoriteLessons")
+	public List<User> users;
 	 
 	@OneToMany(mappedBy = "lesson")
 	public List<MediaFile> mediaFiles;
@@ -97,6 +111,15 @@ public class Lesson {
 		this.title = title;
 		this.description = description;
 		this.category = category;
+	}
+	
+	public static List<Lesson> sortByUserAmount(List<Lesson> lessons){
+		Collections.sort(lessons, new Comparator<Lesson>(){
+			public int compare(Lesson o1, Lesson o2){
+			     return Integer.compare(o2.userLessons.size(), o1.userLessons.size());
+			}
+		});
+		return lessons;
 	}
 
 }

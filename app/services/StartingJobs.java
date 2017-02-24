@@ -3,26 +3,22 @@ package services;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
-
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-
 import models.Category;
-import play.Application;
 import play.db.jpa.JPAApi;
+import javax.inject.Provider;
+import play.Application;
 
 @Singleton
 public class StartingJobs {
 	
 	@Inject
-	public StartingJobs(JPAApi jpaApi) {
+	public StartingJobs(Provider<Application> app, JPAApi jpaApi) {
 		jpaApi.withTransaction(() -> {
 			Query query = jpaApi.em().createQuery("select count(*) from Category");
 			
@@ -34,7 +30,8 @@ public class StartingJobs {
 			}
 			
 			if(count == 0){
-				List<Category> categories = Category.initCategoryByJson();
+				InputStream in = app.get().classloader().getResourceAsStream("category.json");
+				List<Category> categories = Category.initCategoryByJson(in);
 				
 				for(Category category : categories){
 			    	if(category.children != null){

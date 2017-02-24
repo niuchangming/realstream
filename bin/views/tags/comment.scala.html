@@ -1,0 +1,168 @@
+@(lessons: List[Lesson])
+
+<div class="modal fade" id="comment-model" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-block">
+			<a class="link-img"></a>
+			<div class="lesson-brief">
+				<p class="bold-style les-tt">A Level Chinese</p>
+				<p>
+					<span class="lbl-key">教师：</span>
+					<span class="lbl-value">changming</span>
+				</p>
+			</div>
+		</div>
+      </div>
+      <form id="comment-form" action="@routes.CommentController.createComment()" method="POST">
+		<div class="modal-body">
+      		<input name="lessonId" value="" type="hidden"/>
+      		<input name="point" value="5" type="hidden">
+      		<div class="f-item"> 
+      			<label class="f-label">课程评分</label> 
+      			<div class="f-field"> 
+      				<div class="star-list"> 
+      					<i data-index="1" class="fa fa-star"></i> 
+      					<i data-index="2" class="fa fa-star"></i> 
+      					<i data-index="3" class="fa fa-star"></i> 
+      					<i data-index="4" class="fa fa-star"></i> 
+      					<i data-index="5" class="fa fa-star active"></i> 
+    				</div> 
+    				<div class="star-list-intro"> 
+    					<span class="star-num">5星</span> 
+    					<span class="star-text">五星好评！课程非常棒，点赞！</span> 
+   					</div> 
+				</div> 
+			</div>
+			<div class="f-item"> 
+				<label class="f-label">学习感受</label> 
+				<div class="f-field"> 
+					<div class="form-group comment-textarea"> 
+						<textarea class="form-control" rows="5" name="comment" placeholder="课程怎么样？快来说说学习感受吧"></textarea> 
+						<p class="comment-tips">请写下您不满意的地方，机构将努力改进！</p> 
+					</div> 
+				 </div>
+			</div>
+		</div>
+		<div class="modal-footer">
+      		<div class="form-group">
+	        	<input id="save-comment-btn" type="submit" class="btn btn-success" value="Submit Comment">
+	        </div>
+      	</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		point = 5;
+		$('.star-list i').hover(function(){
+			$('.fa-star.active').removeClass('active');
+			$(this).addClass('active');
+			var index = $(this).attr('data-index');
+			if(index == 1){
+				$('.star-num').text('1星');
+				$('.star-text').text('差评！课程太差了，我要吐槽！');
+			}else if(index == 2){
+				$('.star-num').text('2星');
+				$('.star-text').text('勉强中评！课程不满意！');
+			}else if(index == 3){
+				$('.star-num').text('3星');
+				$('.star-text').text('中评！课程一般！');
+			}else if(index == 4){
+				$('.star-num').text('4星');
+				$('.star-text').text('好评！课程还不错，继续保持！');
+			}else{
+				$('.star-num').text('5星');
+				$('.star-text').text('五星好评！课程非常好，继续保持！');
+			}
+		}, function(){
+			$('.fa-star.active').removeClass('active');
+			var selStar = $('.star-list i[data-index='+point+']');
+			selStar.addClass('active');
+			if(point == 1){
+				$('.star-num').text('1星');
+				$('.star-text').text('差评！课程太差了，我要吐槽！');
+			}else if(point == 2){
+				$('.star-num').text('2星');
+				$('.star-text').text('勉强中评！课程不满意！');
+			}else if(point == 3){
+				$('.star-num').text('3星');
+				$('.star-text').text('中评！课程一般！');
+			}else if(point == 4){
+				$('.star-num').text('4星');
+				$('.star-text').text('好评！课程还不错，继续保持！');
+			}else{
+				$('.star-num').text('5星');
+				$('.star-text').text('五星好评！课程非常好，继续保持！');
+			}
+		});
+		
+		$('i.fa-star').click(function(){
+			point = $(this).attr('data-index');
+			$('input[name="point"]').val(point);
+		});
+		
+		$('#comment-model').on('show.bs.modal', function () {
+			var lesId = $('.tab-item-ctn.active').attr('data-ID');
+			@for(lesson <- lessons){
+				if('@lesson.id' === lesId.toString()){
+					$('input[name="lessonId"]').val(lesId);
+					$('.lesson-brief > .les-tt').text('@lesson.title');
+					$('.lesson-brief .lbl-value').text('@lesson.teacher.realName');
+					$('#comment-model .link-img').css('background-image', 'url(\'/lesson/show/cover?lessonId='+ lesId +'\')');
+				}
+			}
+		});
+		
+		$("#comment-form").validate({
+	        rules: {
+	        	comment:{
+	            	minlength: 5,
+	                maxlength: 200,
+	            	required:true
+	            }
+	        },
+	        highlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+	        },
+	        unhighlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+	        },
+	        submitHandler: function(form) {
+	        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+	        	$('#save-comment-btn').after(spinner);
+	        	$('#save-comment-btn').val('');
+	        	$('#save-comment-btn').attr("disabled", true);
+	        	
+	        	$.ajax({
+	                url: "@routes.CommentController.createComment()",
+	                type: "POST",
+	                data: $(form).serialize(),
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	if(data.code != 0){
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		$('#comment-model').modal('hide');
+	                		showAlertToast(data.message, "alert-success");
+	                	}
+	                	spinner.remove();
+	                	$('#save-comment-btn').attr("disabled", false);
+	                	$('#save-comment-btn').val("Submit Comment");
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	spinner.remove();
+	                	$('#save-comment-btn').attr("disabled", false);
+	                	$('#save-comment-btn').val("Submit Comment");
+	                }
+	            });
+	        }
+	    });
+		
+   	});
+</script>

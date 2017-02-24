@@ -10,13 +10,13 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.coobird.thumbnailator.Thumbnails;
 import services.S3Plugin;
@@ -25,6 +25,9 @@ import tools.Utils;
 @Entity
 @DiscriminatorValue("avatar")
 public class Avatar extends Image{
+	@Transient
+	@JsonIgnore
+	public static final String DEFAULT_AVATAR = "public/images/default_avatar.png";
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")

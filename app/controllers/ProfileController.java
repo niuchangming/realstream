@@ -1,17 +1,17 @@
 package controllers;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import actions.AuthAction;
 import models.Account;
 import models.Avatar;
@@ -20,6 +20,7 @@ import models.LessonSession;
 import models.ResponseData;
 import models.Role;
 import models.User;
+import play.Application;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
@@ -32,19 +33,26 @@ import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import tools.Utils;
 import views.html.profilepersonal;
+import views.html.profilemain;
 import views.html.teachersettle;
 import views.html.teacheragreement;
 import views.html.settlereview;
 import views.html.errorpage;
 import views.html.profilelessons;
+import views.html.teacherdetail;
 import views.html.profileregisteredlessons;
+import views.html.profilefavlessons;
 
+@SuppressWarnings("unchecked")
 public class ProfileController extends Controller{
 	@Inject
 	private JPAApi jpaApi;
 	
 	@Inject
     private FormFactory formFactory;
+	
+	@Inject
+	private Provider<Application> application;
 	
 	@With(AuthAction.class)
 	@Transactional
@@ -89,14 +97,32 @@ public class ProfileController extends Controller{
 			user.wechat = wechat;
 			user.qq = qq;
 			jpaApi.em().persist(user);
-			responseData.data = user;
-			return ok(Utils.toJson(User.class, responseData, "*.user", "account", "studentLessons", "teacherLessons", "avatars", "workExperiences"));
-		}catch(NoResultException | JsonProcessingException e){
+		}catch(NoResultException e){
 			responseData.code = 4000;
 			responseData.message = "User does not exist.";
 		}
 		
 		return ok(Json.toJson(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result personalMain(){
+		ResponseData responseData = new ResponseData();
+		try{
+			Account account = (Account) ctx().args.get("account");
+			
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			User user = query.getSingleResult();
+			
+			return ok(profilemain.render(user));
+		}catch(NoResultException e){
+			responseData.code = 4000;
+			responseData.message = "User does not exist.";
+			return notFound(errorpage.render(responseData));
+		}
 	}
 	
 	@With(AuthAction.class)
@@ -145,22 +171,41 @@ public class ProfileController extends Controller{
 	
 	@Transactional
 	public Result showAvatarThumbnail(String thumbnailUUID){
-		TypedQuery<Avatar> query = jpaApi.em()
-				.createQuery("from Avatar a where a.thumbnailUUID = :thumbnailUUID", Avatar.class)
-				.setParameter("thumbnailUUID", thumbnailUUID);
-		
-		InputStream imageStream = null;
-		try{
-			Avatar avatar = query.getSingleResult();
-			imageStream = avatar.downloadThumbnail();
-		}catch(NoResultException e){
-			File defaultAvatar = new File("public/images/default_avatar.png");
-			try {
-				imageStream = new FileInputStream(defaultAvatar);
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} 
+		InputStream imageStream;
+		if(Utils.isBlank(thumbnailUUID)){
+			imageStream = application.get().classloader().getResourceAsStream(Avatar.DEFAULT_AVATAR);
+		}else{
+			TypedQuery<Avatar> query = jpaApi.em()
+					.createQuery("from Avatar a where a.thumbnailUUID = :thumbnailUUID", Avatar.class)
+					.setParameter("thumbnailUUID", thumbnailUUID);
+			
+			try{
+				Avatar avatar = query.getSingleResult();
+				imageStream = avatar.downloadThumbnail();
+			}catch(NoResultException e){
+				imageStream = application.get().classloader().getResourceAsStream(Avatar.DEFAULT_AVATAR);
+			}
 		}
+		return ok(imageStream);
+	}
+	
+	@Transactional
+	public Result showAvatar(long userId, boolean isLarge){
+		InputStream imageStream = null;
+		
+		User user = jpaApi.em().find(User.class, userId);
+		if(user != null){
+			if(user.avatars != null && user.avatars.size() > 0){
+				if(isLarge){
+					imageStream = user.avatars.get(0).download();
+				}else{
+					imageStream = user.avatars.get(0).downloadThumbnail();
+				}
+			}
+		}else{
+			imageStream = application.get().classloader().getResourceAsStream(Avatar.DEFAULT_AVATAR);
+		}
+		
 		return ok(imageStream);
 	}
 	
@@ -182,7 +227,7 @@ public class ProfileController extends Controller{
 	
 	@With(AuthAction.class)
 	@Transactional
-	public Result submitteacherInfo(){
+	public Result submitTeacherInfo(){
 		ResponseData responseData = new ResponseData();
 		try{
 			Account account = (Account) ctx().args.get("account");
@@ -222,10 +267,67 @@ public class ProfileController extends Controller{
 	
 	@With(AuthAction.class)
 	@Transactional
+	public Result updateTeacherInfo(){
+		ResponseData responseData = new ResponseData();
+		try{
+			Account account = (Account) ctx().args.get("account");
+			
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			User user = query.getSingleResult();
+			
+			DynamicForm requestData = formFactory.form().bindFromRequest();
+			String realName = requestData.get("realName");
+			String bestInstitution = requestData.get("institution");
+			String brief = requestData.get("brief");
+			
+		    user.realName = realName;
+		    user.bestInstitution = bestInstitution;
+		    user.brief = brief;
+		    jpaApi.em().persist(user);
+		    
+		    user.initWorkExperiences(requestData.data());
+		}catch (ParseException | NoResultException e) {
+			if(e instanceof NoResultException){
+				responseData.code = 4000;
+			}else{
+				responseData.code = 4001;
+			}
+			responseData.message = e.getLocalizedMessage();
+		}
+		
+		return ok(Json.toJson(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
 	public Result settleReview(){
 		Account account = (Account) ctx().args.get("account");
 		account = jpaApi.em().find(Account.class, account.id);
 		return ok(settlereview.render(account));
+	}
+	
+	@Transactional
+	public Result teacherDetail(long userId){
+		ResponseData responseData = new ResponseData();
+		
+		Account account = jpaApi.em().find(Account.class, userId);
+		if(account != null){
+			if(account.user.role != Role.TEACHER){
+				responseData.code = 4000;
+				responseData.message = "The user is not a teacher.";
+			}
+		}else{
+			responseData.code = 4000;
+			responseData.message = "The teacher does not exist.";
+		}
+		
+		if(responseData.code == 0){
+			return ok(teacherdetail.render(account));
+		}
+		
+		return notFound(errorpage.render(responseData));
 	}
 	
 	@With(AuthAction.class)
@@ -294,6 +396,109 @@ public class ProfileController extends Controller{
 		
 		return notFound(errorpage.render(responseData));
 	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result addFavoriteLesson(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		
+		try{
+			Account account = (Account) ctx().args.get("account");
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			
+			User user = query.getSingleResult();
+			Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+			if(lesson != null){
+				int count = ((BigInteger)jpaApi.em()
+						.createNativeQuery("select count(*) from favorite_lesson fl where fl.user_id = :userId and fl.lesson_id = :lessonId")
+						.setParameter("userId", user.accountId )
+						.setParameter("lessonId", lesson.id).getSingleResult()).intValue();
+				if(count == 0){
+					user.favoriteLessons.add(lesson);
+					jpaApi.em().persist(user);
+				}else{
+					responseData.code = 5000;
+					responseData.message = "You have add the lesson as your favourite.";
+				}
+			}else{
+				responseData.code = 4000;
+				responseData.message = "Lesson does not exist.";
+			}
+    	}catch(NoResultException e){
+    		responseData.code = 4000;
+			responseData.message = "User does not exist.";
+    	}
+		
+		return ok(Json.toJson(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result myFavoriteLessons(int offset){
+		ResponseData responseData = new ResponseData();
+		try{
+			Account account = (Account) ctx().args.get("account");
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			
+			User user = query.getSingleResult();
+			int totalAmount = ((BigInteger)jpaApi.em()
+					.createNativeQuery("SELECT count(*) FROM favorite_lesson fl where fl.user_id = :userId")
+					.setParameter("userId", user.accountId).getSingleResult()).intValue();
+			int pageIndex = (int) Math.ceil(offset / Lesson.PAGE_SIZE) + 1;
+			
+			List<Lesson> lessons = jpaApi.em()
+					.createNativeQuery("SELECT * FROM lesson ls LEFT JOIN favorite_lesson fl ON ls.id = fl.lesson_id WHERE fl.user_id = :userId", Lesson.class)
+					.setParameter("userId", user.accountId)
+					.setFirstResult(offset)
+					.setMaxResults(LessonSession.PAGE_SIZE)
+					.getResultList();
+			
+			return ok(profilefavlessons.render(user, lessons, pageIndex, totalAmount));
+		}catch(NoResultException e){
+			responseData.code = 4000;
+			responseData.message = "User does not exist.";
+		}
+		return notFound(errorpage.render(responseData));
+	}
+	
+	@With(AuthAction.class)
+	@Transactional
+	public Result removeFavoriteLesson(){
+		ResponseData responseData = new ResponseData();
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		long lessonId = Long.parseLong(requestData.get("lessonId"));
+		try{
+			Account account = (Account) ctx().args.get("account");
+			TypedQuery<User> query = jpaApi.em()
+					.createQuery("from User u where u.accountId = :accountId", User.class)
+					.setParameter("accountId", account.id);
+			
+			User user = query.getSingleResult();
+			Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+			
+			if(lesson != null){
+				user.favoriteLessons.remove(lesson);
+				jpaApi.em().persist(user);
+			}else{
+				responseData.code = 4000;
+				responseData.message = "Lesson does not exist.";
+			}
+		}catch(NoResultException e){
+			responseData.code = 4000;
+			responseData.message = "User does not exist.";
+		}
+		
+		return ok(Json.toJson(responseData));
+	}
+	
 }
 
 

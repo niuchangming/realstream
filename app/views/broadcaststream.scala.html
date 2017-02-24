@@ -1,77 +1,204 @@
 @import tools.Constants
 
-@(lesson: Lesson, broadcastSession: BroadcastSession)
+@(user: User, broadcastSession: BroadcastSession, token:String)
 
-<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
-<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/menu_sideslide.css")">
-<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/broadcaststream.css")">
-<link rel="stylesheet" href="//releases.flowplayer.org/6.0.5/skin/minimalist.css">
-<link rel="stylesheet" href="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.css">
-
-<script src="@routes.Assets.versioned("javascripts/jquery-1.12.4.min.js")" type="text/javascript"></script>
-<script src="//releases.flowplayer.org/6.0.5/flowplayer.min.js"></script>
-<script src="//releases.flowplayer.org/hlsjs/flowplayer.hlsjs.min.js"></script>
-<script src="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.min.js"></script>
-<script>
-	window.onload = function () {
-		flowplayer("#hlsjslive", {
-	    	splash: true,
-	    	embed: false,
-	    	ratio: 9/16,
-	    	clip: {
-	      		hlsQualities: [
-	        		{ level: 0, label: "563k" },
-	        		{ level: 1, label: "828k" },
-	        		{ level: 2, label: "2128k" }
-	      		],
-	      		hlsjs: {
-	        		smoothSwitching: false
-	      		},
-	      		live: true,
-	      		sources: [{ type: "application/x-mpegurl", src: "@broadcastSession.hls"}]
-    		}
-		});
-	};
-</script>
-
-<div class="menu-wrap">
-	<nav class="menu">
-		<h3><span>《</span>@lesson.title<span>》</span></h3>
-		<div class="session-list">
-			@for(index <- 0 until lesson.lessonSessions.size){
-				<a href="#" @if(lesson.lessonSessions(index).id == broadcastSession.lessonSession.id){class="active"}><span class="index">@index</span><span>@lesson.lessonSessions(index).title</span></a>
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/menu_sideslide.css")">
+	<link rel="stylesheet" href="//releases.flowplayer.org/6.0.5/skin/minimalist.css">
+	<link rel="stylesheet" href="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.css">
+	
+	<script src="//releases.flowplayer.org/6.0.5/flowplayer.min.js"></script>
+	<script src="//releases.flowplayer.org/hlsjs/flowplayer.hlsjs.min.js"></script>
+	<script src="//releases.flowplayer.org/quality-selector/flowplayer.quality-selector.min.js"></script>
+	<script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
+	<script>
+		$(function(){
+			var isInteractive = @broadcastSession.lessonSession.interactive;
+			session = OT.initSession(@(Constants.TOKBOX_API_KEY), '@broadcastSession.sessionId');
+			
+			if(isInteractive){
+				session.on('streamCreated', function(event) {
+					var token = event.stream.connection.data.substring(14);
+					if(token === '@broadcastSession.lessonSession.lesson.teacher.account.token'){
+						var teacherSubscriberHeight = $('.content').width() * 9 / 16;
+						session.subscribe(event.stream, 'teacher-subscriber', {
+							insertMode: 'append',
+							width: '100%',
+							height: teacherSubscriberHeight
+						});
+					}else{
+						var studentSubscriberHeight = $('#subscriber-container').width() * 9 * 0.2 / 16;
+						session.subscribe(event.stream, 'student-subscriber', {
+							insertMode: 'append',
+							width: '20%',
+							height: studentSubscriberHeight
+						});
+					}
+		  		});
+				
+		    	session.connect('@token', function(error) {
+					if (!error) {
+						publish();
+					} else {
+						alert('There was an error connecting to the session(' +  error.code + "): " + error.message);
+					}
+		  		});	    	
+			}else{
+				flowplayer("#hlsjslive", {
+			    	splash: true,
+			    	embed: false,
+			    	ratio: 9/16,
+			    	clip: {
+			      		hlsQualities: [
+			        		{ level: 0, label: "563k" },
+			        		{ level: 1, label: "828k" },
+			        		{ level: 2, label: "2128k" }
+			      		],
+			      		hlsjs: {
+			        		smoothSwitching: true
+			      		},
+			      		live: true,
+			      		sources: [{ type: "application/x-mpegurl", src: "@broadcastSession.hls"}]
+		    		}
+				});	
+				
+				session.connect('@token', function(error) {
+					if(error){
+						console.log('Session Contection: ' + JSON.stringify(error));						
+					}
+		  		});	 
 			}
-		</div>
-	</nav>
-	<button class="close-button" id="close-button">Close Menu</button>
-</div>
-<button class="menu-button" id="open-button">Open Menu</button>
-<div class="content-wrap">
-	<div class="topbar">
-		<h4>@broadcastSession.lessonSession.title</h4>
-		<div class="right-item">
-			<a class="contact-link">联系老师</a>
-			<a class="feedback-link">反馈</a>
-		</div>
-	</div>
-	<div class="content">
-		<div id="hlsjslive" class="is-closeable"></div>
-	</div>
-	<div class="doc-wrap">
-		<ul>
-			<li>课时相关文件——1 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——2 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——3 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——4 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——5 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——6 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——7 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——8 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——9 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-			<li>课时相关文件——10 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
-		</ul>
-	</div>
-</div>
+			
+			$('.msg-submit-btn').on('click', function(){
+				var msgBox = $('#msg-input');
+				var jsonData = {};	
+				
+				jsonData['key'] = '@user.accountId';
+				jsonData['username'] = '@user.username';
+				jsonData['message'] = msgBox.val();
+				
+				session.signal({
+					type: 'chat',
+					data: JSON.stringify(jsonData)
+				},
+				function(error) {
+					if (!error) {
+						msgBox.val('');
+					}else{
+						console.log('Chat error: ' + JSON.stringify(error));
+					}
+				});
+			});
+			
+			session.on('signal:chat', function(event) {
+				var data = jQuery.parseJSON(event.data);
+				
+				var msgItem = '';
+					if(event.from.connectionId === session.connection.connectionId){
+						msgItem = '<div class="msg-item mine">';
+						msgItem += '<div class="detail">';
+						msgItem += '<p class="sender">' + data['username'] + '</p>';
+						msgItem += '<p class="message">' + data['message'] + '</p>';
+						msgItem += '</div>';
+						msgItem += '<a style="background-image:url(/profile/avatar?isLarge=false&userId=' + data['key'] + ');" class="link-img"></a></div>';
+					}else{
+						msgItem = '<div class="msg-item theirs">';
+						msgItem += '<a style="background-image:url(/profile/avatar?isLarge=false&userId=' + data['key'] + ');" class="link-img"></a>';
+						msgItem += '<div class="detail">';
+						msgItem += '<p class="sender">' + data['username'] + '</p>';
+						msgItem += '<p class="message">' + data['message'] + '</p>';
+						msgItem += '</div></div>';
+					}
+								
+					$('.msg-box').append(msgItem);
+					$(msgItem)[0].scrollIntoView();
+	    	});
+			
+		});
+		
+		function publish(){
+			var publisherOptions = {
+					name: '@user.username',
+					insertMode: 'append',
+					width: '132',
+					height: '99'
+				};
+			
+			var publisher = OT.initPublisher('publisher', publisherOptions, function(error) {
+				if (error) {
+					switch (error.name) {
+				      case "OT_NOT_CONNECTED":
+				    	  alert("Publishing your video failed. You are not connected to the internet.", "alert-danger");
+				        break;
+				      case "OT_CREATE_PEER_CONNECTION_FAILED":
+				    	  alert("Publishing your video failed. This could be due to a restrictive firewall.", "alert-danger");
+				        break;
+				      case "OT_USER_MEDIA_ACCESS_DENIED":
+				    	  alert("Please allow access to the Camera and Microphone and try publishing again.", "alert-danger");
+				    	  break;
+				      default:
+				    	  alert("An unknown error occurred while trying to publish your video. Please try again later.", "alert-danger");
+				    }
+				    publisher.destroy();
+				    publisher = null;
+				} else {
+					session.publish(publisher);
+				}
+			});
+		}
+	</script>
+}
 
-<script src="@routes.Assets.versioned("javascripts/sidemenu/classie.js")" type="text/javascript"></script>
-<script src="@routes.Assets.versioned("javascripts/sidemenu/menu.js")" type="text/javascript"></script>
+@main(scripts) {
+	<div class="menu-wrap">
+		<nav class="menu">
+			<h3><span>《</span>@broadcastSession.lessonSession.lesson.title<span>》</span></h3>
+			<div class="session-list">
+				@for(index <- 0 until broadcastSession.lessonSession.lesson.lessonSessions.size){
+					<a href="#" @if(broadcastSession.lessonSession.lesson.lessonSessions(index).id == broadcastSession.lessonSession.id){class="active"}><span class="index">@index</span><span>@broadcastSession.lessonSession.lesson.lessonSessions(index).title</span></a>
+				}
+			</div>
+		</nav>
+		<button class="close-button" id="close-button">Close Menu</button>
+	</div>
+	<button class="menu-button" id="open-button">Open Menu</button>
+	<div class="content-wrap">
+		<div class="topbar">
+			<h4>@broadcastSession.lessonSession.title</h4>
+			<div class="right-item">
+				<a class="contact-link">联系老师</a>
+				<a class="feedback-link">反馈</a>
+			</div>
+		</div>
+		
+		<div class="chat-wrap">
+			<div class="msg-box">
+			</div>
+		</div>
+		
+		<div class="content">
+			<div id="teacher-subscriber">
+				<div id="publisher"></div>
+			</div>
+			<div id="hlsjslive" class="is-closeable"></div>
+			<div id="student-subscriber"></div>
+			<div class="chat-input">
+				<input id="msg-input" type="text" placeholder="Say what you want" value="">
+				<a class="msg-submit-btn">
+					<i class="fa fa-paper-plane grey"></i>
+				</a>
+			</div>
+		</div>
+		
+		<div class="doc-wrap">
+			<ul>
+				<li>课时相关文件——1 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+				<li>课时相关文件——2 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+				<li>课时相关文件——3 <a class="download-link"><i class="fa fa-cloud-download"></i></a></li>
+			</ul>
+		</div>
+	</div>
+	<script src="@routes.Assets.versioned("javascripts/sidemenu/classie.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/sidemenu/menu.js")" type="text/javascript"></script>
+}

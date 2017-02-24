@@ -10,6 +10,10 @@ body{
 	font-weight: 200;
 }
 
+*, *:after, *:before { -webkit-box-sizing: border-box; box-sizing: border-box; }
+.clearfix:before, .clearfix:after { content: ''; display: table; }
+.clearfix:after { clear: both; }
+
 .bootstrap-datetimepicker-widget a.btn{
 	color: #2b2b2b !important;
 }
@@ -25,7 +29,7 @@ a{
 }
 
 a:hover{
-	color:#76abbf !important;
+	color: #777;
 	text-decoration: none;
 }
 
@@ -138,27 +142,27 @@ p.empty{
 }
 
 .orange{
-	color:#FF5E3A;
+	color:#FF5E3A !important;
 }
 
 .purple{
-	color: #5856D6;	
+	color: #5856D6 !important;	
 }
 
 .blue{
-	color: #007AFF;
+	color: #007AFF !important;
 }
 
 .pink{
-	color: #E492A2;
+	color: #E492A2 !important;
 }
 
 .red{
-	color: #FF3A2D;
+	color: #FF3A2D !important;
 }
 
 .grey{
-	color: #777;
+	color: #777 !important;
 }
 
 .noborder{
@@ -319,6 +323,7 @@ p.empty{
     z-index: 5;
     display: none; 
     font-size: 12px;
+    z-index: 9999;
 }
 .mod-header_wrap-user .mod-header__user-operations a {
     background: #fff;
@@ -455,7 +460,7 @@ p.empty{
 	right: 34px;
 }
 
-.glyphicon-spinner {
+.glyphicon-spinner, .fa-spinner {
     -animation: spin .7s infinite linear;
     -webkit-animation: spin .7s infinite linear;
 }
@@ -622,7 +627,7 @@ ul.sidebar-menu li a > span, i{
 }
 
 .dash-detail-header > a > i{
-	margin-right: 5px;
+	margin-left: 5px;
 	font-size: 120%;
 	vertical-align: middle;
 }
@@ -644,7 +649,7 @@ ul.sidebar-menu li a > span, i{
     display: inline-block;
 }
 
-.lesson-dash .froala-box, #teacher-settle-content .froala-box{
+.froala-box{
     min-height: 96px;
     height: 240px;
     overflow: auto;
@@ -711,6 +716,134 @@ ul.sidebar-menu li a > span, i{
 }
 
 /** Tag Style End **/
+
+/** Index Start **/
+
+.detail-btn {
+    display: inline-block;
+    line-height: 1;
+    font-size:10px;
+    font-weight: 200;
+    padding: 5px 20px;
+    background-color: #333;
+    color: #fff !important;
+}
+
+.total-text{
+	float: right;
+	font-size: 10px;
+	color: #777;
+}
+
+.page-content{
+	width:90%;
+	margin: 0 auto;
+}
+
+.grid-outer {
+	padding: 0 20px;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.grid-outer:last-child{
+	 border-right: none;
+}
+
+.post-wrap {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    outline: none!important;
+}
+
+.post-wrap.post-grid {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.post-thumb{
+	font-size: 0;
+}
+
+.post-header {
+	margin-top: 20px;
+	margin-bottom: 5px;
+}
+
+.post-header-info {
+    text-align:center;
+    letter-spacing: 2px;
+    font-size: 20px;
+}
+
+.cate-text {
+	width: 30%;
+	margin:15px;
+	padding:5px;
+    border-bottom: 1px solid #2b2b2b;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.post-thumb a {
+    width: 100%;
+    height: 200px;
+    display:inline-block;
+}
+
+.post-desc{
+	line-height: 20px;
+	margin: 0 0 5px 0;
+	overflow: hidden;
+}
+
+.post-footer{
+	margin: 15px 0;
+}
+
+.post-cate-info {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 200;
+    font-size: 10px;
+}
+
+.post-cate-info > p{
+	line-height: 21px;
+}
+
+.post-actor-link{
+	display:block;
+}
+
+.cate-info-cell{
+	max-width: 200px;
+	max-height: 21px;
+    border-bottom: 1px solid #76abbf;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.cate-text-first {
+	padding: 5px;
+	font-size:12px;
+	font-weight: 200;
+	color: white;
+    background-color: #76abbf;
+}
+
+.cate-text-remain {
+	margin-left: 5px;
+    text-shadow: none;
+}
+
+.cate-info-price{
+	float: right;
+	color: #777;
+}
+
+/** Index End **/
 
 /** Lesson Image Upload Start **/
 .image-wrap{
@@ -1252,18 +1385,18 @@ input.file-input{
     overflow: hidden;
 }
 
-#teacher-info-form .form-label{
+#teacher-info-form .form-label, #personal-main-form .form-label{
 	width: 120px;
 	display:inline-block;
 	vertical-align: top;
 }
 
-#teacher-info-form .form-input{
+#teacher-info-form .form-input, #personal-main-form .form-input{
 	width: 200px;
 	display:inline-block;
 }
 
-#teacher-info-form .long-txt{
+#teacher-info-form .long-txt, #personal-main-form .long-txt{
 	width: 70%;
 }
 
@@ -1445,7 +1578,6 @@ input.file-input{
 
 .lesson-table a.link-btn{
 	display: inline-block;
-	width: 36px;
 	height: 20px;
 	line-height: 20px;
 	margin: auto 2px;
@@ -2121,6 +2253,10 @@ span.promt-info{
 
 .comment-list .comment-item:first-child {
     border-top: 0;
+}
+
+.comment-list p.empty{
+	margin-top: 100px;
 }
 
 .comment-list .comment-item {
@@ -3046,6 +3182,523 @@ ul.pay-method-list li.selected {
     right: 58px;
 }
 /** Comment End **/
+
+/** Broadcast Live Lesson Stream Start **/ 
+
+.broadcast-group{
+	width: 100%;
+	height: 100%;
+	background-color: #2b2b2b;
+}
+
+.topbar {
+    width: 100%;
+    height: 72px;
+    display: inline-block;
+    position: relative;
+    border-bottom: 1px solid #777;
+    color: white;
+}
+
+.topbar > h4 {
+    display: inline-block;
+    line-height: 72px;
+    margin: 0;
+    margin-left: 60px;
+}
+
+.topbar .right-item {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.topbar .right-item > a{
+	color: white;
+	font-size: 16px;
+}
+
+#video-container{
+    width: 80%;
+    padding-left: 20%;
+    margin: 15px 0;
+    display: inline-block;
+}
+
+#subscriber-container {
+    width: 20%;
+    padding: 15px;
+    height: auto;
+    color: white;
+    display: inline-block;
+    position: absolute;
+}
+
+#subscribers > div{
+	margin: 0 auto 0 auto;
+}
+
+/** Broadcast Live Lesson Stream End **/
+
+/** Broadcast Live Stream Start **/
+
+.contact-link{
+	margin-right: 10px;
+}
+
+.content-wrap{
+	height: 100%;
+	background-color: #2b2b2b;
+}
+
+.content{
+	width: 80%;
+    padding-left: 20%;
+    display: inline-block;
+}
+
+.doc-wrap{
+	width: 20%;
+	padding: 15px;
+	color: white;
+    display: inline-block;
+    position: absolute;
+}
+
+.doc-wrap li{
+	position:relative;
+	padding: 10px 0;
+}
+
+.download-link{
+	position: absolute;
+	top: 50%;
+	right: 0%;
+	transform: translate(-50%, -50%);
+}
+
+.download-link:hover,
+.download-link:focus{
+	color: #bdc3c7;
+	text-decoration: underline;
+}
+
+#hlsjslive{
+	margin-top: 30px;
+	background: black;
+}
+
+#teacher-subscriber{
+	position: relative;
+}
+
+#student-subscriber{
+	margin-top: 15px;
+	overflow-y: scroll;
+}
+
+#publisher{
+	z-index: 999;
+	margin-bottom: 15px;
+}
+
+.chat-wrap{
+	width: 20%;
+	top:72px;
+    bottom: 0;
+    padding: 20px;
+    position: absolute;
+}
+
+.chat-content{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.chat-input {
+    display: inline-block;
+    width: 100%;
+    height: 34px;
+    padding: 6px;
+    font-size: 14px;
+    position:relative;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+
+.chat-input input{
+	width: 100%;
+	padding-right: 40px;
+	background-image: none;
+    border: none;
+}
+
+.chat-input input:focus{
+	outline: 0 !important;
+	border-color: none;
+	-webkit-box-shadow:none !important;
+	-moz-box-shadow:none;
+	box-shadow:none;
+	background-color: white;
+}
+
+.msg-submit-btn{
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translate(0, -50%);
+}
+
+.msg-submit-btn > i{
+	font-size: 16px;
+}
+
+.msg-box{
+	color: #bdc3c7;
+	padding-bottom: 10px;
+}
+
+.msg-item {
+	margin-bottom: 5px;
+	position: relative;
+}
+
+.msg-box .link-img{
+	width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    border-radius: 12px;
+    vertical-align: top;
+}
+
+.msg-box .detail{
+	max-width: 80%;
+	margin-right: 10px;
+	position: relative;
+    color: #000;
+    background: #bdc3c7;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 3px;
+	display: inline-block;
+	padding: 5px 10px;
+}
+
+.msg-box .detail:after {
+    content: "";
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+}
+
+.msg-item.theirs .detail:after {
+    top: 4px;
+    left: -5px;
+    bottom: auto;
+    border-width: 6px 5px 5px 0;
+    border-color: transparent #bdc3c7;
+}
+
+.msg-item.mine .detail:after {
+    top: 4px;
+    right: -5px;
+    bottom: auto;
+    left: auto;
+    border-width: 5px 0 5px 6px;
+    border-color: transparent #bdc3c7;
+}
+
+.msg-item.mine {
+	text-align: right;
+}
+
+.msg-box .sender{
+	font-size: 10px;
+}
+
+/** Broadcast Live Stream End **/
+
+/** Teacher Detail Start **/
+
+.teacher-banner {
+    margin-bottom: 20px;
+    margin-top: 40px;
+}
+
+.teacher-banner .inner-center {
+    border: 1px solid #eee;
+    position: relative;
+    width: 1200px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.teacher-banner .l-side, .teacher-banner .r-side {
+    position: relative;
+    z-index: 100;
+}
+
+.teacher-banner .l-side{
+	border-right: 1px solid #eee;
+	float: left;
+    width: 897px;
+}
+
+.teacher-banner .r-side {
+    float: right;
+    width: 300px;
+    min-height: 244px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.teacher-banner .l-side-info {
+    height: 130px;
+    padding: 30px 30px 0;
+    box-sizing: initial;
+}
+
+.teacher-banner .l-side-info .info-text {
+    width: 700px;
+    float: left;
+    position: relative;
+}
+
+.teacher-banner .l-side-ctrl{
+	margin: 20px;
+}
+
+.teacher-banner .l-side-info .info-text .face-ct {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    border-radius: 3px;
+    line-height: 0;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.face-ct img {
+    max-width: 130px;
+    max-height: 130px;
+    width: auto;
+    height: auto;
+    border-radius: 3px;
+    line-height: 0;
+    border: 0;
+    vertical-align: middle;
+}
+
+.info-text h1 {
+    font-size: 22px;
+    color: #202020;
+    line-height: 1;
+    position: absolute;
+    left: 153px;
+    top: 0;
+    width: auto;
+    _width: 547px;
+    max-width: 547px;
+    height: 26px;
+    overflow: hidden;
+    word-break: break-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.info-text p {
+    font-size: 14px;
+    color: #545454;
+    line-height: 24px;
+    position: absolute;
+    left: 153px;
+    top: 35px;
+    width: auto;
+    _width: 547px;
+    max-width: 547px;
+    height: auto;
+    _height: 100px;
+    max-height: 100px;
+    overflow: hidden;
+    word-break: break-all;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.treeres {
+    float: right;
+    margin: 48px -4px 0 0;
+    height: 68px;
+    overflow: hidden;
+}
+
+.treeres .treeres-item {
+    float: left;
+    width: 80px;
+    height: 68px;
+    font-size: 18px;
+}
+
+.treeres .treeres-item .treeres-num {
+    font-size: 28px;
+    line-height: 36px;
+    color: #e85308;
+    text-align: center;
+}
+
+.treeres .treeres-item .treeres-cat {
+    line-height: 32px;
+    text-align: center;
+}
+
+.mrl15 {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.mt20 {
+    margin-top: 20px!important;
+}
+
+.sm-bm-style .mrl15 .bm-menu-hd {
+    margin-left: 10px;
+}
+
+.sm-bm-style .bm-menu-hd {
+    margin: 25px 0 0;
+    padding-bottom: 9px;
+    font-size: 18px;
+    padding: 0 0 7px;
+}
+
+.sm-bm-style .bm-menu-bd .mod {
+    margin-bottom: -1px;
+    padding: 6px 6px 13px 9px;
+    overflow: hidden;
+}
+
+.bm-menu-bd .bm-menu-more {
+    clear: left;
+    height: 51px;
+    overflow: hidden;
+}
+
+.bm-menu-bd .bm-menu-img {
+    position: relative;
+    float: left;
+    width: 91px;
+    height: 51px;
+    display: block;
+    overflow: hidden;
+    border-radius: 2px;
+}
+
+.bm-menu-bd .bm-menu-img .a-parent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 89px;
+    height: 49px;
+}
+
+.bm-menu-bd .bm-menu-info {
+    padding-left: 102px;
+    color: #999;
+}
+
+.bm-menu-bd .bm-menu-info .bm-menu-info-top {
+    color: #999;
+    margin-top: -4px;
+    line-height: 20px;
+    max-height: 36px;
+    height: auto;
+    _height: 36px;
+    overflow: hidden;
+    -webkit-transition: .3s;
+    -moz-transition: .3s;
+    -o-transition: .3s;
+    transition: .3s;
+}
+
+.link-url, .bm-menu-bd .bm-menu-info .bm-menu-info-top{
+	white-space: normal;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.bm-menu-bd .bm-menu-info .bm-menu-info-top a {
+    color: #000;
+    white-space: normal;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    -webkit-transition: .3s;
+    -moz-transition: .3s;
+    -o-transition: .3s;
+    transition: .3s;
+}
+
+.bm-menu-bd .bm-menu-info .bm-menu-info-bottom {
+    margin-top: 4px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.bm-menu-bd .bm-menu-info .bm-menu-price {
+    margin-right: 5px;
+    color: #e85308;
+}
+
+.teacher-lesson-list{
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	border: 1px solid #eee;
+}
+
+.teacher-lesson-list .grid-outer{
+	padding-top: 15px;
+}
+
+.teacher-lesson-list .post-thumb a{
+	height: 160px;
+}
+
+.teacher-lesson-lbl{
+	width: 1200px;
+	margin: auto;
+}
+
+.teacher-lesson-lbl h4{
+	color: white;
+	padding: 10px 20px;
+	margin: 20px 0 0 0;
+	display: inline-block;
+	background-color: #999;
+}
+
+
+/** Teacher Detail End **/
+
+
+
+
 
 
 

@@ -23,7 +23,7 @@
 				  </div>
 			</div>
 			<div class="file-item">
-				<div class="lesson-img link-img" style="background-image:url('@routes.LessonController.showLessonThumbnail(lessonImage.thumbnailUUID)')">
+				<div class="lesson-img link-img" style="background-image:url('@routes.LessonController.showLessonImage(lessonImage.uuid, false)')">
 					<div class="link-img-overlay">
 					</div>
 					<div class="action-btn-wraper">
@@ -155,7 +155,7 @@
 			        	uploaderEle.hide();
 			       
 			        	fileItemEle.removeClass('hidden');
-	                	fileItemEle.find('.lesson-img').css('background-image', 'url(\'/lesson/show/thumbnail?thumbnailUUID='+ data.result.data.thumbnailUUID +'\')');
+	                	fileItemEle.find('.lesson-img').css('background-image', 'url(\'/lesson/show/image?uuid='+ data.result.data.uuid +'\')');
 			        	fileItemEle.find('.del-link').on('click', function(){
 			        		deleteImage($(this), data.result.data.uuid);
 			        	});

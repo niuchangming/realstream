@@ -50,6 +50,43 @@
 				}
 			});
 			
+			$('.btn-favorite').on('click', function(){
+				@if(account == null){
+					$('#entry-model').modal('show');
+				}else{
+					var favIco = $('.btn-favorite > i');
+					favIco.removeClass('fa-heart');
+					favIco.addClass('fa-spinner');
+					$.ajax({
+		                url: "@routes.ProfileController.addFavoriteLesson()",
+		                type: "POST",
+		                data: {
+		                	lessonId: '@lesson.id'
+		                },
+		                success: function(response, status) {
+		                	var data = $.parseJSON(JSON.stringify(response));
+		                	if(data.code == 0){
+		                		favIco.addClass('red');
+		                		favIco.removeClass('fa-spinner');
+		                		favIco.addClass('fa-heart');
+		                		showAlertToast(data.message, "alert-success");
+		                	}else if(data.code == 5000){
+		                		favIco.removeClass('fa-spinner');
+		                		favIco.addClass('fa-heart');
+		                		showAlertToast(data.message, "alert-warning");
+		                	}else{	
+		                		favIco.removeClass('fa-spinner');
+		                		favIco.addClass('fa-heart');
+		                		showAlertToast(data.message, "alert-danger");
+		                	}
+		                },
+		                error: function(request, status, err){
+		                	console.log(err);
+		                }
+		            });
+				}
+			});
+			
 			$.ajax({
                 url: "@routes.CommentController.commentsByLesson()",
                 type: "POST",
@@ -146,8 +183,8 @@
 	                        </div>
 	                    </div>
 	                    <span class="line-item btn-favorite">
-		         <i class="fa fa-heart"></i>收藏
-		         </span>
+							<i class="fa fa-heart"></i>收藏
+						</span>
 	                </div>
 	                <div class="lesson-period">
 	                    <p>
@@ -202,7 +239,11 @@
 	                <div class="tabs-content" id="basic_tab">
 	                    <h3 class="guide-tt js-teacher-location" data-teacherlocation="1">老师介绍</h3>
 	                    <div class="teacher-item">
-	                        <a href="#" class="link-img" target="_blank" style="background-image:url('//10.url.cn/eth/ajNVdqHZLLActBZJvCrdiblXdIgPK46da2yUicwNMpaBef4UgZxF1RGu41mq4mSomoukF4geA7hPw/');"></a>
+	                    	@if(account.user.avatars != null && account.user.avatars.size() > 0){
+								<a href="@routes.ProfileController.teacherDetail(lesson.teacher.accountId)" target="_blank" style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+							}else{
+								<a href="@routes.ProfileController.teacherDetail(lesson.teacher.accountId)" target="_blank" style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="link-img"></a>
+							}
 	                        <div class="teacher-summary">
 	                            <h4 class="text-tt"><a class="tt-link js-teacher-name" href="/teacher/2697535167" title="于磊Simon" target="_blank">@lesson.teacher.realName</a></h4>
 	                            <div class="text-intro js-teacher-intro">@Html(lesson.teacher.brief)</div>
@@ -257,7 +298,7 @@
 														case a if a > 30 => {【直播】@lesson.lessonSessions(index).title}
 													}
 												</span>
-												<span class="time">@lesson.lessonSessions(index).startDatetime.format("hh:mm dd-MMM-yyyy")</span>
+												<span class="time">@lesson.lessonSessions(index).startDatetime.format("HH:mm dd-MMM-yyyy")</span>
 											</h3>
 		                                </div>
 		                                <!-- <div class="task-task-list">
@@ -315,4 +356,6 @@
 	        <div style="clear:both;"></div>
 	    </div>
 	</div>
+	@entry(account)
+    @modalcreatelesson()
 }

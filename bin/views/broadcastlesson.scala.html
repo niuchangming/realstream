@@ -1,42 +1,112 @@
 @import tools.Constants
 
-@(broadcastSession: BroadcastSession)
+@(user: User, lessonSession: LessonSession, broadcastSession: BroadcastSession)
 
 @scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
 	<script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
     <script type="text/javascript">
-    	var session = OT.initSession(@(Constants.TOKBOX_API_KEY), '@broadcastSession.sessionId');
+    	var isInteractive = @broadcastSession.lessonSession.interactive;
+    	var connectionCount = 0;
+    	
+    	session = OT.initSession(@(Constants.TOKBOX_API_KEY), '@broadcastSession.sessionId');
+    	if(isInteractive){
+    		session.on('streamCreated', function(event) {
+    			var subscriberHeight = $('#subscriber-container').width() * 9 * 0.8 / 16;
+     			var token = session.connection.data.substring(0, 13);
+    			session.subscribe(event.stream, 'subscribers', {
+    				insertMode: 'append',
+    				width: '80%',
+    				height: subscriberHeight
+    			});
+      		});
+        	
+        	session.on({
+        	    sessionDisconnected: function (event) {
+        	      	if (event.reason == 'networkDisconnected') {
+        	    	  	showAlertToast("Your network connection terminated.", "alert-danger");
+        	      	}
+        	    }
+        	});    		
+    	}
+    	
+    	session.on('signal:chat', function(event) {
+			var data = jQuery.parseJSON(event.data);
+			
+			var msgItem = '';
+			if(event.from.connectionId === session.connection.connectionId){
+				msgItem = '<div class="msg-item mine">';
+				msgItem += '<div class="detail">';
+				msgItem += '<p class="sender">' + data['username'] + '</p>';
+				msgItem += '<p class="message">' + data['message'] + '</p>';
+				msgItem += '</div>';
+				msgItem += '<a style="background-image:url(/profile/avatar?isLarge=false&userId=' + data['key'] + ');" class="link-img"></a></div>';
+			}else{
+				msgItem = '<div class="msg-item theirs">';
+				msgItem += '<a style="background-image:url(/profile/avatar?isLarge=false&userId=' + data['key'] + ');" class="link-img"></a>';
+				msgItem += '<div class="detail">';
+				msgItem += '<p class="sender">' + data['username'] + '</p>';
+				msgItem += '<p class="message">' + data['message'] + '</p>';
+				msgItem += '</div></div>';
+			}
+						
+			$('.msg-box').append(msgItem);
+			$(msgItem)[0].scrollIntoView();
+    	});
     	
     	session.connect('@broadcastSession.token', function(error) {
 			if (!error) {
       		    publish();
 			} else {
-				alert('There was an error connecting to the session(' +  error.code + "): " + error.message);
+				switch (error.name) {
+					case "OT_NOT_CONNECTED":
+			    	  showAlertToast("Failed to connect. Please check your connection and try connecting again.", "alert-danger");
+			        	break;
+			      	default:
+			    	  showAlertToast("An unknown error occurred while trying to publish your video. Please try again later.", "alert-danger");
+			    }
 			}
   		});
     	
-    	session.on('streamCreated', function(event) {
-			session.subscribe(event.stream, 'publisher', {
-				insertMode: 'append',
-				width: '100%',
-				height: '100%'
-			});
-  		});
-    	
     	function publish(){
-    		var publisher = OT.initPublisher('video_container', null, function(error) {
-    		  if (error) {
-    			  alert('Publisher initialized failed: ' + error);
-    		  } else {
-    			  session.publish(publisher, function(error) {
+    		var publisherHeight = $('#video-container').width() * 9 / 16;
+    		
+    		var publisherOptions = {
+  					name: '@lessonSession.lesson.teacher.realName',
+  					resolution: '1280x720',
+    				insertMode: 'append',
+    				width: '100%',
+    				height: publisherHeight
+  				};
+    		var publisher = OT.initPublisher('publisher', publisherOptions, function(error) {
+				if (error) {
+					switch (error.name) {
+				      case "OT_NOT_CONNECTED":
+				    	  showAlertToast("Publishing your video failed. You are not connected to the internet.", "alert-danger");
+				        break;
+				      case "OT_CREATE_PEER_CONNECTION_FAILED":
+				    	  showAlertToast("Publishing your video failed. This could be due to a restrictive firewall.", "alert-danger");
+				        break;
+				      case "OT_USER_MEDIA_ACCESS_DENIED":
+				    	  showAlertToast("Please allow access to the Camera and Microphone and try publishing again.", "alert-danger");
+				    	  break;
+				      default:
+				    	  showAlertToast("An unknown error occurred while trying to publish your video. Please try again later.", "alert-danger");
+				    }
+				    publisher.destroy();
+				    publisher = null;
+				} else {
+    			  	session.publish(publisher, function(error) {
     					if (error) {
-    						alert("Error: " + JSON.stringify(error));	
+    						showAlertToast("Error: " + error.name);	
     					} else {
-    						getBroadcastInfo();
+    						if(!isInteractive){
+    							getBroadcastInfo();	
+    						}
     					}
 					});
-    		  }
-    		});
+				}
+			});
     	}
     	
     	function getBroadcastInfo(){
@@ -62,11 +132,65 @@
                 }
             });
     	}
+    	
+    	$(function(){
+    		$('.msg-submit-btn').on('click', function(){
+    			var msgBox = $('#msg-input');
+    			var jsonData = {};
+    			
+    			jsonData['key'] = '@user.accountId';
+				jsonData['username'] = '@user.username';
+				jsonData['message'] = msgBox.val();
+    			
+				session.signal({
+    				type: 'chat',
+    				data: JSON.stringify(jsonData)
+    			},
+    			function(error) {
+    				if (!error) {
+    					msgBox.val('');
+    				}else{
+    					console.log('Chat error: ' + JSON.stringify(error));
+    				}
+    			});
+    		});
+    	});
     </script>
 }
 
 @main(scripts) {
+	<div class="broadcast-group">
+		<div class="topbar">
+			<h4>@broadcastSession.lessonSession.title</h4>
+			<div class="right-item">
+				<a class="feedback-link">反馈</a>
+			</div>
+		</div>
+		
+		<div class="chat-wrap">
+			<div class="msg-box">
+			</div>
+		</div>
+		
+		<div id="video-container">
+			<div id="publisher"></div>
+			<div class="chat-input">
+				<input id="msg-input" type="text" placeholder="Say what you want" value="">
+				<a class="msg-submit-btn">
+					<i class="fa fa-paper-plane grey"></i>
+				</a>
+			</div>
+		</div>
 	
-	<div id="video_container"></div>
-	
+		<div id="subscriber-container">
+			<div id="subscribers"></div>
+		</div>
+	</div>	
 }
+
+
+
+
+
+
+

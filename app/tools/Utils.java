@@ -80,7 +80,7 @@ public class Utils {
 	}
 	
 	public static String getJWTString(int mins){
-		final long iat = System.currentTimeMillis() / 1000L - 120;
+		final long iat = System.currentTimeMillis() / 1000L - 180;
 		final long exp = iat + mins * 60L;
 		
 		JWTSigner signer = new JWTSigner(Constants.TOKBOX_SECRET);

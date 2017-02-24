@@ -1,6 +1,6 @@
 name := """RealStream"""
 
-version := "1.0-SNAPSHOT"
+version := "1.02"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 
 // Running Play in development mode while using JPA will work fine, 
 // but in order to deploy the application you will need to add this to your build.sbt file.
-// PlayKeys.externalizeResources := false
+PlayKeys.externalizeResources := false
 
 EclipseKeys.preTasks := Seq(compile in Compile)
 EclipseKeys.projectFlavor := EclipseProjectFlavor.Java

@@ -16,7 +16,6 @@ import modelVOs.CommentVO;
 import models.Account;
 import models.Comment;
 import models.Lesson;
-import models.LessonSession;
 import models.ResponseData;
 import models.User;
 import play.data.DynamicForm;
@@ -24,7 +23,6 @@ import play.data.FormFactory;
 import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
-import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -34,7 +32,6 @@ public class CommentController extends Controller{
 	
 	@Inject private FormFactory formFactory;
 	@Inject private JPAApi jpaApi;
-	@Inject private WSClient ws;
 	
 	@With(AuthAction.class)
 	@Transactional

@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -21,6 +24,7 @@ import com.opentok.Session;
 import com.opentok.exception.OpenTokException;
 
 import models.Account;
+import models.Archive;
 import models.BroadcastSession;
 import models.Category;
 import models.Lesson;
@@ -29,7 +33,7 @@ import models.LessonSession;
 import models.PublishedLesson;
 import models.ResponseData;
 import models.User;
-import models.UserLesson;
+import play.Application;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
@@ -60,6 +64,7 @@ public class LessonController extends Controller{
 	@Inject private FormFactory formFactory;
 	@Inject private JPAApi jpaApi;
 	@Inject private WSClient ws;
+	@Inject private Provider<Application> application;
 	
 	@With(AuthAction.class)
 	@Transactional
@@ -137,7 +142,7 @@ public class LessonController extends Controller{
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, 
-					"*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages", "*.userLessons", "*.mediaFiles"));
+					"*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages", "*.userLessons", "*.mediaFiles", "*.comments"));
 			return ok(Json.toJson(jsonData));
 		} catch (IOException e) {
 			responseData.message = e.getLocalizedMessage();
@@ -205,71 +210,48 @@ public class LessonController extends Controller{
 	}
 	
 	@Transactional
-	public Result showLessonThumbnail(String thumbnailUUID){
-		ResponseData responseData = new ResponseData();
-		TypedQuery<LessonImage> query = jpaApi.em()
-				.createQuery("from LessonImage li where li.thumbnailUUID = :thumbnailUUID", LessonImage.class)
-				.setParameter("thumbnailUUID", thumbnailUUID);
-		
-		try{
-			LessonImage lessonImage = query.getSingleResult();
-			InputStream imageStream = lessonImage.downloadThumbnail();
-			return ok(imageStream);
-		}catch(NoResultException e){
-			responseData.message = "Image cannot be found.";
-	    	responseData.code = 4000;
-		}
-		return ok(Json.toJson(responseData));
-	}
-	
-	@Transactional
-	public Result showLessonImage(String uuid){
-		ResponseData responseData = new ResponseData();
+	public Result showLessonImage(String uuid, boolean isLarge){
 		TypedQuery<LessonImage> query = jpaApi.em()
 				.createQuery("from LessonImage li where li.uuid = :uuid", LessonImage.class)
 				.setParameter("uuid", uuid);
 		
+		InputStream imageStream = null;
 		try{
 			LessonImage lessonImage = query.getSingleResult();
-			InputStream imageStream = lessonImage.download();
-			return ok(imageStream);
-		}catch(NoResultException e){
-			responseData.message = "Image cannot be found.";
-	    	responseData.code = 4000;
-		}
-		return ok(Json.toJson(responseData));
-	}
-	
-	@Transactional
-	public Result showLessonCover(long lessonId, boolean isLarge){
-		ResponseData responseData = new ResponseData();
-		Query coverQuery = jpaApi.em()
-				.createNativeQuery("select * from image where lesson_id=:lessonId and is_cover=:isCover", LessonImage.class)
-				.setParameter("lessonId", lessonId)
-				.setParameter("isCover", true);
-		
-		try{
-			LessonImage lessonImage;
-			try{
-				lessonImage = (LessonImage) coverQuery.getSingleResult();
-			}catch(NoResultException e){
-				Query lessonImageQuery = jpaApi.em()
-						.createNativeQuery("select * from image where lesson_id=:lessonId limit 1", LessonImage.class)
-						.setParameter("lessonId", lessonId);
-				lessonImage = (LessonImage) lessonImageQuery.getSingleResult();
-			}
-			InputStream imageStream;
 			if(isLarge){
 				imageStream = lessonImage.download();
 			}else{
 				imageStream = lessonImage.downloadThumbnail();
 			}
-			return ok(imageStream);
 		}catch(NoResultException e){
-			responseData.message = "Image cannot be found.";
-	    	responseData.code = 4000;
+			imageStream = application.get().classloader().getResourceAsStream(LessonImage.PLACEHOLDER);
 		}
-		return ok(Json.toJson(responseData));
+		return ok(imageStream);
+	}
+	
+	@Transactional
+	public Result showLessonCover(long lessonId, boolean isLarge){
+		Query coverQuery = jpaApi.em()
+				.createNativeQuery("select * from image where (lesson_id=:lessonId and is_cover=:isCover) or lesson_id=:lessonId limit 1", LessonImage.class)
+				.setParameter("lessonId", lessonId)
+				.setParameter("isCover", true);
+		
+		LessonImage lessonImage = null;
+		InputStream imageStream = null;
+		try{
+			lessonImage = (LessonImage) coverQuery.getSingleResult();
+		}catch(NoResultException e){
+			imageStream = application.get().classloader().getResourceAsStream(LessonImage.PLACEHOLDER);
+			return ok(imageStream);
+		}
+		
+		if(isLarge){
+			imageStream = lessonImage.download();
+		}else{
+			imageStream = lessonImage.downloadThumbnail();
+		}
+		
+		return ok(imageStream);
 	}
 	
 	@With(AuthAction.class)
@@ -624,16 +606,25 @@ public class LessonController extends Controller{
 			responseData.message = "Lesson Session cannot be found.";
 		}else{
 			try {
+				Map<String, String> metaData = new HashMap<String, String>();
+				Account account = (Account) ctx().args.get("account");
+				metaData.put("account_token", account.token);
+				
+				TypedQuery<User> query = jpaApi.em()
+						.createQuery("from User u where u.accountId = :accountId", User.class)
+						.setParameter("accountId", account.id);
+				User user = query.getSingleResult();
+				
 				Session tokSession = BroadcastManager.getInstance().createSession();
-				String token = BroadcastManager.getInstance().createToken(tokSession, (System.currentTimeMillis() / 1000L) + (4 * 60 * 60));
+				String token = BroadcastManager.getInstance().createToken(tokSession.getSessionId(), (System.currentTimeMillis() / 1000L) + (4 * 60 * 60), metaData);
 				
 				BroadcastSession broadcastSession = new BroadcastSession(lessonSession);
 				broadcastSession.sessionId = tokSession.getSessionId();
 				broadcastSession.token = token;
 				
 				jpaApi.em().persist(broadcastSession);
-				return ok(broadcastlesson.render(broadcastSession));
-			} catch (OpenTokException e) {
+				return ok(broadcastlesson.render(user, lessonSession, broadcastSession));
+			} catch (NoResultException | OpenTokException e) {
 				responseData.code = 4001;
 				responseData.message = e.getLocalizedMessage();
 			}
@@ -671,7 +662,7 @@ public class LessonController extends Controller{
 				responseData.data = broadcastSession;
 				
 				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lessonSession"));
+				JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, "*.lessonSession", "*.archives"));
 				
 				return ok(Json.toJson(jsonData));
 			}
@@ -695,12 +686,31 @@ public class LessonController extends Controller{
 				.createNativeQuery("SELECT * FROM broadcast_session bs WHERE bs.lesson_session_id=:lessonSessionId ORDER BY bs.creation_datetime DESC LIMIT 1", BroadcastSession.class)
 				.setParameter("lessonSessionId", lessonSessionId).getSingleResult();
 		
-		if(broadcastSession == null){
+		if(broadcastSession != null){
+			Map<String, String> metaData = new HashMap<String, String>();
+			Account account = (Account) ctx().args.get("account");
+			metaData.put("account_token", account.token);
+			
+			try {
+				TypedQuery<User> userQuery = jpaApi.em()
+						.createQuery("from User u where u.accountId = :accountId", User.class)
+						.setParameter("accountId", account.id);
+				User user = userQuery.getSingleResult();
+				
+				String token = BroadcastManager.getInstance()
+						.createToken(broadcastSession.sessionId, (System.currentTimeMillis() / 1000L) + (4 * 60 * 60), metaData);
+				
+				return ok(broadcaststream.render(user, broadcastSession, token));
+			} catch (OpenTokException e) {
+				responseData.code = 4001;
+				responseData.message = e.getLocalizedMessage();
+			} catch (NoResultException e){
+				responseData.code = 400;
+				responseData.message = "The user does not exist.";
+			}
+		}else{
 			responseData.code = 4000;
 			responseData.message = "Broadcast Session cannot be found.";
-		}else{
-			Lesson lesson = broadcastSession.lessonSession.lesson;
-			return ok(broadcaststream.render(lesson, broadcastSession));
 		}
 		
 		return notFound(errorpage.render(responseData)); 
@@ -710,7 +720,7 @@ public class LessonController extends Controller{
 		JsonNode sessionIdJson = Json.newObject().put("sessionId", sessionId);
 		
 		CompletionStage<WSResponse> responsePromise = ws.url("https://api.opentok.com/v2/project/" + Constants.TOKBOX_API_KEY + "/broadcast/")
-				.setHeader("X-OPENTOK-AUTH", Utils.getJWTString(5))
+				.setHeader("X-OPENTOK-AUTH", Utils.getJWTString(10))
 				.setContentType("application/json")
 				.post(sessionIdJson);
 		
@@ -723,9 +733,12 @@ public class LessonController extends Controller{
 		
 		DynamicForm requestData = formFactory.form().bindFromRequest();
 		String archiveId = requestData.get("id");
+		String name = requestData.get("name");
 		String sessionId = requestData.get("sessionId");
 		String status = requestData.get("status");
-		String archiveUrl = requestData.get("url");
+		String url = requestData.get("url");
+		long size = Long.parseLong(requestData.get("size"));
+		long createAt = Long.parseLong(requestData.get("createdAt"));
 		long duration = Long.parseLong(requestData.get("duration"));
 	
 		try{
@@ -734,12 +747,17 @@ public class LessonController extends Controller{
 					.setParameter("sessionId", sessionId)
 					.getSingleResult();
 			
-			broadcastSession.archiveUrl = archiveUrl;
-			broadcastSession.status = status;
-			broadcastSession.archiveId = archiveId;
-			broadcastSession.duration = duration;
+			Archive archive = new Archive(broadcastSession);
+			archive.archiveId = archiveId;
+			archive.creationDateTime = new Date(createAt);
+			archive.name = name;
+			archive.sessionId = sessionId;
+			archive.status = status;
+			archive.url = url;
+			archive.size = size;
+			archive.duration = duration;
 			
-			jpaApi.em().persist(broadcastSession);
+			jpaApi.em().persist(archive);
 		}catch(NoResultException e){
 			responseData.code = 4000;
 			responseData.message = "BroadcastSession cannot be found.";

@@ -26,11 +26,10 @@ GET     /edit                							controllers.LessonController.editLesson(less
 POST    /lesson/basic/save                				controllers.LessonController.saveLessonBasicInfo
 GET     /lesson/image                					controllers.LessonController.editLessonImages(lessonId: Long ?= 0)
 POST    /lesson/upload/image                			controllers.LessonController.uploadLessonImage
-GET     /lesson/show/thumbnail                			controllers.LessonController.showLessonThumbnail(thumbnailUUID: String ?= "")
-GET     /lesson/show/image                				controllers.LessonController.showLessonImage(uuid: String ?= "")
+GET     /lesson/show/image                				controllers.LessonController.showLessonImage(uuid: String ?= "", isLarge: Boolean ?= false)
 GET  	/lesson/show/cover                          	controllers.LessonController.showLessonCover(lessonId: Long ?= 0, isLarge: Boolean ?= false)
 POST    /lesson/delete/image                			controllers.LessonController.deleteLessonImage
-POST    /lesson/update/imageinfo                		controllers.LessonController.updateLessonImageInfo
+POST    /lesson/update/image/info                		controllers.LessonController.updateLessonImageInfo
 GET     /lesson/session                					controllers.LessonController.lessonSession(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST    /lesson/session/save                			controllers.LessonController.saveLessonSession
 POST	/lesson/sessions								controllers.LessonController.lessonSessions
@@ -39,22 +38,30 @@ POST 	/lesson/publish/category						controllers.LessonController.pubishedLessons
 GET     /lesson/price                					controllers.LessonController.lessonPrice(lessonId: Long ?= 0)
 POST    /lesson/price/save                				controllers.LessonController.saveLessonPrice
 POST    /lesson/publish              					controllers.LessonController.publishLesson
+
 GET 	/lesson/file/management							controllers.FileController.fileManagement(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST 	/lesson/file/upload								controllers.FileController.uploadMediaFile
 GET     /lesson/file/download                			controllers.FileController.downloadFile(mediaFileUUID: String ?= "")
 POST    /lesson/file/delete                				controllers.FileController.deleteFile
-POST 	/lesson/comments								controllers.CommentController.commentsByLesson()
+
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
 POST    /profile/update/personal                		controllers.ProfileController.updatePersonalProfile
+GET    	/profile/personal/main                			controllers.ProfileController.personalMain
 POST    /profile/upload/avatar                			controllers.ProfileController.uploadAvatar
+POST    /profile/add/favorite/lesson                	controllers.ProfileController.addFavoriteLesson
 GET     /profile/show/avatar/thumbnail               	controllers.ProfileController.showAvatarThumbnail(thumbnailUUID: String ?= "")
+GET		/profile/avatar									controllers.ProfileController.showAvatar(userId: Long ?= 0, isLarge: Boolean ?= false)
 GET     /profile/teacher/agreement                		controllers.ProfileController.readTeacherAgreement
 GET     /profile/teacher/settle                			controllers.ProfileController.teacherSettle
-POST    /profile/teacher/submit                			controllers.ProfileController.submitteacherInfo
+POST    /profile/teacher/submit                			controllers.ProfileController.submitTeacherInfo
+POST    /profile/teacher/update                			controllers.ProfileController.updateTeacherInfo
 GET     /profile/settle/review                			controllers.ProfileController.settleReview
+GET     /profile/teacher                				controllers.ProfileController.teacherDetail(userId: Long ?= 0)
 GET     /profile/lesson/list                			controllers.ProfileController.myLessons(offset: Integer ?= 0)
 GET		/profile/register/lesson/list					controllers.ProfileController.myRegisteredLessons
+GET		/profile/favorite/lesson						controllers.ProfileController.myFavoriteLessons(offset: Integer ?= 0)
+POST	/profile/remove/favorite/						controllers.ProfileController.removeFavoriteLesson
 
 
 GET		/payment/review									controllers.PaymentController.paymentReview(lessonId: Long ?= 0)
@@ -63,8 +70,8 @@ GET 	/payment/request/paypal							controllers.PaymentController.requestPaypal(l
 GET 	/payment/execute								controllers.PaymentController.executePaypal(userId: Long ?= 0, lessonId: Long ?= 0)
 
 
-
 POST 	/comment/create									controllers.CommentController.createComment
+POST 	/lesson/comments								controllers.CommentController.commentsByLesson()
 
 
 
