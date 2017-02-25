@@ -56,7 +56,11 @@
 	<div id="dash-content" class="dash-bg">
 	
 		<div id="lesson-header" class="dash-block">
-			<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(lesson.teacher.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+			@if(lesson.teacher.avatars != null && lesson.teacher.avatars.size() > 0){
+				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(lesson.teacher.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+			}else{
+				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="link-img"></a>
+			}
 			<div class="lesson-brief">
 				<p class="bold-style">@lesson.title</p>
 				<p>

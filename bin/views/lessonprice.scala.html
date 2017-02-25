@@ -129,7 +129,7 @@
 				<label>课程总价:</label>
 			</div>
 			<div class="form-input">
-				<input type="text" class="form-control" name="price" placeholder="课程总价" value="@lesson.price">
+				<input type="text" class="form-control" name="price" placeholder="课程总价" value="@lesson.price.intValue()">
 			</div>
 			<span class="currency">RMB</span>
 		</div>
@@ -147,7 +147,7 @@
 					<label>优惠价格:</label>
 				</div>
 				<div class="form-input">
-					<input type="text" class="form-control" name="offerPrice" placeholder="优惠价格 (例如: 100)" value="@lesson.offerPrice">
+					<input type="text" class="form-control" name="offerPrice" placeholder="优惠价格 (例如: 100)" value="@lesson.offerPrice.intValue()">
 				</div>
 				<span class="currency">RMB</span>
 			 </div>

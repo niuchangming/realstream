@@ -124,30 +124,14 @@ public class LessonController extends Controller{
 		Category category = jpaApi.em().find(Category.class, categoryId);
 		Lesson dbLesson = jpaApi.em().find(Lesson.class, lessonId);
 		
-		if(category == null){
-			responseData.message = "You must set a category for this lesson.";
+		if(category == null || dbLesson == null){
+			responseData.message = "The lesson cannot be found or category is empty.";
 			responseData.code = 4000;
+		}else{
+			dbLesson.updateByBasic(lessonTitle, lessonDesc, category);
+			jpaApi.em().persist(dbLesson);
 		}
 		
-		if(dbLesson == null){
-			responseData.message = "The lesson cannot be found.";
-			responseData.code = 4000;
-		}
-		
-		dbLesson.updateByBasic(lessonTitle, lessonDesc, category);
-		jpaApi.em().persist(dbLesson);
-		
-		responseData.data = dbLesson;
-		
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode jsonData = mapper.readTree(Utils.toJson(ResponseData.class, responseData, 
-					"*.teacher", "*.students",  "*.lesson", "*.category", "*.lessonSessions", "*.lessonImages", "*.userLessons", "*.mediaFiles", "*.comments"));
-			return ok(Json.toJson(jsonData));
-		} catch (IOException e) {
-			responseData.message = e.getLocalizedMessage();
-			responseData.code = 4001;
-		}
 		return ok(Json.toJson(responseData));
 	}
 	
@@ -497,25 +481,27 @@ public class LessonController extends Controller{
     		lesson.price = price;
         	lesson.offerPrice = offerPrice;
         	try {
-        		if(Utils.isBlank(offerStartDate) && Utils.isBlank(offerEndDate)){
+        		if(!Utils.isBlank(offerStartDate) && !Utils.isBlank(offerEndDate)){
         			lesson.offerStartDate = Utils.parse(offerStartDate);
         			lesson.offerEndDate = Utils.parse(offerEndDate);
+        			if(ids != null && ids.length > 0){
+        				String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
+                    	for(int i = 0; i < ids.length; i++){
+                    		if(i == 0){
+                    			updateQueryStr += "ls.id = " + ids[i];
+                    		}else{
+                    			updateQueryStr += " or ls.id = " + ids[i];
+                    		}
+                    	}
+                    	
+                    	jpaApi.em().createQuery("update LessonSession ls set ls.isTrial = false where ls.lesson=:lesson")
+                    	.setParameter("lesson", lesson).executeUpdate(); //set all lesson session isTrail to false
+                    	jpaApi.em().createQuery(updateQueryStr).executeUpdate();
+        			}
+        		}else{
+        			responseData.code = 5000;
+        			responseData.message = "Offer Start and End Date cannot be empty.";
         		}
-    			
-    			if(ids != null && ids.length > 0){
-    				String updateQueryStr = "update LessonSession ls set ls.isTrial = true where ";
-                	for(int i = 0; i < ids.length; i++){
-                		if(i == 0){
-                			updateQueryStr += "ls.id = " + ids[i];
-                		}else{
-                			updateQueryStr += " or ls.id = " + ids[i];
-                		}
-                	}
-                	
-                	jpaApi.em().createQuery("update LessonSession ls set ls.isTrial = false where ls.lesson=:lesson")
-                	.setParameter("lesson", lesson).executeUpdate(); //set all lesson session isTrail to false
-                	jpaApi.em().createQuery(updateQueryStr).executeUpdate();
-    			}
     		} catch (ParseException e) {
     			responseData.code = 4001;
     			responseData.message = e.getLocalizedMessage();

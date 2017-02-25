@@ -66,6 +66,7 @@ public class LessonSession {
 	
 	public LessonSession(Lesson lesson){
 		this.lesson = lesson;
+		this.creationDateTime = new Date();
 	}
 	
 }

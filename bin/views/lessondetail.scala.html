@@ -216,7 +216,11 @@
 	                    </div>
 	                </div>
 	                <div class="oper-bar">
-	                    <a class="btn-join btn-blue" href="@routes.PaymentController.paymentReview(lesson.id)">立即报名</a>
+	                	@if(account != null){
+							<a class="btn-join btn-blue" href="@routes.PaymentController.paymentReview(lesson.id)">立即报名</a>
+						}else{
+							<a class="btn-join btn-blue" href="javascript:void(0)" data-toggle="modal" data-target="#entry-model">立即报名</a>
+						}
 	                    <span class="btn-advice-wrap">
 			         		<span class="btn-advice-wording btn-outline">咨询</span>
 		                    <span class="btn-advice-qq btn-outline btn-advice hide">在线</span>
@@ -239,8 +243,8 @@
 	                <div class="tabs-content" id="basic_tab">
 	                    <h3 class="guide-tt js-teacher-location" data-teacherlocation="1">老师介绍</h3>
 	                    <div class="teacher-item">
-	                    	@if(account.user.avatars != null && account.user.avatars.size() > 0){
-								<a href="@routes.ProfileController.teacherDetail(lesson.teacher.accountId)" target="_blank" style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
+	                    	@if(lesson.teacher.avatars != null && lesson.teacher.avatars.size() > 0){
+								<a href="@routes.ProfileController.teacherDetail(lesson.teacher.accountId)" target="_blank" style="background-image:url('@routes.ProfileController.showAvatarThumbnail(lesson.teacher.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
 							}else{
 								<a href="@routes.ProfileController.teacherDetail(lesson.teacher.accountId)" target="_blank" style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="link-img"></a>
 							}
