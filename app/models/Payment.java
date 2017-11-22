@@ -18,12 +18,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "payment")
 public class Payment {
-	public static final String ACCOUNT_NUM = "901338972";
-	public static final String PRIVATE_KEY = "4FBA6BED-D519-4036-B595-8DF7C965A903";
-	public static final String PUBLIC_KEY = "DE961933-6B42-4809-9BDF-07DA4F3881CD";
+//	For Development
+//	public static final String CLIENT_ID = "AZEqphfzbNIakHIzMtcMObJyk88_lsLjfufaUrrmPXFba_bDBf_moWLAubeR0d-nZl46P0D_-KsFpxrZ";
+//	public static final String SECRET = "ELo8G3cbwPoWkTJYVmCp9rUvKLQRlfpKLzZgfpg53LS9KCxoWUjTym3rllXNVSu1KD4XC6jfzoFjsnCf";
 	
-	public static final String CLIENT_ID = "AZEqphfzbNIakHIzMtcMObJyk88_lsLjfufaUrrmPXFba_bDBf_moWLAubeR0d-nZl46P0D_-KsFpxrZ";
-	public static final String SECRET = "ELo8G3cbwPoWkTJYVmCp9rUvKLQRlfpKLzZgfpg53LS9KCxoWUjTym3rllXNVSu1KD4XC6jfzoFjsnCf";
+//	For Production
+	public static final String PAYPAL_CLIENT_ID = "AQRIvu7V8JzNVvDMbNSUF-44o1bKaC8Be5XsqaOLqB3MVx49euFox4WagStIMNGhG0WSv0zMgTxItykN";
+	public static final String PAYPAL_SECRET = "ECbzJtDJf679QgpTCYB5vm8e0y1EsZTFQL1KxeLAgEetKO-8MdQ_3hqom-_Fai5JbBLI0ZjLlCej_YnZ";
+	
+	public static final String ALIPAY_GATEWAY_NEW = "https://mapi.alipay.com/gateway.do?";
+	public static final String ALIPAY_PARTNER_ID = "2088621726632683";
+	public static final String ALIPAY_CODE = "tgonu410228f8gjbju33hpf2mcu2v0pn";
 	
 	@Id
 	@GeneratedValue
@@ -33,29 +38,16 @@ public class Payment {
 	@Column(name="transaction_id")
 	public String transactionId;
 	
-	public String state;
+	public String status;
 	
-	@Column(name="card_type")
-	public String cardType;
-	
-	@Column(name="first_name")
-	public String firstName;
-	
-	@Column(name="last_name")
-	public String lastName;
-	
-	@Column(name="exp_month")
-	public int expMonth;
-	
-	@Column(name="exp_year")
-	public int expYear;
-	
-	@Column(name="card_number")
-	public String cardNumber;
+	public String method;
 	
 	public String amount;
 	
 	public String currency;
+	
+	@Column(name="notify_id")
+	public String notifyId;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="pay_datetime")
@@ -65,12 +57,19 @@ public class Payment {
     @JoinColumn(name = "user_id") 
     public User user;
 	
+	@ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "lesson_id") 
+	public Lesson lesson;
+	
 	public Payment(){}
 	
-	public Payment(User user){
+	public Payment(User user, Lesson lesson){
 		this.user = user;
+		this.lesson = lesson;
 		this.payDatetime = new Date();
 	}
+	
+	
 }
 
 

@@ -48,6 +48,9 @@ public class BroadcastSession {
 	@OneToMany(mappedBy = "broadcastSession")
 	public List<Archive> archives;
 	
+	@OneToMany(mappedBy = "broadcastSession")
+	public List<ChatMessage> chatMessages;
+	
 	public BroadcastSession(){}
 	
 	public BroadcastSession(LessonSession lessonSession){

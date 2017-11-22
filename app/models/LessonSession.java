@@ -17,11 +17,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 @Entity
 @Table(name = "lesson_session")
 public class LessonSession {
-	public final static int PAGE_SIZE = 10;
-	
 	@Id
 	@GeneratedValue
 	public long id;
@@ -30,9 +31,6 @@ public class LessonSession {
 	
 	@Lob
 	public String brief; 
-	
-	@Column(name="interactive", columnDefinition = "boolean default false")
-	public boolean interactive;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "creation_datetime")
@@ -52,6 +50,10 @@ public class LessonSession {
 	public boolean isTrial;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "chapter_id")
+	public Chapter chapter;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lesson_id")
 	public Lesson lesson;
 	
@@ -59,8 +61,12 @@ public class LessonSession {
 	public List<BroadcastSession> broadcastSessions;
 	
 	@OneToMany(mappedBy = "lessonSession")
-	@OrderBy("startDatetime ASC")
+	@OrderBy("uploadedDatetime ASC")
 	public List<MediaFile> mediaFiles;
+	
+	@OneToMany(mappedBy = "lessonSession")
+	@LazyCollection(LazyCollectionOption.EXTRA)
+	public List<Question> questions;
 	
 	public LessonSession(){}
 	

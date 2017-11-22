@@ -5,25 +5,25 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">添加课程文件</h4>
+        <h4 class="modal-title">Add Media File</h4>
       </div>
       <div class="modal-body">
       	<form id="fileupload">
       		<div class="form-group">
 	      	  	<div class="file-upload-wrapper">
 		            <a class="file-upload-link">
-		      	  		选择文件
+		      	  		Choose
 						<input id="file-uploader" type="file" name="file" data-url="@routes.FileController.uploadMediaFile()"/>      	  	
 		      	  	</a>
-		      	  	<label id="filename-lbl">未选择文件</label>
+		      	  	<label id="filename-lbl">Max image size is: 5.0 MB</label>
 		      	  	<p class="hide"><span>Uploading</span><span> </span><span class="progress">0%</span></p>
 		        </div>
 		        <label class="error hide"></label>
 		      </div>
 		      <div class="form-group">
-					<label>文件专属课时:</label>
+					<label>Select Lesson Session:</label>
 					<select class="form-control" name="lessonSessionId">
-						<option value="-1">选择课时</option>
+						<option value="-1">Lesson Session</option>
 						@for(lessonSession <- lesson.lessonSessions){
 							<option value="@lessonSession.id">@lessonSession.title</option>
 						}
@@ -36,7 +36,7 @@
       <div class="modal-footer">
       	<div class="form-group">
         	<button id="file-confirm-btn" class="btn btn-success" disabled>
-        		上传
+        		Upload
         	</button>
         </div>
       </div>
@@ -118,8 +118,8 @@
 	        	rowItem += '<td><p>' + sizeInMB + 'M</p></td>'
 	        	rowItem += '<td><p>' + response.result.data.fileType + '</p></td>';
 	        	rowItem += '<td>';
-	        	rowItem += '<a class="link-btn download-btn" href="/lesson/file/download?mediaFileUUID='+response.result.data.uuid+'">点击下载</a>';
-	        	rowItem += '<a class="link-btn del-btn" data-uuid="'+ response.result.data.uuid + '">删除</a>';
+	        	rowItem += '<a class="link-btn download-btn" href="/lesson/file/download?mediaFileUUID='+response.result.data.uuid+'">Download</a>';
+	        	rowItem += '<a class="link-btn del-btn" data-uuid="'+ response.result.data.uuid + '">Delete</a>';
 	        	rowItem += '</td>';
 	        	rowItem += '</tr>';
 	        	
@@ -141,18 +141,17 @@
 		$('#file-upload-model').on('hide.bs.modal', function () {
 			$('#fileupload .error').addClass('hide');
 		});
-			
 	});
 	
 	function resetModal(){
 		$('#fileupload .error').addClass('hide');
 		$("input[type=reset]").trigger("click");
-    	$('#filename-lbl').text('未选择文件');	
+    	$('#filename-lbl').text('Max image size is: 5.0 MB');	
     	$('.file-upload-wrapper > p').addClass('hide');
     	$('.progress').text('0%');
     	spinner.remove();
     	uploadBtn.attr('disabled', true);
-    	uploadBtn.text('上传');
+    	uploadBtn.text('Upload');
     	
     	$('#file-upload-model').modal('hide');
 	}

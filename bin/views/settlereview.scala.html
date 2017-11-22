@@ -6,34 +6,33 @@
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
 }
 
-@main(scripts) {
+@main(scripts, "线上教学平台——Ekoo教育") {
 	@topbar(account)
-	
 	<div id="teacher-settle-content" class="dash-bg">
 		<section>
 			<div class="note-block">
-				<p class="prompt">老师入驻</p>
+				<p class="prompt">Tutor Registration</p>
 				<p class="value">
-					<span>链接亿万用户，传递思想，实现价值</span>
-					<span class="new-line">目前对个人老师开放全部课程类型的课程发布。<a>了解更多</a></span>
+					<span>Connected to millions of users. </span>
+					<span class="new-line">Be our registered tutor and post courses online.<a>more</a></span>
 				</p>
 			</div>
 			
 			<div class="mod-steps">
 				<ul class="steps-nav">
-					<li><i class="i-right fa fa-check"></i><span class="steps-num">1</span>签订入驻协议</li>
-					<li><i class="i-right fa fa-check"></i><span class="steps-num">2</span>提交资料</li>
-	                <li class="active"><i class="icon-font i-right"></i><span class="steps-num">3</span>入驻审核</li>
+					<li><i class="i-right fa fa-check"></i><span class="steps-num">1</span>Terms & Conditions</li>
+					<li><i class="i-right fa fa-check"></i><span class="steps-num">2</span>Submit Form</li>
+	                <li class="active"><i class="icon-font i-right"></i><span class="steps-num">3</span>Review</li>
 				</ul>
 			</div>
 			
 			<div class="wrap-step wrap-step-3" style="display: block;">
 				<div class="join-msg">
-					<p class="orange span-large">感谢您加入我们的教师队伍!</p>
-					<p>为了是保证给每个学生提供最优质的教学体验，我们将在<span class="span-large orange">48</span>小时内对您提交的资料进行审核,<br>
-						请您耐心等待审核结果...
+					<p class="orange span-large">Thank you for joining our teaching group!</p>
+					<p>In order to ensure that each student has the best quality teaching experience，<br>We will take <span class="span-large orange">48</span> hours in reviewing your submitted information,<br>
+					Please be patient with the reviewing results...
 					</p>
-					<a class="btn btn-info home-link" href="@routes.HomeController.index()">返回主页</a>
+					<a class="btn btn-info home-link" href="@routes.HomeController.index()">Back Home</a>
 				</div>
 			</div>
 		</section>

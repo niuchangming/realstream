@@ -1,0 +1,203 @@
+@import tags._
+@import tools.Constants
+
+@(account: Account)
+
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	<div class="page-adv"> 
+		<header class="page-head">
+	        <div class="page-story">
+	            <div class="page--story">
+            		<h1 class="adv-word heading-word">Join the global fastest growing team of tutors</h1>
+                    <h3 class="adv-word middle-word">Access thousands of private tutoring jobs in Maths, English, Science, Economic, Societies… anything!</h3>
+                    <p class="adv-word bottom-word">Whether you are new to tutoring or an established professional tutor, we will help you find new students.</p>
+                    @if(account != null){
+						@if(!account.user.role.equals(Role.TEACHER)){
+							<a class="tt-signup-btn" href="@routes.ProfileController.readTeacherAgreement()">SIGN UP</a>
+						}else{
+							<a class="tt-signup-btn" onclick="showAlertToast('You are a tutor already', 'alert-warning');">SIGN UP</a>
+						}
+					}else{
+						<a class="tt-signup-btn" data-toggle="modal" data-target="#entry-model">@messages.at("topbar.tutor")</a>
+					}
+	            </div>
+	        </div>
+	    </header>
+	    
+	    <div class="page-be-tutor bg-snow">
+	        <div class="row wrapper">
+               	<div class="col"> 
+                    <div class="col col-sm-4 benefit-item">
+                        <img class="benefit-ico" src="@routes.Assets.versioned("images/book.png")"/>
+                        <div class="epsilon"><b>Select your own subjects</b></div>
+                        <div class="benefit-desc">From Maths to Economic and Science, we have a huge number of Chinese students looking for tutors in over 300 different subjects.</div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 benefit-item">
+                    <div class="tac eight-tenths align-center">
+                    	<img class="benefit-ico" src="@routes.Assets.versioned("images/students.png")"/>
+                        <div class="epsilon"><b>Choose your own students</b></div>
+                        <div class="benefit-desc">With a free profile and us advertising on your behalf, we will help you secure new students without investing loads of time and money into marketing.</div>
+                    </div>
+                </div>
+                <div class="col col-sm-4 benefit-item">
+                    <div class="tac eight-tenths align-center">
+                    	<img class="benefit-ico" src="@routes.Assets.versioned("images/increase.png")"/>
+                        <div class="epsilon"><b>Take control of your business</b></div>
+                        <div class="benefit-desc">You have complete control over the rate you charge, and you can teach as little or as often as you like.</div>
+                    </div>
+                </div>
+	        </div>
+		</div>
+		
+		<div class="page-be-tutor">
+		    <div class="wrapper">
+		        <div class="feature">
+		            <div class="feature_block feature_block-text">
+		                <div class="feature_heading"><strong>Grow your tuition business, quickly and simply</strong></div>
+		                <div class="feature_desc">It’s completely free to have a profile and gain acess to thousands of students who are actively seeking tuition. Our commission system means that we only earn when you do.</div>
+		                @if(account != null){
+							@if(!account.user.role.equals(Role.TEACHER)){
+								<a class="tt-signup-btn" href="@routes.ProfileController.readTeacherAgreement()">BECOME A TUTOR</a>
+							}else{
+								<a class="tt-signup-btn" onclick="showAlertToast('You are a tutor already', 'alert-warning');">BECOME A TUTOR</a>
+							}
+						}else{
+							<a class="tt-signup-btn" data-toggle="modal" data-target="#entry-model">BECOME A TUTOR</a>
+						}
+		            </div>
+		            <div class="feature_block feature_block-img">
+		                <div class="img-bg" style="background-image:url('https://hastech.company/tf/academia-preview/academia/img/home1/s1.jpg');"></div>
+		            </div>
+		        </div>
+		    </div>
+		</div>	
+		
+		<div class="page-works">
+	        <div class="wrapper">
+	            <div class="works-block">
+	                <h2 class="gamma">How It Works</h2>
+	                <p class="zeta">At EkooEdu, you can find students really easily, organise&nbsp;your&nbsp;lessons<br>and get paid straight into your account.</p>
+	            </div>
+	
+	            <div class="promo-blocks">
+	            	@if(account != null){
+						@if(!account.user.role.equals(Role.TEACHER)){
+							<a class="promo-blocks__item signup-blk" href="@routes.ProfileController.readTeacherAgreement()">
+			                	<div class="block-inner">
+			                		<i class="fa fa-user-o" aria-hidden="true"></i>
+		                        	Sign up and create a free profile
+			                	</div>
+			                </a>
+						}else{
+							<a class="promo-blocks__item signup-blk" onclick="showAlertToast('You are a tutor already', 'alert-warning');">
+			                	<div class="block-inner">
+			                		<i class="fa fa-user-o" aria-hidden="true"></i>
+		                        	Sign up and create a free profile
+			                	</div>
+			                </a>
+						}
+					}else{
+						<a class="promo-blocks__item signup-blk" data-toggle="modal" data-target="#entry-model">
+			                <div class="block-inner">
+			               		<i class="fa fa-user-o" aria-hidden="true"></i>
+		                       	Sign up and create a free profile
+			               	</div>
+		              	</a>
+					}
+	                <div class="promo-blocks__item">
+	                	<div class="block-inner">
+		                	<i class="fa fa-search" aria-hidden="true"></i>
+		                	We find students &nbsp;&nbsp;suitable for you
+	                	</div>
+	                </div>
+	                <div class="promo-blocks__item">
+	                	<div class="block-inner">
+		                	<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+		                    Plan your teaching plan to match your timetable
+	                    </div>
+	                </div>
+	                <div class="promo-blocks__item">
+	                	<div class="block-inner">
+		                	<i class="fa fa-heart-o" aria-hidden="true"></i>
+		                	Teach! Enjoy helping students progress
+	                	</div>
+	                </div>
+	                <div class="promo-blocks__item">
+	                	<div class="block-inner">
+		                	<i class="fa fa-money" aria-hidden="true"></i>
+		                	Get paid straight into your bank account
+	                	</div>
+	                </div>
+	            </div>
+	        </div>
+    	</div>
+    	
+    	<div class="page-tutors">
+		   <div class="wrapper">
+		      <div class="feature_heading txt-center"><strong>Help Others Become Their Absolute Best</strong></div>
+		      <div class="tutor-list row">
+		         <div class="col col-sm-4">
+		            <!--Box Info Intro-->
+		            <div class="info-box-intro">
+		               <a class="tutor-img" style="background-image: url('https://ekooedu.com/profile/avatar?userId=453');"></a>
+		               <div class="info-box-intro__title">Maria Martins</div>
+		               <div class="info-box-intro__cite">MOE Singapore</div>
+		               <div class="info-box-intro__content">I am an MOE-trained teacher since 2010 and have been passionate about teaching since my initial years of education as a student.
+My experiences as a student leader in my schooling days – in physical, cultural and musical pursuits – coupled with many opportunities to lead groups of students as an educator serves as a beacon of light for my students to achieve their fullest potential. </div>
+		            </div>
+		         </div>
+		         <div class="col col-sm-4">
+		            <!--Box Info Intro-->
+		            <div class="info-box-intro">
+		            	<a class="tutor-img" style="background-image: url('https://ekooedu.com/profile/avatar?userId=209');"></a>
+		               	<div class="info-box-intro__title">Lee Chye Chye Kevin</div>
+		               	<div class="info-box-intro__cite">MOE Singapore</div>
+		               	<div class="info-box-intro__content">I was a former secondary school English teacher, who left teaching to pursue my career as a lecturer and trainer in the private sector. I also became a coach and mentor with personal interests in inspirational and motivational development. My passion in life is to share my past experiences with as many people as possible so that they can benefit from my mistakes and make better and faster progresses in life.</div>
+		            </div>
+		         </div>
+		         <div class="col col-sm-4">
+		            <!--Box Info Intro-->
+		            <div class="info-box-intro">
+		               <a class="tutor-img" style="background-image: url('https://ekooedu.com/profile/avatar?userId=1873');"></a>
+		               <div class="info-box-intro__title">Gerilynne Elaine</div>
+		               <div class="info-box-intro__cite">Pioneer Junior College</div>
+		               <div class="info-box-intro__content">Firstly, I don’t consider myself a teacher but a lifelong learner, a mentor and an educator. I believe that true education does not involve teaching to the test. While I recognize the importance and merits of tests, I also strongly believe that education is about the broadening of one’s mind. As Aristotle once said, “It is the mark of an educated mind to be able to entertain a thought without accepting it.” And the ability to think and to question is what I would most like to impart to my students.</div>
+		            </div>
+		         </div>
+		      </div>
+		   </div>
+		</div>
+    	@entry(account)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

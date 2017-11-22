@@ -1,0 +1,35 @@
+@import tags._
+
+@(account: Account)
+
+@help(account, 3){
+	<div class="dash-detail-header">
+		<p>@messages.at("help.Register")</p>
+	</div>
+	<div class="help-body">
+		<div class="step">
+			<h4>Step 1:</h4>
+			<p>
+				If you don't have an account, click 'Login' button in the main page.
+			</p>
+			<img src="@routes.Assets.versioned("images/help_20.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 2:</h4>
+			<p>You will see login dialog popped up. And click 'register' link to switch to registration dialog.</p>
+			<img src="@routes.Assets.versioned("images/help_21.jpg")" />
+			<img src="@routes.Assets.versioned("images/help_22.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 4:</h4>
+			<p>Enter your mobile number and password, then 'Create' button.</p>
+			<p>We will send you 4-digital verification code.</p>
+		</div>
+		<div class="step">
+			<h4>Step 5:</h4>
+			<p>You will see mobile number verification dialog popped up and receive a SMS message with 4-digital verification code.</p>
+			<p>Enter the 4-digital verification code in the field to complete the registration.</p>
+			<img src="@routes.Assets.versioned("images/help_23.jpg")" />
+		</div>
+	</div>
+}

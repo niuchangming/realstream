@@ -38,6 +38,8 @@ public class Image {
 	@Column(name="uuid")
 	public String uuid;
 	
+	public String name;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="uploaded_datetime", nullable = false)
 	public Date uploadedDateTime;
@@ -47,7 +49,6 @@ public class Image {
 	public Image(File file){
 		this.uuid = Utils.uuid();
 		this.uploadedDateTime = new Date();
-		
 		upload(file);
 	}
 	

@@ -1,0 +1,239 @@
+@import tags._
+
+@(account: Account)
+
+@adminframe(1){
+	<script>
+	   	$(function() {	
+	   		$('#ta-event').froalaEditor({
+				toolbarInline: false,
+				height: 300
+			});	
+	   		
+	   		$(".uploader").on("change", function(e){
+				var srcTarget = e.originalEvent.target || e.originalEvent.srcElement;
+				var file = srcTarget.files[0];
+				if(file){
+					var isValidFile = GetFileSize(srcTarget.id);
+					if(isValidFile){
+						var reader = new FileReader();
+			        	var inputEle = $(this);
+				        reader.onloadend = function() {
+				        	var uploaderEle = inputEle.closest('.uploader');
+		                	var browserEle = uploaderEle.find('.browse-btn');
+		                	var linkEle = uploaderEle.find('.link-img');
+		                	
+		                	uploaderEle.addClass('noborder');
+		                	linkEle.removeClass('hidden');
+		                	browserEle.hide();
+		                	linkEle.css('background-image', 'url(\'' + reader.result + '\')');
+				        }
+				        reader.readAsDataURL(file);
+					}else{
+						showAlertToast('@messages.at("error.file_size")', "alert-danger");
+					}
+		        }
+			});
+	   		
+	   		$('#event-save').on('click', function(){
+				$('#event-form').submit();
+			});
+	   		
+	   		$("#event-form").validate({
+				ignore: [],
+		        rules: {
+		        	title:{
+		            	minlength: 2,
+		                maxlength: 100,
+		            	required:true
+		            },
+		           	description:{
+		            	minlength: 10,
+		            	required:true
+		            },
+		            link{
+		            	url: true
+		            },
+		            webImage:{
+		            	required: true
+		            },
+		            mobileImage:{
+		            	required: true
+		            }
+		        },
+		        highlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+		        },
+		        unhighlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+		        },
+		        submitHandler: function(form) {
+		        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+		        	var saveBtn = $('#event-save');
+		        	
+		        	saveBtn.after(spinner);
+		        	saveBtn.attr("disabled", true);
+		        	saveBtn.text("");
+		        	
+		        	$.ajax({
+		                url: "@routes.EventController.saveEvent()",
+		                type: "POST",
+		                processData:false,
+		                contentType:false,
+		                data:  new FormData($( "#event-form" )[0]),
+		                success: function(response, status) {
+		                	var data = $.parseJSON(JSON.stringify(response));
+		                	
+		                	if(data.code != 0){
+		                		showAlertToast(data.message, "alert-danger");
+		                	}else{
+		                		showAlertToast(data.message, "alert-success");
+		                	}
+		                	
+		                	spinner.remove();
+		                	saveBtn.attr("disabled", false);
+		                	saveBtn.val("Submit");
+		                },
+		                error: function(request, status, err){
+		                	showAlertToast(err, "alert-danger");
+		                	spinner.remove();
+		                	saveBtn.attr("disabled", false);
+		                	saveBtn.val("Submit");
+		                }
+		            });
+		        	
+		        }
+		    });
+	   		
+	   	});
+	   	
+	   	function GetFileSize(fileid) {
+			 try {
+				 var fileSize = 0;
+				 if(checkIE()) {
+					 var objFSO = new ActiveXObject("Scripting.FileSystemObject"); var filePath = $("#" + fileid)[0].value;
+					 var objFile = objFSO.getFile(filePath);
+					 var fileSize = objFile.size; //size in kb
+					 fileSize = fileSize / 1048576; //size in mb 
+				 }else {
+					 fileSize = $("#" + fileid)[0].files[0].size //size in kb
+					 fileSize = fileSize / 1048576; //size in mb 
+				 }
+				 
+				 if(fileSize <= 2){
+					 return true; 
+				 }
+			 }catch (e) {
+			 	console.log("Error is :" + e);
+			 }
+			 return false;
+		}
+		
+		function checkIE() {
+		    var ua = window.navigator.userAgent;
+		    var msie = ua.indexOf("MSIE");
+		    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)){  
+				return true;
+		    } else{
+		 		return false;
+		    }	
+		}
+	</script>
+	<div class="dash-detail-header">
+		<p class="lesson-sec-title">Create Event</p>
+		<a id="event-save" class="btn btn-success">Submit</a>
+	</div>
+	<form id="event-form" enctype ="multipart/form-data">
+		<div class="form-group">
+			<div class="form-input">
+				<input type="text" class="form-control" name="title" placeholder="Title">
+			</div>
+		</div>
+		<textarea id="ta-event" name="description"></textarea>
+		<div class="form-group">
+			<div class="form-input">
+				<input type="text" class="form-control" name="link" placeholder="Link">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="form-input">
+				<input type="text" class="form-control" name="teacherId" placeholder="Teacher ID">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="form-input">
+				<input type="text" class="form-control" name="lessonId" placeholder="Lesson ID">
+			</div>
+		</div>
+		<div style="clear:both;"></div>
+		
+		<div class="form-group avatar-group">
+			<div id="avatar" class="form-label">
+				<label><b>*</b>Mobile Cover:</label>
+			</div>
+			<div class="uploader">
+				<a id="mobile-link" class="link-img hidden"></a>
+				<div class="upload-wrap">
+					<i class="fa fa-picture-o" aria-hidden="true"></i>
+				<div class="upload-text">
+					<p>Drop photo here</p>
+					<p class="small-p">or</p>
+				</div>
+				<a class="browse-btn">Browse Files</a>
+				<input id="mobile-uploader" class="file-input" type="file" name="mobileImage"/>
+				</div>
+			</div>
+			<div class="upload-tips">
+				<p>The size of the image must be less than 2M.</p> 
+				<p>JPG, PNG, and BMP formats are supported.</p>
+			</div>
+		</div>
+		
+		<div class="form-group avatar-group">
+			<div id="avatar" class="form-label">
+				<label><b>*</b>Web Cover:</label>
+			</div>
+			<div class="uploader">
+				<a id="web-link" class="link-img hidden"></a>
+				<div class="upload-wrap">
+					<i class="fa fa-picture-o" aria-hidden="true"></i>
+				<div class="upload-text">
+					<p>Drop photo here</p>
+					<p class="small-p">or</p>
+				</div>
+				<a class="browse-btn">Browse Files</a>
+				<input id="web-uploader" class="file-input" type="file" name="webImage"/>
+				</div>
+			</div>
+			<div class="upload-tips">
+				<p>The size of the image must be less than 2M.</p> 
+				<p>JPG, PNG, and BMP formats are supported.</p>
+			</div>
+		</div>
+	</form>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

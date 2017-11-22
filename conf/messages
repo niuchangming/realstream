@@ -1,0 +1,285 @@
+topbar.login=Login
+topbar.profile=Profile
+topbar.timetable=Timetables
+topbar.favorite=Favorites
+topbar.lesson=Lessons
+topbar.student=Students
+topbar.logout=Logout
+topbar.help=Help
+topbar.create_lesson=Create Lesson
+topbar.institution=Institutions
+topbar.tutor=Tutors
+topbar.become_tutor=Become a Tutor
+topbar.about_us=About&Contact Us
+topbar.home=Home
+topbar.news=News
+
+about.mission=We carefully vetted teachers world wide, only to get you on the road to academic success.
+about.about=Ekoo Education is a professional online education platform powered by EkooLab and obtained rewarding from the Incubator of NTU in early 2017. We are committed to aggregate a large number of excellent educational institutions and teachers worldwide, focusing on A-Level, IGCSE, IB, AP, SAT, IELTS, TOEFL and many other international examinations, to create interactive, engaging, and highly effective online education to the world.
+about.why_us=Why Us
+
+home.new=New
+home.offer=Offer
+home.hot=Hot
+home.trial=Trial
+home.session=sessions
+home.more_detail=More Details
+home.more=More
+home.about_contact=About & Contact Us
+home.privacy=Privacy & Policy
+home.term=Term of Use
+home.external_link=External Links:
+home.1=1 vs 1
+home.2=1 vs 2
+home.3=1 vs 3
+home.4=1 vs 4
+home.5=1 vs 5
+home.live=Live
+
+detail.play=Play
+detail.reg_fee=Registration Fee:
+detail.service_policy=Service Policies :
+detail.guarantee=Guarantee
+detail.refund=Refund
+detail.playback=Playback
+detail.student=Students
+detail.rate=Rating
+detail.share=Share
+detail.buy_now=Buy Now
+detail.advisory=Advisory
+detail.site=Site
+detail.call=Call
+detail.summary=SUMMARY
+detail.catalog=CATALOG
+detail.comment=COMMENTS
+detail.tutor_intro=Tutor Introduction
+detail.brief=Brief
+detail.all_comment=All Comments
+detail.4_5_star=4-5 Star
+detail.3_star=3 Star
+detail.1_2_star=1-2 Star
+detail.exclusive=Exclusively on EkooEdu
+detail.service=Students with outstanding academic performance are provided with FREE college entrance examination.
+detail.partner=Some of universities we joined
+detail.nus=National University of Singapore
+detail.ntu=Nanyang Technological University
+detail.cambridge=University of Cambridge
+detail.melbourne=University of Melbourne
+detail.queensland=University of Queensland
+detail.contact_us=Contact Us
+detail.pay_note=After successful registration, our customer supporters will contact you within two hours. We need to know more about your study and your choice of subjects to help you select the most suitable teacher who will discuss with you and make a teaching plan，Registration fee can be refunded.
+
+lesson.my_lessons=My Lessons
+lesson.create_lesson=Create Lesson
+lesson.lesson=Lesson
+lesson.students=Students
+lesson.state=State
+lesson.action=Action
+lesson.open=Opening
+lesson.close=Closed
+lesson.view=View
+lesson.edit=Edit
+lesson.basic_info=Basic Information
+lesson.title=Title
+lesson.desc=Description
+lesson.category=Category
+lesson.room_size=Room Size
+lesson.is_small=Is Small Class?
+lesson.save=Save
+lesson.publish=Publish
+
+category.abroad=Abroad
+category.primary=Primary
+category.secondary=Secondary
+category.high=High
+
+subject.math=Math
+subject.physics=Physics
+subject.chemistry=Chemistry
+subject.biology=Biology
+subject.engish=English
+subject.chinese=Chinese
+subject.history=History
+subject.geography=Geography
+subject.politics=Politics
+
+ls_sess.content=Content
+
+bread.home=Home
+bread.all_lesson=All Lessons
+bread.lesson_detail=Lesson Detail
+bread.profile=Profile
+
+category.all=All
+
+profile.basic_info=Basic
+profile.tutor_detail=Tutor Detail
+profile.timetable=Timetable
+profile.favorite= Favorites
+profile.lessons=Lessons
+profile.backup=Backups
+profile.question=Questions
+profile.student=Students
+profile.pay_history=Pay Histories
+profile.me=Me
+profile.my_profile=My Profile
+profile.lesson_management=Lesson Management
+profile.student_management=Student Management
+profile.file=Files
+profile.credit=Credits
+
+basic.person_info=Personal Information
+basic.your_photo=Your Photo
+basic.name=Name
+basic.email=Email
+basic.wechat=WeChat
+basic.qq=QQ
+basic.drop_photo=Drop photo here
+basic.or=or
+basic.browse_file=Browse Files
+
+teacher.teacher_info=Teacher Information
+teacher.realname=Real Name
+teacher.person_info=Personal Detail
+teacher.institution=Institution
+teacher.experience=Experiences
+
+advisory.phone_no=Phone Number
+advisory.sg_call=For Singapore, Please call：
+advisory.cn_call=For China, Please call：
+advisory.ok=OK
+
+about.misson_title=Our Mission
+about.mission_content=We have handpicked the "best" teachers, only for sending you to the "best" school of the world.
+about.about_us_1=EkooEdu is Ekoolab's professional online education platform. We are utmost in our efforts to assemble a large number of local and international teachers of excellent calibre, focusing on the various international university entrance exams such as the  GCE A-Levels，IGCSE，IB, AP, SAT, IELTS, TOEFL etc，moulding an international team for the online education, especially to provide an interactive and live learning environment for our Chinese students.
+about.about_us_2=Our teachers have many years of experience teaching at the best of colleges, with passion for teaching, for students, and are willing to commit heart, time and efforts to guide each and every student.
+about.about_us_3=We respect the diversity and different needs of every student, with self directed learning, based on the student's grasp of knowledge and professional aspirations to formulate the lesson plan, so as to help the student be able to easily and comfortably adjust to and master the international entrance exams.
+about.adv=Our advantages
+about.adv_team_title=outstanding teaching team
+about.adv_team=Local and international outstanding teaching team, with many years of existing experience at premiere college preparation institutions, and a mastery of the examination focus, effectively enabling the student in examination taking skills and techniques.
+about.adv_smallgroup_title=Small Group
+about.adv_smallgroup=Small group lesson format, where by the student and teacher have the freedom to exchange ideas and thoughts during the lesson, and the teacher being able to synthesize the learning points and guide the student accordingly at the conclusion of the lesson.
+about.adv_livecast_title=Live Cast
+about.adv_livecast=During the livecast, we can accomodate 10000 persons online learning at any time, economical, and convenient to student and teacher, with students and teachers able to be exposed to a multitude of teaching and learning experiences.
+about.adv_english_title=Entirely in English
+about.adv_english=Conducted entirely in English, with the learning of knowledge comes the practice and training of the English language capability, without the need of actual overseas travel.
+about.adv_replay_title=Replay
+about.adv_replay=Online replay function enables the convenient replay of the lesson at a click. Allowing revision, anytime, any place, for further absorption of lesson content.
+about.adv_guarantee_title=100% Guarantee
+about.adv_guarantee=Selected students who show excellence have the opportunity to enrol in privileged status, with 100% guarantee for enrolment into the world's top 100 universities.
+about.adv_contact_us=Contact Us
+about.adv_china=China
+about.adv_singapore=Singapore
+about.adv_email=Email
+
+payment.title=TITLE
+payment.start=START FROM
+payment.amount=LESSON AMOUNT
+payment.total=TOTAL
+payment.payment_method=PAYMENT METHOD
+payment.alipay=ALIPAY
+payment.paypal=PAYPAL
+payment.paypal_note=By using PAYPAL, Please press 'Payment via Paypal' button below to enter your PAYPAL account information and compete the payment.
+payment.alipay_note=By using ALIPAY, Please press 'Payment via Alipay' button below to scan QR code by using Alipay mobile application to compete the payment.
+payment.pay_btn=PAY NOW
+payment.compete_pay=Complete Payment
+payment.thank_message=Thanks for Your Payment
+payment.invoice_note=We will send out invoice by your registered mobile phone number within 2 hours.
+payment.back_home=BACK HOME
+
+help.tutor=Tutor
+help.tutor_register=Tutor Registration
+help.lesson_creation=Create a Lesson
+help.start_session=Start a Session
+help.student=Student
+help.register=Register
+help.buy_lesson=Buy a Lesson
+help.attend_lesson=Attend a Lesson
+help.evaluate_lesson=Evaluate lesson
+
+entry.login=Login
+entry.register=Register
+entry.registration=Registration
+entry.password=Password
+entry.confirm_password=Confirm password
+entry.create=Create
+entry.not_register_message=Have not registered?
+entry.registered_message=Do you already have an account?
+entry.mobile_val=Mobile Validation
+entry.sms_message=We sent a 4-digit number to your registered mobile number.
+entry.resend=Re-Send
+entry.validate=Validate
+entry.admin_login=Admin Login
+
+btn.save=Save
+btn.delete=Delete
+btn.more_experience=More Teaching Experiences
+
+placeholder.realname=Consistent with your identity card.
+placeholder.teacher_brief=eg：I'm a full-time music teacher and part-time bartender. Have a great sense of humor and passion in running. Don't be shy to showcase your talent and charm.
+placeholder.institution=Institution you worked at.
+placeholder.start_date=Start Date
+placeholder.end_date=End Date
+placeholder.teaching_experience=Fill in your teaching experience
+
+message.image_format_size=Support image files in format of jpg, png, or jpeg. File size of each image cannot exceed 5M.
+message.info_security=You are able to choose to provide personal contacts to generate more educational services. Personal contacts will not be publicized without your permission.
+message.image_patient=It might take a while to generate the image. Please be patient.
+message.teacher_brief=Will be displayed on the teacher's homepage, please as far as possible to embody the personal teaching direction and experience advantage.
+message.words={0} words
+message.best_institution=Kindly indicate an educational institution that you worked/are working at.
+message.otp_sms=Thank you for joining EkooEdu, your Verification Code is:
+message.small_class="Small Class" allows two-way video communications between the tutor and the students.
+message.small_class_size=To ensure the quality of interaction, "Small Class" has no more than 5 students.
+message.live_class="Large class" is one-way live video streaming, which allows students to see the tutor. Tutor will not be able to see the students.
+message.live_class_size=No limitation of class size for "large class".
+
+error.file_size=File size cannot be more than 2MB!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,5 @@
 @import tags._
+@import tools.Constants
 
 @(lesson: Lesson, categories: List[Category])
 
@@ -7,15 +8,35 @@
 		$(function(){
 			var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
 			
-			$('input.category').on('click', function(){
+			$('input[name="categoryId"]').on('click', function(){
 				$('.category-lbl.selected').removeClass('selected');
 	       		$(this).parent().addClass('selected');
 	       	});
 			
-			$('#lesson-desc').editable({inlineMode: true});
+			$('input[name="subject"]').on('click', function(){
+				$('.subject-lbl.selected').removeClass('selected');
+	       		$(this).parent().addClass('selected');
+	       	});
+			
+			$('#lesson-desc').froalaEditor({
+				toolbarInline: true,
+				height: 240
+			});
 			
 			$('#save-lesson-btn').on('click', function(){
 				$('#lesson-basic-form').submit();
+			});
+			
+			$('#tiny-lesson-chx').change(function(){
+				if ($(this).is(':checked')) {
+					$(this).val(1);
+					$(this).attr('checked', true);
+		            $('.lesson-count-group').removeClass('hide');
+		        }else{
+		        	$(this).val(0);
+		        	$(this).attr('checked', false);
+		        	$('.lesson-count-group').addClass('hide');
+		        }
 			});
 			
 			$("#lesson-basic-form").validate({
@@ -27,6 +48,21 @@
 		            },
 		        	description:{
 		        		required:true
+		            },
+		            maxCount: {
+		            	required: function (element) {
+		                     if($("#tiny-lesson-chx").is(':checked')){
+		                         return true;                            
+		                     }else{
+		                         return false;
+		                     }  
+		                },
+		                range: [1, 5]
+		            }
+		        },
+		        messages: {
+		        	maxCount: {
+		        		range: "Small Class cannot be more than 5 persons."
 		            }
 		        },
 		        highlight: function (element) {
@@ -63,13 +99,13 @@
 		                	}
 		                	spinner.remove();
 		                	$('#save-lesson-btn').attr("disabled", false);
-		                	$('#save-lesson-btn').text("修改保存");
+		                	$('#save-lesson-btn').text("Save");
 		                },
 		                error: function(request, status, err){
 		                	showAlertToast(err, "alert-danger");
 		                	spinner.remove();
 		                	$('#save-lesson-btn').attr("disabled", false);
-		                	$('#save-lesson-btn').text("修改保存");
+		                	$('#save-lesson-btn').text("Save");
 		                }
 		            });
 		        }
@@ -78,54 +114,140 @@
 	   	});
 	</script>
 	<div class="dash-detail-header">
-		<p class="lesson-sec-title">基本信息</p>
+		<p class="lesson-sec-title">@messages.at("lesson.basic_info")</p>
 	</div>
 	<form id="lesson-basic-form" action="@routes.LessonController.saveLessonBasicInfo()" method="POST">
 		<input type="hidden" name="id" value="@lesson.id"/>
 		<div class="form-group">
 			<div class="form-label">
-				<label for="lesson-title">课程名称:</label>
+				<label for="lesson-title">@messages.at("lesson.title"):</label>
 			</div>
 			<div class="form-input">
-				<input id="lesson-title" type="text" class="form-control" name="title" placeholder="课程名称" value="@lesson.title">
+				<input id="lesson-title" type="text" class="form-control" name="title" placeholder="Lesson Title" value="@lesson.title">
 			</div>
 		</div>
 		
 		<div class="form-group">
 			<div class="form-label">
-				<label for="lesson-desc">课程描述:</label>
+				<label for="lesson-desc">@messages.at("lesson.desc"):</label>
 			</div>
 			<div class="form-input">
-				<textarea id="lesson-desc" class="form-control" name="description" rows="4" placeholder="您需要描述一下课程的具体内容">@lesson.description</textarea>
+				<textarea id="lesson-desc" class="form-control" name="description" rows="4" placeholder="Describe your lesson">@lesson.description</textarea>
 			</div>
 		</div>
 		
 		<div id="lesson-category-wrap" class="form-group">
 			<div class="form-label">
-				<label>课程类型:</label>
+				<label>@messages.at("lesson.category"):</label>
 			</div>
 			
 			<div class="form-input">
 				@for(index <- 0 until categories.size) {
 					@if(index == 0 && lesson.category == null){
 				        <label class="category-lbl selected">
-				        <input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				        <input type="radio" name="categoryId" class="form-control" value="@categories(index).id" checked>
 				    }else{
 				    	@if(lesson.category != null && lesson.category.id.equals(categories(index).id)){
 				    		<label class="category-lbl selected">
-				    		<input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				    		<input type="radio" name="categoryId" class="form-control" value="@categories(index).id" checked>
 				    	}else{
 				    		<label class="category-lbl">
-				    			<input type="radio" name="categoryId" class="form-control category" value="@categories(index).id" checked>
+				    		<input type="radio" name="categoryId" class="form-control" value="@categories(index).id">
 				    	}
 				    }
-								<a class="radio-box">@categories(index).name
-									<i class="icon-check"></i>
-								</a>
-							</label>				  
+					<a class="radio-box">@messages.at("category." + categories(index).name.toLowerCase())
+						<i class="icon-check"></i>
+					</a>
+				</label>				  
 				}
 			</div>
 		</div>
+		
+		<div id="lesson-subject-wrap" class="form-group">
+			<div class="form-label">
+				<label>@messages.at("lesson.category"):</label>
+			</div>
+			<div class="form-input">
+				<label class="subject-lbl @if(lesson.subject == null || lesson.subject.ordinal() == 0){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="MATH" @if(lesson.subject == null || lesson.subject.ordinal() == 0){checked}>
+					<a class="radio-box">@messages.at("subject.math")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 1){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="PHYSICS" @if(lesson.subject != null && lesson.subject.ordinal() == 1){checked}">
+					<a class="radio-box">@messages.at("subject.physics")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 2){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="CHEMISTRY" @if(lesson.subject != null && lesson.subject.ordinal() == 2){checked}">
+					<a class="radio-box">@messages.at("subject.chemistry")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 3){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="BIOLOGY" @if(lesson.subject != null && lesson.subject.ordinal() == 3){checked}">
+					<a class="radio-box">@messages.at("subject.biology")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 4){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="ENGLISH" @if(lesson.subject != null && lesson.subject.ordinal() == 4){checked}">
+					<a class="radio-box">@messages.at("subject.engish")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 5){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="CHINESE" @if(lesson.subject != null && lesson.subject.ordinal() == 5){checked}">
+					<a class="radio-box">@messages.at("subject.chinese")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 6){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="HISTORY" @if(lesson.subject != null && lesson.subject.ordinal() == 6){checked}">
+					<a class="radio-box">@messages.at("subject.history")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 7){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="GEOGRAPHY" @if(lesson.subject != null && lesson.subject.ordinal() == 7){checked}">
+					<a class="radio-box">@messages.at("subject.geography")
+						<i class="icon-check"></i>
+					</a>
+				</label>
+				<label class="subject-lbl @if(lesson.subject != null && lesson.subject.ordinal() == 8){selected}">
+				   	<input type="radio" name="subject" class="form-control" value="POLITICS" @if(lesson.subject != null && lesson.subject.ordinal() == 8){checked}">
+					<a class="radio-box">@messages.at("subject.politics")
+						<i class="icon-check"></i>
+					</a>
+				</label>				  
+			</div>
+		</div>
+		
+		<div id="tiny-lesson-group" class="form-group">
+			<div class="form-label">
+				<label for="lesson-desc">@messages.at("lesson.room_size"):</label>
+			</div>
+			<div class="form-input">
+				<label>
+					<input id="tiny-lesson-chx" type="checkbox" name="interactive" @if(lesson.interactive){checked="checked" value="1"}else{value="0"}>
+					@messages.at("lesson.is_small")
+				</label>
+				<div class="lesson-count-group @if(!lesson.interactive){hide}">	
+					<input class="form-control" name="maxCount" placeholder="Room number" value="@lesson.maxCount">
+				</div>
+			</div>
+		</div>
 	</form>
+	
+	<div class="alert alert-info img-upload-info" role="alert">
+		<ul>
+			<li>@messages.at("message.small_class")</li>
+			<li>@messages.at("message.small_class_size")</li>
+			<li>@messages.at("message.live_class")</li>
+			<li>@messages.at("message.live_class_size")</li>
+		</ul>
+	</div>
 	
 }

@@ -1,0 +1,210 @@
+<script type="text/javascript">
+	$(function(){
+		$('#explain-form .switch > input').change(function() {
+	        if($(this).is(":checked")) {
+	        	$('#explain-form .cmn-content').addClass('expend');
+	        }else{
+	        	$('#explain-form .cmn-content').removeClass('expend');
+	        }
+	    });
+		
+		$("#explain-form .input-image").change(function(){
+			if (this.files && this.files[0]) {
+				var filename = $(this).val().split('\\').pop();
+				$(this).parent().siblings('.filename-lbl').text(filename);
+			}
+		});
+		
+		$('#explain-model').on('hidden.bs.modal', function () {
+			$('#explain-form')[0].reset();
+			$('#explain-form .cmn-content').removeClass('expend');
+			$('#explain-form .switch > input').prop('checked', false);
+			$('#explain-form textarea[name=explain]').text('');
+			$('#explain-form label.filename-lbl').text('Max image size is: 2.0 MB');
+			$('#explain-form .attachment-image').addClass('hide');
+			$('#explain-form .attachment-text').removeClass('hide');
+		});
+		
+		$('#explain-model').on('show.bs.modal', function(e) {
+	        var id = $(e.relatedTarget).data('answer-id');
+	        $('input[name=answerId]').val(id);
+	        
+	        if(id){
+	        	$('#explain-model .loading-bar').removeClass('hide');	
+	        	$('#explain-model .field-wrapper').addClass('hide');
+	        	
+	        	$.ajax({
+	                url: "@routes.QuestionController.getAnswer()",
+	                type: "POST",
+	                data: {
+	                	answerId: id
+	                },
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	if(data.code == 0){
+	        				if(data.data.content){
+	        					$('#explain-form input[name=content]').val(data.data.content);
+	        				}
+	        				
+	        				if(data.data.explanation || data.data.answerImages.length > 0){
+	        					$('#explain-form .cmn-content').addClass('expend');
+	        					$('#explain-form .switch > input').prop('checked', true);
+	        					
+	        					if(data.data.explanation){
+	        						$('#explain-form textarea[name=explain]').text(data.data.explanation);
+	        					}
+	        					
+	        					if(data.data.answerImages.length > 0){
+	        						$('#explain-form label.filename-lbl').text(data.data.answerImages[0].name);
+	        					}
+	        				}
+	                	}
+	                	$('#explain-model .loading-bar').addClass('hide');	
+        	        	$('#explain-model .field-wrapper').removeClass('hide');
+	                },
+	                error: function(request, status, err){
+	                	$('#explain-model .loading-bar').addClass('hide');	
+	    	        	$('#explain-model .field-wrapper').removeClass('hide');
+	                }
+	            });
+	        	
+	        }else{
+	        	$('#explain-model .loading-bar').addClass('hide');	
+	        	$('#explain-model .field-wrapper').removeClass('hide');
+	        }
+	    });
+		
+		$('#explain-form .tab-selector li').on('click', function(){
+			$(this).siblings().removeClass('selected');
+			$(this).addClass('selected');
+			
+			if($(this).hasClass('image')){
+				$('#explain-form .attachment-image').removeClass('hide');
+				$('#explain-form .attachment-text').addClass('hide');
+			}else{
+				$('#explain-form .attachment-text').removeClass('hide');
+				$('#explain-form .attachment-image').addClass('hide');
+			}
+		});
+		
+		$("#explain-form").validate({
+	        rules: {
+	        	explain:{
+	            	required:true,
+	            	minlength: 2
+	            },
+	            videoUrl: {
+	            	url: true
+	            }
+	        },
+	        highlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+	        },
+	        unhighlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+	        },
+	        submitHandler: function(form) {
+	        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+	        	$('#explain-form .submit-btn').after(spinner);
+	        	$('#explain-form .submit-btn').css('color', 'transparent');
+	        	$('#explain-form .submit-btn').attr("disabled", true);
+	        	
+	        	var formData = new FormData(form);
+	        	var fileInput = $('#explain-form input.input-image');
+	        	if(fileInput.val() === ''){
+	        		formData.delete("anwserImage");
+	        	}
+	        	
+	        	$.ajax({
+	                url: "@routes.QuestionController.addExplanation()",
+	                type: "POST",
+	                processData: false,
+	                contentType: false,
+	                data: formData,
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	if(data.code != 0){
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		location.reload(true);
+	                	}
+	                	spinner.remove();
+	                	$('#explain-form .submit-btn').css("color", "white");
+	                	$('#explain-form .submit-btn').attr("disabled", false);
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	spinner.remove();
+	                	$('#explain-form .submit-btn').css("color", "white");
+	                	$('#explain-form .submit-btn').attr("disabled", false);
+	                }
+	            });
+	        	
+	        }
+	    });
+	});
+</script>
+
+<div class="modal fade" id="explain-model" role="dialog">
+  	<div class="modal-dialog" role="document">
+    	<div class="modal-content">
+    		<form id="explain-form">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">Explanation</h4>
+				</div>
+		     	<div class="modal-body">
+		     		<div class="loading-bar">
+		     			<i class="fa fa-spinner"></i>
+		     		</div>
+		     		<div class="field-wrapper">
+		     			<input type="hidden" name="answerId" value="">
+				  		<div class="form-group">
+				      		<label>Answer:</label>	
+				      		<input class="form-control" name="content" placeholder="Write down the correct answer for this question." />
+				      	</div>
+				      	
+				      	<div class="form-group">
+				      		<label>Text/Image:</label>
+				      		<div class="switch">
+							  	<input id="explain-toggle" class="cmn-toggle cmn-toggle-round" type="checkbox">
+							  	<label for="explain-toggle"></label>
+							</div>
+								
+							<div class="cmn-content expand-cell-detail">
+								<ul class="tab-selector">
+									<li class="text selected">Text</li>
+									<li class="image">Image</li>
+								</ul>
+									
+								<div class="tab-container">
+									<div class="attachment-text tab-content">
+								      	<label>Text:</label>
+								      	<textarea class="form-control" name="explain" rows="3" placeholder="Write down the explanation for this question."></textarea>	
+									</div>
+									<div class="attachment-image tab-content file wrapper hide">
+										<div class="file-upload-wrapper">
+								            <a class="file-upload-link">
+								      	  		Choose Image
+												<input class="input-image ques-image" type="file" name="anwserImage" />      	  	
+								      	  	</a>
+								      	  	<label class="filename-lbl">Max image size is: 2.0 MB</label>
+								        </div>
+								        <label class="error hide"></label>
+									</div>
+								</div>
+							</div>
+				      	</div>
+		     		</div>
+		      	</div>
+		      	<div class="modal-footer">
+		      		<div class="form-group">
+		        		<button class="btn btn-success submit-btn">
+		        			 Submit
+		        		</button>
+		        	</div>
+		      	</div>
+	      	</form>
+    	</div>
+  	</div>
+</div>

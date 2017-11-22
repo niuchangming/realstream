@@ -1,0 +1,39 @@
+@import tags._
+
+@(account: Account)
+
+@help(account, 2){
+	<div class="dash-detail-header">
+		<p>@messages.at("help.start_session")</p>
+	</div>
+	<div class="help-body">
+		<div class="step">
+			<h4>Step 1:</h4>
+			<p>You can start a lesson session if the session start date time is within 30 minutes compared to your current local date time.<br/><br/>
+			You should go lesson session page and choose the certain lesson session you want to start.
+			Press the red ‘Start’ button to start.
+			</p>
+			<img src="@routes.Assets.versioned("images/help_15.jpg")" />
+			<p>The center square is your main video stream, which will be showed to your students/users.</p>
+			<img src="@routes.Assets.versioned("images/help_16.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 2:</h4>
+			<p>Hovering your mouse on the middle square, the top control bar would be appeared:</p>
+			<img src="@routes.Assets.versioned("images/help_17.jpg")" />
+			<ul>
+				<li class="red">Press ‘mute’ button to mute your voice</li>
+				<li class="red">Press ‘expand’ button to expand full screen.</li>
+				<li class="red">Press ‘sharing screen’ button to share your screen:</li>
+			</ul>
+			<img src="@routes.Assets.versioned("images/help_18.jpg")" />
+			<p class="red">For sharing your screen, you must install the EkooEdu plugin.</p>
+			<ul>
+				<li>For Chrome user, install it by using this link https://chrome.google.com/webstore/search/ekooedu</li>
+				<li>For rest of browsers, currently not support screen sharing features.</li>
+				<li>You can choose sharing your whole screen or sharing some opened application.</li>
+			</ul>
+			<img src="@routes.Assets.versioned("images/help_19.jpg")" />
+		</div>
+	</div>
+}

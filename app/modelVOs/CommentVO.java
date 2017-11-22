@@ -2,7 +2,7 @@ package modelVOs;
 
 import java.util.Date;
 
-public class CommentVO extends Object{
+public class CommentVO {
 	public String comment;
 	public int point;
 	public String author;

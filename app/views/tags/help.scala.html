@@ -1,0 +1,75 @@
+@(account: Account, section: Integer)(content: Html)
+ 
+@scripts = {
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	
+	<div id="dash-content" class="dash-bg">
+		<div id="sidebar" class="dash-block">
+		   	<p>@messages.at("help.tutor")</p>
+		    <ul class="sidebar-menu">
+		        <li class="sub-menu">
+		            <a @if(section == 0){class="active"}" href="@routes.HomeController.helpTutorRes()">
+		                <i class="fa fa-dashboard"></i>
+		                <span>@messages.at("help.tutor_register")</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu">
+		            <a @if(section == 1){class="active"}" href="@routes.HomeController.helpCreatePublishLesson()">
+		                <i class="fa fa-clock-o"></i>
+		                <span>@messages.at("help.lesson_creation")</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu">
+		            <a @if(section == 2){class="active"}" href="@routes.HomeController.helpStartSession()">
+		                <i class="fa fa-clock-o"></i>
+		                <span>@messages.at("help.start_session")</span>
+		            </a>
+		        </li>
+		    </ul>
+		    
+		    <p>@messages.at("help.student")</p>
+		    <ul class="sidebar-menu">
+		        <li class="sub-menu">
+		            <a @if(section == 3){class="active"}" href="@routes.HomeController.helpRegister()">
+		                <i class="fa fa-dashboard"></i>
+		                <span>@messages.at("help.register")</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu">
+		            <a @if(section == 4){class="active"}" href="@routes.ProfileController.myRegisteredLessons()">
+		                <i class="fa fa-clock-o"></i>
+		                <span>@messages.at("help.buy_lesson")</span>
+		            </a>
+		        </li>
+		        
+		        <li class="sub-menu">
+		            <a @if(section == 5){class="active"}" href="@routes.ProfileController.myRegisteredLessons()">
+		                <i class="fa fa-clock-o"></i>
+		                <span>@messages.at("help.attend_lesson")</span>
+		            </a>
+		        </li>
+		        <li class="sub-menu">
+		            <a @if(section == 6){class="active"}" href="@routes.ProfileController.myRegisteredLessons()">
+		                <i class="fa fa-clock-o"></i>
+		                <span>@messages.at("help.evaluate_lesson")</span>
+		            </a>
+		        </li>
+		    </ul>
+		</div>
+	
+		<div id="dash-detail-wrap" class="profile-dash">
+			<div id="dash-detail" class="dash-block">
+				@content
+			</div>
+		</div>
+	</div>
+	
+    @entry(account)
+    @modalcreatelesson()
+}

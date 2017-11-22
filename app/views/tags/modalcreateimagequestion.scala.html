@@ -1,0 +1,335 @@
+@(lesson: Lesson)
+
+<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/jquery-ui.css")">
+<script type="text/javascript">
+	$(function(){
+		$(document).on('click', "#img-que-form .question-act.add", function(){
+			var nextKey = nextChar($(this).parents('li.choice-opt').find('.key').text());
+			var choiceItem = newImageChoice(nextKey);
+			$(this).parents('#img-que-form ul').append(choiceItem);
+			sortByAlphabet($('#img-que-form'));
+		});
+		
+		$(document).on('click', "#img-que-form .question-act.remove", function(){
+			if($('#img-que-form .choice-opt').length > 1){
+				$(this).parents('li').remove();
+				sortByAlphabet($('#img-que-form'));
+			}
+		});
+		
+		$(document).on('click', '#img-que-form .question-act.tick', function(){
+			if($(this).hasClass('correct')){
+				$(this).removeClass('correct');
+				$(this).parent().siblings('input.input-result').val(0);
+			}else{
+				$(this).addClass('correct');
+				$(this).parent().siblings('input.input-result').val(1);
+			}
+		});
+		
+		$('#img-que-form .tab-selector li').on('click', function(){
+			$(this).siblings().removeClass('selected');
+			$(this).addClass('selected');
+			
+			if($(this).hasClass('image')){
+				$('#img-que-form .attachment-image').removeClass('hide');
+				$('#img-que-form .attachment-video').addClass('hide');
+			}else{
+				$('#img-que-form .attachment-video').removeClass('hide');
+				$('#img-que-form .attachment-image').addClass('hide');
+			}
+		});
+		
+		$('#img-que-form .switch > input').change(function() {
+	        if($(this).is(":checked")) {
+	        	$('#img-que-form .cmn-content').addClass('expend');
+	        }else{
+	        	$('#img-que-form .cmn-content').removeClass('expend');
+	        }
+	    });
+		
+		$(document).on('change', '#img-que-form .input-image', function(){
+			if (this.files && this.files[0]) {
+				var filename = $(this).val().split('\\').pop();
+				$(this).parent().siblings('.filename-lbl').text(filename);
+			    $(this).parents('.choice-opt').find('.input-content').val(filename);
+			}
+		});
+		
+		$('#img-que-model').on('hidden.bs.modal', function () {
+			$('#img-que-form')[0].reset();
+			$('#img-que-form .choice-opt').each(function(){
+				if(!$(this).hasClass('choice-A')){
+					$(this).remove();
+				}
+				$('#img-que-form .filename-lbl').text('Max image size is: 2.0 MB');
+			});
+		});
+		
+		$.validator.addMethod('imgCorrectRequired', function (value, element, param) {
+	        return $('#img-que-form .question-act.correct').length > 0;
+	    });
+		
+		$.validator.addMethod('imgRequired', function (value, element) {
+			var correct = true;
+			
+			$('.choice-image').each(function(i, e){
+				if($(e).get(0).files.length == 0 && $(e).parent().siblings('.filename-lbl').text() === 'Max image size is: 2.0 MB'){
+					correct = false;
+				}
+			});				
+			
+	        return correct;
+	    });
+		
+		$("#img-que-form").validate({
+			ignore: [],
+	        rules: {
+	        	content:{
+	            	required:true
+	            },
+	            'choiceResult[]':{
+	            	required:true,
+	            	imgCorrectRequired: true
+	            },
+	            'choiceImage[]':{
+	            	imgRequired: true
+	            },
+	            videoUrl: {
+	            	url: true
+	            }
+	        },
+	        messages: {
+	        	"choiceResult[]": "There must be at least one correct option.",
+	        	'choiceImage[]': "All choice must have an image."
+            },
+            errorPlacement: function(error, element) {
+            	if (element.attr("name") == "choiceResult[]" || element.attr("name") == "choiceImage[]"){
+                    error.appendTo($('#img-que-form .choice-list'));
+                }else{
+                	error.insertAfter(element);
+                }
+            },
+	        highlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+	        },
+	        unhighlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+	        },
+	        submitHandler: function(form) {
+	        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+	        	$('#img-que-form .submit-btn').after(spinner);
+	        	$('#img-que-form .submit-btn').css('color', 'transparent');
+	        	$('#img-que-form .submit-btn').attr("disabled", true);
+	        	
+	        	var formData = new FormData(form);
+	        	var fileInput = $('#img-que-form input.ques-image');
+	        	if(fileInput.val() === ''){
+	        		formData.delete("image");
+	        	}
+	        	
+	        	var questionId = $('#img-que-form input[name=questionId]').val();
+	        	var url = "@routes.QuestionController.createQuestion()";
+	        	if(questionId){
+	        		url = "@routes.QuestionController.editQuestion()";
+	        	}
+	        	
+	        	$.ajax({
+	                url: url,
+	                type: "POST",
+	                processData: false,
+	                contentType: false,
+	                data: formData,
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	
+	                	if(data.code != 0){
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		location.reload(true);
+	                	}
+	                	
+	                	spinner.remove();
+	                	$('#img-que-form .submit-btn').css("color", "white");
+	                	$('#img-que-form .submit-btn').attr("disabled", false);
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	spinner.remove();
+	                	$('#img-que-form .submit-btn').css("color", "white");
+	                	$('#img-que-form .submit-btn').attr("disabled", false);
+	                }
+	            });
+	        }
+	    });
+		
+		$('#img-que-model').on('show.bs.modal', function(e) {
+	        var id = $(e.relatedTarget).data('id');
+	        var lessonSessionId = $(e.relatedTarget).data('session-id');
+	        var content = $(e.relatedTarget).data('content');
+	        var answerJson = $(e.relatedTarget).data('answer');
+	        var videoUrl = $(e.relatedTarget).data('video-url');
+	        var qaImageName = $(e.relatedTarget).data('qa-image');
+	        
+	        if(id){
+	        	$('#img-que-form').find('input[name="questionId"]').val(id);
+		        $('#img-que-form').find('textarea[name="content"]').val(content);
+		        if(lessonSessionId){
+		        	$('#img-ls-list option[value='+lessonSessionId+']').prop('selected', true);
+		        }
+		        
+		        if(videoUrl || qaImageName){
+		        	$('#img-que-form .switch > input').prop('checked', true);
+		        	$('#img-que-form .cmn-content').addClass('expend');
+		        	
+		        	if(videoUrl){
+		        		$('#img-que-form').find('input[name="videoUrl"]').val(videoUrl);
+		        	}
+		        	
+			        if(qaImageName){
+		        		$('#img-que-form').find('.filename-lbl').text(qaImageName);
+		        	}
+		        }
+		        
+		        $.each(answerJson, function(index, value) {
+		        	if($('#img-que-form .choice-' + value.key).length == 0){
+		        		var choiceItem = newImageChoice(value.key);
+		        		$('#img-que-form ul.choice-list').append(choiceItem);
+		        	}
+		        	
+		        	if(value.result == 1){
+		        		$('#img-que-form .choice-' + value.key).find('.question-act.tick').addClass('correct');
+		        	}else{
+		        		$('#img-que-form .choice-' + value.key).find('.question-act.tick').removeClass('correct');
+		        	}
+		        	
+		        	$('#img-que-form .choice-' + value.key).find('input.input-key').val(value.key);
+		        	$('#img-que-form .choice-' + value.key).find('input.input-result').val(value.result);
+		        	$('#img-que-form .choice-' + value.key).find('input.input-content').val(value.content);
+		        	$('#img-que-form .choice-' + value.key).find('label.filename-lbl').text(value.content);
+		        });
+	        }else{
+	        	$('#img-que-form').find('input[name="questionId"]').val('');
+	        }
+	    });
+	});
+	
+	function newImageChoice(key){
+		var choiceItem = '<li class="choice-opt choice-' + key + '">';
+			choiceItem += '<span class="key">' + key + '</span>';
+			choiceItem += '<input class="form-control input-key" type="hidden" name="choiceKey[]" />';
+			choiceItem += '<input class="form-control input-result" type="hidden" name="choiceResult[]" value=""/>';
+			choiceItem += '<input class="form-control input-content" type="hidden" name="choiceContent[]"  value=""/>';
+			choiceItem += '<div class="file-upload-wrapper">';
+			choiceItem += '<a class="file-upload-link">Choose Image<input class="input-image choice-image" type="file" name="choiceImage[]" /> </a> <label class="filename-lbl">Max image size is: 2.0 MB</label></div>';
+			choiceItem += '<div class="choice-act-gp">';
+			choiceItem += '<a class="question-act add"><i class="fa fa-plus-circle icon"></i></a>';
+			choiceItem += '<a class="question-act remove"><i class="fa fa-minus-circle icon"></i></a>';
+			choiceItem += '<a class="question-act tick"><i class="fa fa-check-circle-o"></i></a>';
+			choiceItem += '</div>';
+			choiceItem += '</li>';
+			return choiceItem;
+	}
+</script>
+
+<div class="modal fade" id="img-que-model" role="dialog">
+  	<div class="modal-dialog" role="document">
+    	<div class="modal-content">
+    		<form id="img-que-form">
+		      	<div class="modal-header">
+		        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        	<h4 class="modal-title">Image Choice</h4>
+		      	</div>
+		      	<div class="modal-body">
+				  	<input type="hidden" name="lessonId" value="@lesson.id">
+				  	<input type="hidden" name="questionId" value="">
+				  	<input type="hidden" name="quesType" value="2">
+				  	<div class="form-group">
+			      		<label>Question:</label>	
+			      		<textarea class="form-control" name="content" rows="2" placeholder="Write down your question."></textarea>
+			      	</div>
+				      	
+			      	<div class="form-group">
+			      		<label>Choices:</label>
+			      		<ul class="choice-list">
+			      			<li class="choice-opt choice-A">
+			      				<span class="key">A</span> 
+			      				<input class="form-control input-key" type="hidden" name="choiceKey[]" value=""/>
+			      				<input class="form-control input-result" type="hidden" name="choiceResult[]" value=""/>
+			      				<input class="form-control input-content" type="hidden" name="choiceContent[]"  value=""/>
+								<div class="file-upload-wrapper">
+							    	<a class="file-upload-link">
+							      		Choose Image
+										<input class="input-image choice-image" type="file" name="choiceImage[]" />      	  	
+						      	  	</a>
+						      	  	<label class="filename-lbl">Max image size is: 2.0 MB</label>
+						        </div>
+			      				<div class="choice-act-gp">
+				      				<a class="question-act add">
+				      					<i class="fa fa-plus-circle icon"></i>
+				      				</a>
+				      				<a class="question-act remove">
+				      					<i class="fa fa-minus-circle icon"></i>
+				      				</a>
+				      				<a class="question-act tick">
+				      					<i class="fa fa-check-circle-o"></i>
+				      				</a>
+			      				</div>
+			      			</li>
+			      		</ul>
+			      	</div>
+			      	
+			      	<div class="form-group">
+						<label>Lesson Session:</label>
+						<select id="img-ls-list" class="form-control" name="lessonSessionId">
+							<option value="0">Choose Lesson Session</option>
+						    @for(lessonSession <- lesson.lessonSessions){
+						    	<option value="@lessonSession.id">@lessonSession.title</option>
+						    }
+						</select>
+					</div>
+			      	
+			      	<div class="form-group">
+			      		<label>Image/Video:</label>
+			      		<div class="switch">
+						  	<input id="img-toggle" class="cmn-toggle cmn-toggle-round" type="checkbox">
+						  	<label for="img-toggle"></label>
+						</div>
+						
+						<div class="cmn-content expand-cell-detail">
+							<ul class="tab-selector">
+								<li class="image selected">Image</li>
+								<li class="video">Video</li>
+							</ul>
+							
+							<div class="tab-container">
+								<div class="attachment-image tab-content file wrapper">
+									<div class="file-upload-wrapper">
+							            <a class="file-upload-link">
+							      	  		Choose Image
+											<input class="input-image ques-image" type="file" name="image" />      	  	
+							      	  	</a>
+							      	  	<label class="filename-lbl">Max image size is: 2.0 MB</label>
+							        </div>
+							        <label class="error hide"></label>
+								</div>
+								
+								<div class="attachment-video tab-content hide">
+							      	<label>Video:</label>	
+							      	<input class="form-control" name="videoUrl" placeholder="http://" />
+								</div>
+							</div>
+						</div>
+			      	</div>
+		      	</div>
+		      	<div class="modal-footer">
+		      		<div class="form-group">
+		        		<button class="btn btn-success submit-btn">
+		        			 Submit
+		        		</button>
+		        	</div>
+		      	</div>
+	      	</form>
+    	</div>
+  	</div>
+</div>

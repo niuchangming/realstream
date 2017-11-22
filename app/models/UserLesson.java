@@ -33,8 +33,11 @@ public class UserLesson {
     @Column(name="is_completed", columnDefinition = "boolean default false")
     public boolean isCompleted;
     
+    @Column(columnDefinition = "double default 0")
+    public double progress;
+    
     @Temporal(TemporalType.TIMESTAMP)
-	@Column(name="creation_datetime")
+	@Column(name="completion_datetime")
     public Date completionDatetime;
     
     public UserLesson(){}
@@ -42,6 +45,7 @@ public class UserLesson {
     public UserLesson(User user, Lesson lesson){
     	this.user = user;
     	this.lesson = lesson;
+    	
     }
     
 }

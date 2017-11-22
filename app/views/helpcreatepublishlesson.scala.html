@@ -1,0 +1,63 @@
+@import tags._
+
+@(account: Account)
+
+@help(account, 1){
+	<div class="dash-detail-header">
+		<p>@messages.at("help.lesson_creation")</p>
+	</div>
+	<div class="help-body">
+		<div class="step">
+			<h4>Step 1:</h4>
+			<p>In the home page, move your mouse on ‘Create Lesson’ Link. The dropdown list will be appeared, choose ‘Tutors’ option.</p>
+			<img src="@routes.Assets.versioned("images/help_6.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 2:</h4>
+			<p>You will see a dialog popped up. you must enter your lesson title and press ‘Submit’ button.</p>
+			<img src="@routes.Assets.versioned("images/help_7.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 3:</h4>
+			<p>In the lesson basic Information page, you must fill in lesson title, brief and category. For coaching class, you must set the size of your class which must be not more than 5 students.
+			You may select the text to change its style.</p>
+			<img src="@routes.Assets.versioned("images/help_8.jpg")" />
+			<p class="red">Don't forget press 'Save' button to save lesson properties.</p>
+		</div>
+		<div class="step">
+			<h4>Step 4:</h4>
+			<p>In the lesson image page, you must upload at least one lesson image. The image must be the explanation of your lesson.<br/><br/> In the lesson image page, you must upload at least one lesson image. The image must be the explanation of your lesson.</p>
+			<ul>
+				<li>You can set the image as the lesson cover image. By default, the first image is the lesson cover page.</li>
+				<li>You can add caption brief for the image.</li>
+				<li>You can delete the image.</li>
+			</ul>
+			<img src="@routes.Assets.versioned("images/help_9.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 5:</h4>
+			<p>In the lesson session page, you should see all the lesson sessions. And Clicking ‘Create a Session’ button to create a new session.</p>
+			<img src="@routes.Assets.versioned("images/help_10.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 6:</h4>
+			<p>You should see a dialog popped up, and you must fill in the session title, brief, start date time and duration. If the lesson has chapters, you may put the lesson under a chapter.</p>
+			<img src="@routes.Assets.versioned("images/help_11.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 7:</h4>
+			<p>In the lesson price page, you must set the lesson price. The currency is Singapore Dollar.<br/><br/>
+			You may set the promotion price, promotion period and promotion reason by expanding the ‘Offer Bar’.
+			</p>
+			<img src="@routes.Assets.versioned("images/help_12.jpg")" />
+			<p>You may set free lesson sessions to attractive more users, and the maximum free lesson must be not more than three.</p>
+			<img src="@routes.Assets.versioned("images/help_13.jpg")" />
+			<p class="red">Don't forget press 'Save' button to save lesson properties.</p>
+		</div>
+		<div class="step">
+			<h4>Step 8:</h4>
+			<p>After your set basic information, images, sessions and price of the lesson, you may want to publish the lesson. By doing this, you just press ‘Publish’ button. It will appear in the home page immediately.</p>
+			<img src="@routes.Assets.versioned("images/help_14.jpg")" />
+		</div>
+	</div>
+}

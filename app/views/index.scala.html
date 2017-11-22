@@ -1,76 +1,78 @@
 @import tags._
 
-@(account: Account, categories: List[Category])
-
-@scripts = {
-    <script type="text/javascript">
-		$(function(){
-			
-			$('.category-section').each(function(){
-				var sectionEle = $(this);
-				var categoryId = sectionEle.attr('data-cate');
-				$.ajax({
-	                url: "@routes.LessonController.pubishedLessonsByCategory()",
-	                type: "POST",
-	                data: {
-	                	categoryId: categoryId
-	                },
-	                success: function(response, status) {
-	                	var respData = $.parseJSON(JSON.stringify(response));
-	                	
-	                	if(respData.code != 0){s
-	                		showAlertToast(data.message, "alert-danger");
-	                	}else{
-	                		if(respData.data.length > 0){
-                				for(var i = 0; i < respData.data.length; i++){
-                					var itemHtml = '<div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">';
-                					itemHtml += '<article class="post-wrap">';
-                					itemHtml += '<div class="post-header">';
-                					itemHtml += '<div class="post-cate-info">';
-                					itemHtml += '<p><span class="cate-info-cell"><span class="cate-text-first">' + respData.data[i].lessonKeyName + '</span><span class="cate-text-remain">' + respData.data[i].institution + '</span></span><span class="total-text">' + respData.data[i].lessonSessionCount + '节课</span></p>';                   												
-                					itemHtml += '</div></div>';
-                					itemHtml += '<div class="post-thumb">';
-                					itemHtml += '<a class="link-img" style="background-image:url(/lesson/show/cover?lessonId=' + respData.data[i].lessonId + ')"></a>';
-                					itemHtml += '</div>';
-                					itemHtml += '<div class="post-footer">';
-                					itemHtml += '<div class="post-desc">' + respData.data[i].lessonTitle + '</div>';
-                					itemHtml += '<div><a class="detail-btn" target="_blank" href="/lesson?lessonId=' + respData.data[i].lessonId + '">查看详情</a><span class="cate-info-price">¥' + respData.data[i].lessonPrice + '</span></div>';
-                					itemHtml += '</div></article></div>';
-									
-									sectionEle.append(itemHtml);
-	                			}
-	                		}else{
-	                			sectionEle.remove();
-	                		}
-	                	}
-	                },
-	                error: function(request, status, err){
-	                }
-	            });	
-			});
-	   	});
-	</script>
-}
+@(account: Account, lessonMap: Map[Category, List[Lesson]], categories: List[Category])
  
-@main(scripts) {
+@scripts = {
+	<script src="@routes.Assets.versioned("javascripts/responsiveslides.min.js")" type="text/javascript"></script>
+	<script>
+    	$(function() {
+    		$("#rslides").responsiveSlides();
+    		$('[data-toggle="tooltip"]').tooltip()
+    	});
+  	</script>
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
 	@topbar(account)
-	<div class="page-content">    
-	    @for(category <- categories){
-	    	<div class="category-section row" data-cate="@category.id">
-		    	<div class="col col-xs-12">
-		    		<div class="post-header-info">
-		    			<div class="cate-text">
-		   					<span>@category.name</span>
-		   				</div>
-					</div>
-					
-					<div class="post-body">
-				         
-			    	</div>
-			    </div>
-	    	</div>
-	    }
+	<ul id="rslides">
+     	<li><img src="@routes.Assets.versioned("images/slider_1.jpg")"></li>
+     	<li>
+     		<img src="@routes.Assets.versioned("images/slider_2.jpg")">
+     		<a class="video-demo" data-toggle="modal" data-target="#class-demo-modal">过来瞅瞅</a>
+     	</li>
+     	<li><img src="@routes.Assets.versioned("images/slider_3.jpg")"></li>
+	</ul>
+	<div class="page-content"> 
+		<div class="inner-content">
+			@for((key, lessons)<- lessonMap) {
+				<div class="category-section row" data-cate="@key.id">
+			    	<div class="col col-xs-12">
+			    		<div class="post-header-info">
+			    			<div class="cate-text">
+			   					<span>@key.name</span>
+			   					<a class="more-link" href="@routes.LessonController.publishedLessons(0, key.id, null)">@messages.at("home.more")</a>
+			   				</div>
+						</div>
+						
+						<div class="post-body">
+					         @for(index <- 0 until lessons.size){
+					         	<div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
+									<article class="post-wrap">
+										<div class="post-thumb">
+											<a class="link-img" style="background-image:url(/lesson/show/cover?lessonId=@lessons(index).id)" target="_blank" href="@routes.LessonController.lessonDetail(lessons(index).id)"></a>
+											<a class="img-mask bg-@index" target="_blank" href="@routes.LessonController.lessonDetail(lessons(index).id)"></a>
+											<span class="cate-text-first">
+												@if(lessons(index).maxCount == 0){
+													@messages.at("home.live")
+												}else{
+													@messages.at("home." + lessons(index).maxCount)
+												}
+											</span>
+										</div>
+										<div class="post-footer">
+											<div class="post-desc">@lessons(index).title</div>
+											<div>
+												<a class="detail-btn" target="_blank" href="@routes.LessonController.lessonDetail(lessons(index).id)">@messages.at("home.more_detail")</a>
+												<span class="cate-info-price">S$@lessons(index).price</span>
+											</div>
+										</div>
+									</article>
+								</div>
+					         }
+				    	</div>
+				    </div>
+		    	</div>	
+			}
+	    </div>
     </div>
+    
+    <div class="modal fade" id="class-demo-modal" role="dialog">
+		<div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		    	<video src="@routes.Assets.versioned("images/video_demo.mp4")" autoplay loop></video>
+	    	</div>
+		</div>
+	</div>
     @entry(account)
     @modalcreatelesson()
 }

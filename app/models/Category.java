@@ -3,6 +3,7 @@ package models;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -30,13 +31,16 @@ public class Category {
 	
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
 	@JsonDeserialize(contentAs=Category.class)
+	@JsonIgnore
 	public List<Category> children;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="parent_id")
+	@JsonIgnore
 	public Category parent;
 	
 	@OneToMany(mappedBy = "category")
+	@JsonIgnore
 	public List<Lesson> lessons;
 	
 	public Category(){}

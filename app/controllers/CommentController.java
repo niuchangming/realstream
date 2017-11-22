@@ -81,7 +81,7 @@ public class CommentController extends Controller{
 	@SuppressWarnings("unchecked")
 	public Result commentsByLesson(){
 		ResponseData responseData = new ResponseData();
-
+		
 		DynamicForm requestData = formFactory.form().bindFromRequest();
 		long lessonId = Long.parseLong(requestData.get("lessonId"));
 		try {

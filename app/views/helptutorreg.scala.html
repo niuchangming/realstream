@@ -1,0 +1,34 @@
+@import tags._
+
+@(account: Account)
+
+@help(account, 0){
+	<div class="dash-detail-header">
+		<p>@messages.at("help.tutor_register")</p>
+	</div>
+	<div class="help-body">
+		<p>To complete the tutor registration, Please follow the steps below:</p>
+		<div class="step">
+			<h4>Step 1:</h4>
+			<img src="@routes.Assets.versioned("images/help_1.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 2:</h4>
+			<img src="@routes.Assets.versioned("images/help_2.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 3:</h4>
+			<img src="@routes.Assets.versioned("images/help_3.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 4:</h4>
+			<p>Fill in your personal particulars and press ‘Submit’ button to complete the registration.</p>
+			<img src="@routes.Assets.versioned("images/help_4.jpg")" />
+		</div>
+		<div class="step">
+			<h4>Step 5:</h4>
+			<p>Finally, We will review your profile and get result back to you by email.</p>
+			<img src="@routes.Assets.versioned("images/help_5.jpg")" />
+		</div>
+	</div>
+}

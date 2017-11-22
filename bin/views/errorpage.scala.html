@@ -1,6 +1,9 @@
 @(error: ResponseData)
 
-@main() {
+@scripts = {
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
 	<div class="error-body">
 		<p class="error-title">Opps!</p>
 		<p class="error-message pink">@error.message</p>

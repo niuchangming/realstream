@@ -1,0 +1,5 @@
+package models;
+
+public enum Subject {
+	MATH, PHYSICS, CHEMISTRY, BIOLOGY, ENGLISH, CHINESE, HISTORY, GEOGRAPHY, POLITICS
+}

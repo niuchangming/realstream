@@ -2,49 +2,91 @@
 
 <div class="top-bar-wrap">
 	<div id="top-bar">
-   	<a id="logo_link">
-   		School Logo Image
-   	</a>
-   	<div id="js-mod-header-login" class="mod-header__wrap-login">
+		<div class="mod-header-links">
+			<a id="logo_link" style="background-image:url('@routes.Assets.versioned("images/logo.png")');" class="mod-header__user-img link-img" href="@routes.HomeController.index()"></a>
+			<a href="@routes.HomeController.index()">@messages.at("topbar.home")</a>
+			<a href="@routes.HomeController.about()">@messages.at("topbar.about_us")</a>
+			<a href="@routes.HomeController.becomeTutor()">@messages.at("topbar.become_tutor")</a>
+			<a href="@routes.HomeController.tutors()">@messages.at("topbar.tutor")</a>
+			<a href="@routes.TuiwenController.tuiwens()">@messages.at("topbar.news")</a>
+		</div>
+   		
+   		<div id="js-mod-header-login" class="mod-header__wrap-login">
     	@if(account == null) {
-		  	<a href="javascript:void(0)" class="mod-header__link-login js-login-op" id="js_login" data-toggle="modal" data-target="#entry-model">登录</a>
+		  	<a href="javascript:void(0)" class="mod-header__link-login js-login-op" id="js_login" data-toggle="modal" data-target="#entry-model">@messages.at("topbar.login")</a>
 		} else {
 			<div class="mod-header_wrap-user">
 				<i class="icon-red-circle" style="display:none;"></i>
 				@if(account.user.avatars.size() > 0){
-					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="mod-header__user-img link-img"></a>
+					<a target="_blank" href="@routes.ProfileController.personalProfile()" style="background-image:url('@routes.ProfileController.showAvatarThumbnail(account.user.avatars.get(0).thumbnailUUID)');" class="mod-header__user-img link-img"></a>
 				}else{
-					<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="mod-header__user-img link-img"></a>
+					<a target="_blank" href="@routes.ProfileController.personalProfile()" style="background-image:url('@routes.ProfileController.showAvatarThumbnail()');" class="mod-header__user-img link-img"></a>
 				}
 				<p class="mod-header__user-name">
-					<a href="/user/index/index.html" class="mod-header__user-operation">个人中心</a>
+					<a target="_blank" href="@routes.ProfileController.personalProfile()" class="mod-header__user-operation">@messages.at("topbar.profile")</a>
 				</p>
 				<ul class="mod-header__user-operations">
-					<li><a href="@routes.ProfileController.personalProfile()">个人资料</a></li>
-					<li><a href="@routes.ProfileController.myRegisteredLessons()">学习进度</a></li>
-					<li><a href="@routes.ProfileController.myFavoriteLessons(0)">收藏列表</a></li>
-					<li><a href="@routes.ProfileController.myLessons()">课程管理</a></li>
-					<li><a href="@routes.LessonController.editLesson(20)">学员管理</a></li>
-					<li><a href="@routes.HomeController.logout()" class="mod-header__link-logout">退出</a></li>	
+					<li><a target="_blank" href="@routes.ProfileController.personalProfile()">@messages.at("topbar.profile")</a></li>
+					<li><a target="_blank" href="@routes.ProfileController.myRegisteredLessons()">@messages.at("topbar.timetable")</a></li>
+					<li><a target="_blank" href="@routes.ProfileController.myFavoriteLessons(0)">@messages.at("topbar.favorite")</a></li>
+					<li><a target="_blank" href="@routes.ProfileController.myLessons()">@messages.at("topbar.lesson")</a></li>
+					<li><a target="_blank" href="@routes.LessonController.editLesson(20)">@messages.at("topbar.student")</li>
+					<li><a href="@routes.HomeController.logout()" class="mod-header__link-logout">@messages.at("topbar.logout")</a></li>	
 				</ul>
 			</div>
 		}
-		<div class="apply-entrance js-apply-entrance">
-				<p class="apply-tt">我要开课</p>
+			<div class="apply-entrance js-apply-entrance">
+				<p class="apply-tt">@messages.at("topbar.create_lesson")</p>
 				<ul class="apply-link-list">
 					<li>
-						<a href="javascript:void(0)" title="教育机构开课">教育机构开课</a>
+						<a href="@routes.HomeController.comingSoon()">@messages.at("topbar.institution")</a>
 					</li>
 					<li>
-						@if(account != null && account.user.role.equals(Role.TEACHER)){
-							<a href="javascript:void(0)" title="个人老师开课" data-toggle="modal" data-target="#create-lesson-model">个人老师开课</a>
+						@if(account != null){
+							@if(account.user.role.equals(Role.TEACHER)){
+								<a data-toggle="modal" data-target="#create-lesson-model">@messages.at("topbar.tutor")</a>
+							}else{
+								<a href="@routes.ProfileController.readTeacherAgreement()">@messages.at("topbar.tutor")</a>
+							}
 						}else{
-							<a href="@routes.ProfileController.readTeacherAgreement()" title="个人老师开课">个人老师开课</a>
+							<a data-toggle="modal" data-target="#entry-model">@messages.at("topbar.tutor")</a>
 						}
 					</li>
 				</ul>
 			</div>
-			<a id="js-help" href="javascript:void(0)" class="mod-header__link-help">帮助</a>
+			<a href="@routes.HomeController.helpTutorRes()" class="mod-header__link-help">@messages.at("topbar.help")</a>
+			
+			<div class="apply-entrance">
+				<p class="apply-tt">Language(语言)</p>
+				<ul class="apply-link-list">
+					<li>
+						<a href='@routes.HomeController.changeLanguage("en")'>English</a>
+					</li>
+					<li>
+						<a href='@routes.HomeController.changeLanguage("zh-CN")'>中文</a>
+					</li>
+				</ul>
+			</div>
+			
 		</div>
 	</div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

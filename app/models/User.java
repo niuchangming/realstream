@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -57,17 +60,17 @@ public class User{
 	
 	public String qq;
 	
-	public int point; //0-100 学童
+	public int credit; // 学分，之后可用于消费打折
 	
-	public int credit;
+	public int coin;
 	
 	public Role role;
 	
 	@Column(name="real_name")
 	public String realName;
 	
-	@Column(name="ic_uuid")
-	public String icUUID;
+	@Column(name="ic")
+	public String ic;
 	
 	@Column(name="certificate_uuid")
 	public String certificateUUID;
@@ -95,15 +98,27 @@ public class User{
 	public List<UserLesson> userLessons;
 
 	@OneToMany(mappedBy = "user")
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	public List<Payment> payments;
 	
 	@OneToMany(mappedBy = "user")
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	public List<Comment> comments;
+	
+	@OneToMany(mappedBy = "user")
+	@LazyCollection(LazyCollectionOption.EXTRA)
+	public List<ChatMessage> chatMessages;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "event_id") 
+    public Event event;
 	
 	public User(){}
 	
 	public User(Account account){
 		this.account = account;
+		this.credit = 0;
+		this.coin = 0;
 		this.role = Role.STUDENT;
 	}
 	
@@ -155,18 +170,6 @@ public class User{
 	    	
 	    	JPA.em().persist(workExperience);
 	    }
-	}
-	
-	public void uploadIcImage(File file){
-		this.icUUID = Utils.uuid();
-		if (S3Plugin.amazonS3 == null) {
-            throw new RuntimeException("S3 Could not save");
-        }else {
-        	this.icUUID = Utils.uuid();
-            PutObjectRequest putObjectRequest = new PutObjectRequest(S3Plugin.s3Bucket, this.icUUID, file);
-            putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
-            S3Plugin.amazonS3.putObject(putObjectRequest); 
-        }
 	}
 	
 	public void uploadCertImage(File file){

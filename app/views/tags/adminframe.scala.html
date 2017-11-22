@@ -1,0 +1,66 @@
+@(section: Integer)(content: Html)
+
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/froala_editor.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/froala_style.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/colors.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/image.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/video.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/table.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/code_view.min.css")">
+	
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/froala_editor.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/font_size.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/font_family.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/colors.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/lists.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/image.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/video.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/link.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/table.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/code_view.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/save.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/align.min.js")" type="text/javascript"></script>
+}
+
+@main(scripts, "线上教学平台——Ekoo教育"){
+	<div class="dash-header">
+		<nav class="bread-crumb inner-center bottom-border">
+		    <a class="bread-crumb-item" href="@routes.HomeController.index()">Home</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item" href="@routes.LessonController.publishedLessons(0, 0, null)">All Lessons</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item item-current" href="#">Admin Dashboard</a>
+		</nav>
+	</div>
+	<div id="dash-content" class="dash-bg">
+		<div id="sidebar" class="dash-block">
+		   	<p>Article</p>
+		    <ul class="sidebar-menu" id="nav-accordion">
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 0){class="active"} href="@routes.TuiwenController.createTuiwen()">
+		                <i class="fa fa-pencil-square-o"></i>
+		                <span>Create Article</span>
+		            </a>
+		        </li>
+		    </ul>
+		    
+		    <p>Event</p>
+		    <ul class="sidebar-menu" id="nav-accordion">
+		        <li class="sub-menu dcjq-parent-li">
+		            <a @if(section == 1){class="active"} href="@routes.EventController.creatEvent()">
+		                <i class="fa fa-calendar-o"></i>
+		                <span>Create Event</span>
+		            </a>
+		        </li>
+		    </ul>
+		</div>
+	
+		<div id="dash-detail-wrap" class="admin-dash">
+			<div id="dash-detail" class="dash-block">
+				@content
+			</div>
+		</div>
+	</div>
+}

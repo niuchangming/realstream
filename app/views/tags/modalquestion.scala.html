@@ -1,0 +1,347 @@
+<script src="@routes.Assets.versioned("javascripts/modernizr.custom.js")" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+<div class="modal fade" id="question-model" role="dialog">
+  	<div class="modal-dialog" role="document">
+    	<div class="modal-content">
+    		<div class="ques-header">
+    			<span id="t-ques"></span>
+    			<div id="circle-prog"><span></span></div>
+   				<svg id="cross" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+					<circle id="cross_circle" fill="none" stroke="rgb(179, 60, 60)" stroke-width="30" stroke-miterlimit="10" cx="256" cy="256" r="225"  fill="transparent" stroke-linecap="round"stroke-dashoffset="2000" stroke-dasharray="2000"/>
+					<g>
+						<rect id="cross_p1" x="239.397" y="67.518" rx="17" ry="17"  transform="matrix(0.7071 0.7071 -0.7071 0.7071 255.9995 -106.0389)" width="33.205" height="0" fill="rgb(179, 60, 60)" />
+					</g>
+					<g>
+						<rect id="cross_p2" x="239.397" y="67.519" rx="17" ry="17"  transform="matrix(0.7071 -0.7071 0.7071 0.7071 -106.039 256.0001)" width="33.205" height="0" fill="rgb(179, 60, 60)" />
+					</g>
+				</svg>
+				
+				<svg id="tick" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+					<g>
+						<circle id="tick_circle" cx="256" cy="256" r="240" stroke="rgb(75, 212, 146)" stroke-width="30" fill="transparent" stroke-linecap="round"stroke-dashoffset="2000" stroke-dasharray="2000" />
+					</g>
+					<rect id="tick_p1" rx="17" ry="17" x="180.448" y="244.566" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -166.3342 225.5657)" width="30" height="0" fill="rgb(75, 212, 146)" />
+					<rect id="tick_p2" rx="17" ry="17" x="308.664" y="141" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 350.3278 686.445)" width="30" height="0" fill="rgb(75, 212, 146)" />
+				</svg>
+    		</div>
+      		<div id="pt-main" class="pt-perspective">
+			</div>
+			<button id="iterateEffects" class="pt-touch-button">Next</button>
+    	</div>
+  	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('#question-model').on('show.bs.modal', function (e) {
+			sessionId = $(e.relatedTarget).data('session-id');
+	        title = $(e.relatedTarget).data('title');
+	        
+	        questions = lessonSessionMap[sessionId];
+	        $.each(questions, function(i, v) {
+	        	var pageItem = '<div class="pt-page">';
+	        		pageItem += '<div class="left">';
+	        		pageItem += '<p class="ques-content"><span class="num">' + (i + 1) + '.</span><span> </span>' + v.content + '</p>';
+	        		if(v.questionImages.length > 0){
+	        			pageItem += '<img src="/question/image?uuid=' + v.questionImages[0].uuid + '"/>';
+	        		}
+	        		pageItem += '</div>';
+	        		pageItem += '<div class="right">';
+	        		pageItem += '<ul>';
+	        		
+	        		$.each(v.answers, function(j, a) {
+	        			var jsonObj = $.parseJSON(a.choiceJson);
+	        			$.each(jsonObj, function(m, jsonItem) {
+	        				pageItem += '<li class="opt" data-result=' + jsonItem.result + '>';
+			        		pageItem += '<span class="key-wrap"><span class="key">' + jsonItem.key + '</span></span>';
+			        		if(v.questionType === 'MULTIPLE_CHOICE'){
+			        			pageItem += '<span class="content">' + jsonItem.content + '</span>';
+			        		}else{
+			        			$.each(v.choiceImages, function(n, img) {
+			        				if(img.name === jsonItem.content){
+			        					pageItem += '<img src="/choice/image?uuid=' + img.uuid + '"/>';
+			        					return false;
+			        				}
+			        			});
+			        		}
+			        		pageItem += '<div style="clear:both;"></div>';
+			        		pageItem += '</li>';
+	        			}); 
+	        		});
+	        		
+	        		pageItem += '</ul>';
+	        		pageItem += '</div>';
+	        		pageItem += '</div>';
+	        		
+        		$('#pt-main').append(pageItem);
+	        });
+	        
+	        var resultPage = '<div class="pt-page pt-result">';
+				resultPage += '</div>';
+			$('#pt-main').append(resultPage);
+	        
+	        $('#t-ques').text(title);
+	        $('#circle-prog > span').text(1 + "/" +questions.length);
+	        
+	        $('#circle-prog').circleProgress({
+			    value: 1 / questions.length,
+			    size: 48,
+			    fill: '#fff',
+			  	emptyFill: '#a3d2f8'
+			});
+	        
+	        init();
+		});
+		
+		$('#question-model').on('hidden.bs.modal', function (e) {
+			$('#pt-main').empty();
+		});
+		
+		$(document).on('click', 'li.opt', function(event){
+			$('li.opt.active').removeClass('active');
+			 $(event.currentTarget).addClass('active');
+		});
+		
+		$(document).on('click', '#iterateEffects', function() {
+			if(isAnimating) {
+				return false;
+			}
+			
+			if($('.pt-page-current').hasClass('pt-result')){
+				$('#iterateEffects').text('Next');
+				$('#question-model').modal('hide');
+			}else{
+				var activeOpt = $('.pt-page.pt-page-current').find('li.opt.active');
+				if(activeOpt.length > 0){
+					var result = activeOpt.data('result');
+					if(questions[current].questionType === 'MULTIPLE_CHOICE' || questions[current].questionType === 'PICTURE_CHOICE'){
+						if(result == 1){
+							tick_animationIn();
+						}else{
+							var correctAnswser = '';
+		        			$.each(questions[current].answers, function(i, a) {
+		        				var jsonObjs = $.parseJSON(a.choiceJson);
+		        				$.each(jsonObjs, function(j, jsonObj) {
+		        					if(jsonObj.result == 1){
+			        					correctAnswser += jsonObj.key + ', ';
+			        				}
+			        			}); 
+		        			}); 
+		        			
+		        			if(correctAnswser.length > 2){
+		        				correctAnswser = correctAnswser.substring(0, correctAnswser.length - 2);
+		        			}
+		        			
+							wrongResults[current] = correctAnswser;
+							cross_animationIn();
+						}
+					}				
+				}else{
+					alert("Please choose your anwser before \'click\' next.");
+				}
+			}
+		});
+		
+		
+		$(document).on('click', '.expand-cell-header', function() {
+			var expandWrap = $(this).parent();
+			expandWrap.toggleClass('expend');
+		});
+		
+   	});
+	
+	function init() {
+		wrongResults = {};
+		$main = $( '#pt-main' );
+		$pages = $main.children( 'div.pt-page' );
+		animcursor = 1;
+		pagesCount = $pages.length;
+		current = 0;
+		isAnimating = false;
+		endCurrPage = false;
+		endNextPage = false;
+		animEndEventNames = {
+			'WebkitAnimation' : 'webkitAnimationEnd',
+			'OAnimation' : 'oAnimationEnd',
+			'msAnimation' : 'MSAnimationEnd',
+			'animation' : 'animationend'
+		};
+		// animation end event name
+		animEndEventName = animEndEventNames[ Modernizr.prefixed( 'animation' ) ];
+		// support css animations
+		support = Modernizr.cssanimations;
+		
+		$pages.each(function() {
+			var $page = $( this );
+			$page.data( 'originalClassList', $page.attr( 'class' ) );
+		});
+
+		$pages.eq( current ).addClass( 'pt-page-current' );
+	}
+
+	function nextPage() {
+		isAnimating = true;
+		
+		var $currPage = $pages.eq( current );
+		if( current < pagesCount - 1 ) {
+			++current;
+			
+			var $nextPage = $pages.eq(current).addClass('pt-page-current'),
+			outClass = 'pt-page-moveToTopFade', inClass = 'pt-page-moveFromBottomFade';
+			
+			if(!$nextPage.hasClass('pt-result')){
+				$('#circle-prog > span').text((current + 1) + "/" + (pagesCount - 1)); // -1 means exclude pt-result;				
+				$('#circle-prog').circleProgress(
+						{ 
+							value: (current + 1) / (pagesCount - 1),
+							animationStartValue: current / (pagesCount - 1)
+						});
+			}else{
+				if(jQuery.isEmptyObject(wrongResults)){
+					var resultItem = '<div class="result-content">';
+						resultItem += '<p class="score green">100</p>';
+						resultItem += '<p class="cngs green">Congratulations!</p>';
+						resultItem += '<p class="result-message">You got full marks! Keep up the good work and continue aiming high!</p>';
+						resultItem += '</div>';
+					$('.pt-result').append(resultItem);
+				}else{
+					var sum = 0;
+					$.each(wrongResults, function(index, value){
+						sum++;
+					});
+					
+					var resultItem = '<div class="result-content">';
+						resultItem += '<p class="score red">' + sum + ' Wrongs!</p>';
+						resultItem += '<div class="explain-wrap">';
+						
+						$.each(wrongResults, function(index, value){
+							resultItem += '<div class="expand-cell-wrap">';
+							resultItem += '<div class="expand-cell-header">';
+							resultItem += '<div class="ques-index"><span>' + (parseInt(index) + 1) + '</span></div>';
+							resultItem += '<p class="section-title">' + questions[index].content + '</p>';
+							resultItem += '</div>';
+							resultItem += '<div class="expand-cell-detail">';
+							
+							if(questions[index].questionType === 'MULTIPLE_CHOICE' || questions[index].questionType === 'PICTURE_CHOICE'){
+								resultItem += '<div class="correct-anw">';
+								resultItem += '<i class="fa fa-check-circle green"></i>';
+								resultItem += '<p class="anw-title green">Correct Answer:<span>  </span> <span>' + wrongResults[index] + '</span></p>';
+								resultItem += '<p class="anw-content">' + questions[index].content + '</p>';
+								if(questions[index].questionImages.length > 0){
+									resultItem += '<img src="/question/image?uuid=' + questions[index].questionImages[0].uuid + '"/>';
+				        		}
+								resultItem += '</div>';								
+							}
+							
+							resultItem += '</div>';
+							resultItem += '</div>';
+						});
+						
+						resultItem += '</div>';
+						resultItem += '</div>';
+						
+					$('.pt-result').append(resultItem);
+				}
+				
+				$('#iterateEffects').text('Close');
+			}
+			
+			$currPage.addClass( outClass ).on( animEndEventName, function() {
+				$currPage.off( animEndEventName );
+				endCurrPage = true;
+				if( endNextPage ) {
+					onEndAnimation( $currPage, $nextPage );
+				}
+			});
+	
+			$nextPage.addClass( inClass ).on( animEndEventName, function() {
+				$nextPage.off( animEndEventName );
+				endNextPage = true;
+				if( endCurrPage ) {
+					onEndAnimation( $currPage, $nextPage );
+				}
+			} );
+	
+			if( !support ) {
+				onEndAnimation( $currPage, $nextPage );
+			}
+		}else {
+			//last page
+		}
+
+	}
+
+	function onEndAnimation( $outpage, $inpage ) {
+		endCurrPage = false;
+		endNextPage = false;
+		resetPage( $outpage, $inpage );
+		isAnimating = false;
+	}
+
+	function resetPage( $outpage, $inpage ) {
+		$outpage.attr( 'class', $outpage.data( 'originalClassList' ) );
+		$inpage.attr( 'class', $inpage.data( 'originalClassList' ) + ' pt-page-current' );
+	}
+	
+	//Tick or Cross Animation
+	function cross_animationIn(){
+		$("#cross_circle")
+		    .delay(100)
+			.velocity({strokeWidth: 30},200, "easeOutExpo")
+			.velocity({strokeDasharray:1600,strokeDashoffset: 0},700, "easeInOutSine");
+		$("#cross_circle").velocity("reverse", { duration: 1 });
+		
+		$("#cross_p1")
+		    .delay(700)
+			.velocity({ height: 376.964, width: 33.205 },300, "easeOutQuart");
+		$("#cross_p1").velocity("reverse", { duration: 1 });
+		
+		$("#cross_p2")
+			.delay(800)
+			.velocity({ height: 376.964, width: 33.205 },500, "easeOutQuart", function(){
+				nextPage();
+			});
+		$("#cross_p2").velocity("reverse", { duration: 1 });
+	}
+
+	function tick_animationIn(){
+		$("#tick_circle")
+			.delay(100)
+			.velocity({strokeWidth: 30},200, "easeOutExpo")
+			.velocity({strokeDasharray:1600,strokeDashoffset: 0},700, "easeInOutSine");
+		$("#tick_circle").velocity("reverse");
+
+		$("#tick_p1")
+		    .delay(600)
+			.velocity({ height: 137.999, width: 30 },300, "easeInExpo");
+		$("#tick_p1").velocity("reverse");
+		
+		$("#tick_p2")
+			.delay(890)
+			.velocity({ height: 259.334, width: 30 },500, "easeOutExpo", function(){
+				nextPage();
+			});
+		$("#tick_p2").velocity("reverse");
+	}
+</script>
+<!-- https://tympanus.net/Development/Animocons/ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

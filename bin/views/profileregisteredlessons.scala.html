@@ -1,10 +1,10 @@
 @import tags._
 
-@(user: User, lessons: List[Lesson])
+@(user: User, lessons: List[Lesson], achievementVO: modelVOs.AchievementVO)
 
-@profileframe(user, 2){
+@profileframe(user, achievementVO, 2){
 	<div class="dash-detail-header">
-		<p>学习进度</p>
+		<p>My Timetable</p>
 	</div>
 	@if(lessons.size() > 0){
 		<div class="dash-detail-body">
@@ -15,17 +15,17 @@
 				</a>
 				@for(index <- 0 until lessons.size){
 					<div class="tab-item-ctn @if(index == 0){active}" data-ID='@lessons(index).id'>
-						<p class="tab-title" title="工业设计考研复试逆袭第一经验分享">@lessons(index).title</p>
+						<p class="tab-title">@lessons(index).title</p>
 						<div class="process-ctn">	
 			               <div class="process-full">
 			                  <div class="process-done" style="width:0%;"></div>
 			               </div>
-		               		<span class="process-text">已学习0%</span>
+		               		<span class="process-text">progress 0%</span>
 			            </div>
 			            <div class="course-date">
-		            		<span>@if(lessons(index).startDatetime != null){@lessons(index).startDatetime.format("dd MMM yyyy")}</span>
-			            	<span>至</span>
-			            	<span>@if(lessons(index).endDatetime != null){@lessons(index).endDatetime.format("dd MMM yyyy")}</span>
+		            		<span class="time">@lessons(index).startDatetime</span>
+			            	<span>To</span>
+			            	<span class="time">@lessons(index).endDatetime</span>
 			            </div>
 					</div>         	
 		        }
@@ -36,36 +36,38 @@
 		   </div>
 		   <div class="details-ctn">
 		      <div class="course-settings-ctn">
-		         <div class="ctrl-item process"><span>学习进度：</span><span>0</span><span>%</span></div>
+		         <div class="ctrl-item process"><span>Progress：</span><span>0</span><span>%</span></div>
 		         <div class="ctrl-item action-item before-line">
 		            <a class="comments-ctn" data-toggle="modal" data-target="#comment-model">
-		            	<i class="fa fa-commenting-o"></i>评价
+		            	<i class="fa fa-commenting-o"></i>Comment
 		           	</a>
 		         </div>
 		         <a href="#" target="_blank" class="ctrl-item action-item before-line connect">
-		         	<i class="fa a-volume-control-phone"></i><span>联系老师</span>
+		         	<i class="fa a-volume-control-phone"></i><span>Contact</span>
 		       	 </a>
-		         <a href="#" target="_blank" class="ctrl-item action-item before-line connect">
-		         	<i class="fa fa-info-circle"></i><span>查看课程详情</span>
+		         <a href="#" target="_blank" class="ctrl-item action-item before-line connect detail-link">
+		         	<i class="fa fa-info-circle"></i><span>Details</span>
 		      	 </a>
 		      </div>
 		      <div class="section-wrap">
-		      	<span class="title">全部任务</span>
-		      	<span class="nums">(共1节)</span>
+		      	<span class="title">ALL SESSIONS</span>
+		      	<span class="nums">( Total: @lessons(0).lessonSessions.size() )</span>
 			  </div>
 		   </div>
 		</div>
 	}else{
-		<p class="empty">您暂无任何课程～</p>
+		<p class="empty">Sorry, You havn't any class～</p>
 	}
 	
 	@comment(lessons)
+	@modalquestion()
 	
-   <script src="@routes.Assets.versioned("javascripts/jquery-dateFormat.min.js")" type="text/javascript"></script>
    <script src="@routes.Assets.versioned("javascripts/circle-progress.min.js")" type="text/javascript"></script>
+   <script src="@routes.Assets.versioned("javascripts/moment.js")" type="text/javascript"></script>
    <script>
 	$(function(){
 		lessonMap = {};
+		lessonSessionMap = {};
 		pageIndex = 0;
 		tabContainerWidth = $('.tab-ctn').width() - 62;
 		tabWidth = $('.tab-item-ctn').width();
@@ -73,7 +75,7 @@
 		nextBtn = $('#next-btn');
 		prevBtn = $('#prev-btn');
 		lessonTabs = $('.tab-item-ctn');
-		totalLessonCount = lessonTabs.length;
+		totalLessonCount = $('.tab-item-ctn').length;
 		
 		if(@lessons.size() > 0){
 			updatePage();
@@ -105,7 +107,25 @@
 			}
 		});
 		
+		$('.course-date .time').each(function(){
+			var local = toClientDatetime($(this).text(), 'll');
+			$(this).text(local);
+		});
 	});
+	
+	function toClientDatetime(serverDatetimeStr, format){
+		var date = serverDatetimeStr,
+	    values = date.split(/[^0-9]/),
+	    year = parseInt(values[0], 10),
+	    month = parseInt(values[1], 10) - 1, // Month is zero based, so subtract 1
+	    day = parseInt(values[2], 10),
+	    hours = parseInt(values[3], 10),
+	    minutes = parseInt(values[4], 10),
+	    seconds = parseInt(values[5], 10);
+	
+		date = toLocal(new Date(year, month, day, hours, minutes, seconds));
+		return moment(date).format(format);
+	}
 	
 	function loadLessonSession(value){
 		var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner loading-bar"></i>');
@@ -129,6 +149,9 @@
             	}else{
             		lessonMap[lessonId] = data.data;
             		updateSessionView(lessonMap[lessonId]);
+            		
+            		$('.details-ctn').find('.detail-link').attr('href', '/lesson?lessonId=' + lessonId);
+            		$('.section-wrap .nums').text('(Total: ' + lessonMap[lessonId].length + ')');
             	}
             	spinner.remove();
             },
@@ -145,20 +168,26 @@
 	        var lsView = '<div class="detail-item-ctn">';
 	        lsView += '<div class="detail-item-body">';
 	        lsView += '<div class="task-item-ctn">';
-	        lsView += '<div class="icon"><span>' + key + '</span></div>';
+	        lsView += '<div class="icon"><span>' + (key + 1) + '</span></div>';
 	        lsView += '<div class="task-title">' + lessonSession.title + '</div>';
-	        lsView += '<div class="sub-title">' + $.format.date(new Date(lessonSession.startDatetime), 'HH:mm, d MMM yyyy') + '</div>';
+	        lsView += '<div class="sub-title">' + moment(new Date(lessonSession.startDatetime)).format('MMM DD, YYYY, hh:mm A') + '</div>';
 
 	        var diff = diffDate(new Date(), new Date(lessonSession.startDatetime));
 	        if(diff <= -lessonSession.duration){
-	        	lsView += '<div class="task-button-ctn">已结束</div>';
-	        }else if(diff > -lessonSession.duration && diff <= 0){
-	        	lsView += '<a class="btn task-button-ctn broadcast-btn" href="/broadcast/lessonSession/join?lessonSessionId='+ lessonSession.id +'">直播中...</a>';
-	        }else if(diff > 0 && diff <= 30){
-	        	lsView += '<a class="btn task-button-ctn broadcast-btn" href="/broadcast/lessonSession/join?lessonSessionId='+ lessonSession.id +'">开始直播</a>';
+	        	lsView += '<div class="task-button-ctn">Finished</div>';
+	        }else if((diff > -lessonSession.duration && diff <= 0) || (diff > 0 && diff <= 30)){
+	        	lsView += '<a class="btn task-button-ctn broadcast-btn" href="/broadcast/lessonSession/join?lessonSessionId='+ lessonSession.id +'">Start</a>';
 	        }else{
-	        	lsView += '<div class="task-button-ctn">直播未开始</div>';
+	        	lsView += '<div class="task-button-ctn">Starting Soon</div>';
 	        }
+	        
+	        if(lessonSession.questions.length > 0){
+	        	if (!(lessonSession.id in lessonSessionMap)){
+	        		lessonSessionMap[lessonSession.id] = lessonSession.questions;
+				}
+	        	lsView += '<a class="question" data-toggle="modal" data-target="#question-model" data-session-id=' + lessonSession.id + ' data-title="' + lessonSession.title + '">Question</a>';
+	        }
+	        
 	        lsView += '</div></div></div>';
 	        
 	        $('.details-ctn').append(lsView);
@@ -209,6 +238,5 @@
 			updateSessionView(lessonMap[lessonId]);
 		}
 	}
-	
    	</script>
 }

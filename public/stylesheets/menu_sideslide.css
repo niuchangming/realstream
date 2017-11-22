@@ -16,27 +16,14 @@
 
 /* Menu Button */
 .menu-button {
-	position: fixed;
 	z-index: 1000;
 	margin: 9px;
 	padding: 0;
 	width: 2.5em;
 	height: 2.25em;
 	border: none;
-	text-indent: 2.5em;
 	font-size: 1.5em;
-	color: transparent;
 	background: transparent;
-}
-
-.menu-button::before {
-	position: absolute;
-	top: 0.5em;
-	right: 0.5em;
-	bottom: 0.5em;
-	left: 0.5em;
-	background: linear-gradient(white 20%, transparent 20%, transparent 40%, white 40%, white 60%, transparent 60%, transparent 80%, white 80%);
-	content: '';
 }
 
 .menu-button:hover {
@@ -84,6 +71,7 @@
 	position: absolute;
 	z-index: 1001;
 	min-width: 240px;
+	max-width: 320px;
 	width: 20%;
 	height: 100%;
 	background: #373a47;
@@ -103,9 +91,11 @@
 }
 
 .menu h3{
+	margin: 30px 0;
 	text-align: center;
 	color: white;
 	font-weight: 200;
+	font-size: 18px;
 }
 
 .menu h3 > span{
@@ -127,6 +117,13 @@
 	padding: 0.8em;
 	-webkit-transform: translate3d(0,500px,0);
 	transform: translate3d(0,500px,0);
+}
+
+.session-list a.title {
+	width: calc(100% - 48px);
+    overflow: hidden;
+    height: 16px;
+    display: inline-block;
 }
 
 .session-list,

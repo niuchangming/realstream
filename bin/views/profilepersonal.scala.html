@@ -1,26 +1,26 @@
 @import tags._
 
-@(user: User)
+@(user: User, achievementVO: modelVOs.AchievementVO)
 
-@profileframe(user, 0){
+@profileframe(user, achievementVO, 0){
 	<div class="dash-detail-header">
-		<p>个人信息</p>
-		<a id="personal-save" class="btn btn-success">保存</a>
+		<p>@messages.at("basic.person_info")</p>
+		<a id="personal-save" class="btn btn-success">@messages.at("btn.save")</a>
 	</div>
 	
 	<div class="form-group">
 		<div id="avatar-wrap" class="form-label">	
-			<label>头像:</label>
+			<label>@messages.at("basic.your_photo"):</label>
 		</div>
 		<div id="avatar-uploader-wrap" class="uploader @if(user.avatars.size > 0){noborder}">
 			<a id="avatar-link" class="link-img" style="@if(user.avatars.size > 0){background-image:url('@routes.ProfileController.showAvatarThumbnail(user.avatars.get(0).thumbnailUUID)')} else{display: none;}"></a>
 			<div class="upload-wrap">
 				<i class="fa fa-picture-o" aria-hidden="true"></i>
 				<div class="upload-text">
-					<p>Drop photo here</p> 
-				  	<p class="small-p">or</p>
+					<p>@messages.at("basic.drop_photo")</p> 
+				  	<p class="small-p">@messages.at("basic.or")</p>
 				</div>
-				<a class="browse-btn @if(user.avatars.size > 0){hidden}">Browse Files</a>
+				<a class="browse-btn @if(user.avatars.size > 0){hidden}">@messages.at("basic.browse_file")</a>
 				<input id="avatar-uploader" class="file-input" type="file" name="avatar" data-url="@routes.ProfileController.uploadAvatar()"/>
 			  </div>
 		</div>
@@ -28,7 +28,7 @@
 	<form id="profile-personal-form">
 		<div class="form-group">
 			<div class="form-label">
-				<label>姓名:</label>
+				<label>@messages.at("basic.name"):</label>
 			</div>
 			<div class="form-input">
 				<input class="form-control" name="username" value="@user.username"/>
@@ -37,7 +37,7 @@
 		
 		<div class="form-group">
 			<div class="form-label">
-				<label>邮件地址:</label>
+				<label>@messages.at("basic.email"):</label>
 			</div>
 			<div class="form-input">
 				<input class="form-control" name="email" value="@user.email" />
@@ -46,7 +46,7 @@
 		
 		<div class="form-group">
 			<div class="form-label">
-				<label>微信号码:</label>
+				<label>@messages.at("basic.wechat"):</label>
 			</div>
 			<div class="form-input">
 				<input class="form-control" name="wechat" value="@user.wechat"/>
@@ -55,7 +55,7 @@
 		
 		<div class="form-group">
 			<div class="form-label">
-				<label>QQ号码:</label>
+				<label>@messages.at("basic.qq"):</label>
 			</div>
 			<div class="form-input">
 				<input class="form-control" name="qq" value="@user.qq"/>
@@ -64,9 +64,9 @@
 	</form>
 	<div class="alert alert-info profile-personal-info" role="alert">
 		<ul>
-			<li>支持jpg, png, jpeg格式的图片文件，每张图片大小不超过5M。</li>
-			<li>您可在报名成功后选择提供联系方式给机构获得更多教学服务，未经您的确认不会公开您的信息。</li>
-			<li>图片将上传到云端服务器，上传后会生成另外的一张小图，所以会需要一点时间，请耐心等待。</li>
+			<li>@messages.at("message.image_format_size")</li>
+			<li>@messages.at("message.info_security")</li>
+			<li>@messages.at("message.image_patient")</li>
 		</ul>
 	</div>
 	
@@ -131,7 +131,7 @@
 			$("#profile-personal-form").validate({
 		        rules: {
 		            username:{
-		            	minlength: 3,
+		            	minlength: 2,
 		                maxlength: 50,
 		            	required:true
 		            },
@@ -169,13 +169,13 @@
 		                	
 		                	spinner.remove();
 		                	$('#personal-save').attr("disabled", false);
-		                	$('#personal-save').val('保存');
+		                	$('#personal-save').val(@messages.at("btn.save"));
 		                },
 		                error: function(request, status, err){
 		                	showAlertToast(err, "alert-danger");
 		                	spinner.remove();
 		                	$('#personal-save').attr("disabled", false);
-		                	$('#personal-save').val('保存');
+		                	$('#personal-save').val(@messages.at("btn.save"));
 		                }
 	                });
 		        }

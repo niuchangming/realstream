@@ -2,14 +2,18 @@
 
 @scripts = {
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
-	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/froala_editor.min.css")">
-	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/froala_style.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/froala_editor.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/froala_style.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/special_characters.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala_v2/colors.min.css")">
 	
-	<script src="@routes.Assets.versioned("javascripts/froala/froala_editor.min.js")" type="text/javascript"></script>
-	<script src="@routes.Assets.versioned("javascripts/froala/font_size.min.js")" type="text/javascript"></script>
-	<script src="@routes.Assets.versioned("javascripts/froala/colors.min.js")" type="text/javascript"></script>
-	<script src="@routes.Assets.versioned("javascripts/froala/font_family.min.js")" type="text/javascript"></script>
-	<script src="@routes.Assets.versioned("javascripts/froala/lists.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/froala_editor.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/special_characters.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/font_size.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/font_family.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/colors.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/froala_v2/lists.min.js")" type="text/javascript"></script>
+	
 	<script>
 		$(function(){
 			$('#publish-lesson-btn').on('click', function(){
@@ -22,7 +26,7 @@
 				$.ajax({
 	                url: "@routes.LessonController.publishLesson()",
 	                type: "POST",
-	                data: {
+	                data: {	
 	                	lessonId: @lesson.id
 	                },
 	                success: function(response, status) {
@@ -37,13 +41,13 @@
 	                	}
 	                	spinner.remove();
 	                	$('#publish-lesson-btn').attr("disabled", false);
-	                	$('#publish-lesson-btn').text("发布课程");
+	                	$('#publish-lesson-btn').text("Publish");
 	                },
 	                error: function(request, status, err){
 	                	showAlertToast(err, "alert-danger");
 	                	spinner.remove();
 	                	$('#publish-lesson-btn').attr("disabled", false);
-	                	$('#publish-lesson-btn').text("发布课程");
+	                	$('#publish-lesson-btn').text("Publish");
 	                }
 	            });
 				
@@ -52,9 +56,17 @@
 	</script>
 }
 
-@main(scripts){
+@main(scripts, "线上教学平台——Ekoo教育"){
+	<div class="dash-header">
+		<nav class="bread-crumb inner-center bottom-border">
+		    <a class="bread-crumb-item" href="@routes.HomeController.index()">Home</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item" href="@routes.LessonController.publishedLessons(0, 0, null)">All Lessons</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item item-current" href="routes.LessonController.lessonDetail(lesson.id)">Lesson Detail</a>
+		</nav>
+	</div>
 	<div id="dash-content" class="dash-bg">
-	
 		<div id="lesson-header" class="dash-block">
 			@if(lesson.teacher.avatars != null && lesson.teacher.avatars.size() > 0){
 				<a style="background-image:url('@routes.ProfileController.showAvatarThumbnail(lesson.teacher.avatars.get(0).thumbnailUUID)');" class="link-img"></a>
@@ -64,105 +76,102 @@
 			<div class="lesson-brief">
 				<p class="bold-style">@lesson.title</p>
 				<p>
-					<span class="lbl-key">教师：</span>
+					<span class="lbl-key">Tutor：</span>
 					<span class="lbl-value">@lesson.teacher.username</span>
 				</p>
 			</div>
 			<div class="btn-wrap">
 				@if(section == 0 || section == 5){
 					<div>
-						<a id="save-lesson-btn" class="btn btn-info">保存修改</a>
+						<a id="save-lesson-btn" class="btn btn-info">Save</a>
 					</div>				
 				}
 				<div>
-					<a id="publish-lesson-btn" class="btn btn-success">发布课程</a>
+					<a id="publish-lesson-btn" class="btn btn-success">Publish</a>
 				</div>
 			</div>
 		</div>
 		
 		<div id="sidebar" class="dash-block">
-		   	<p>基本信息</p>
+		   	<p>Basic Information</p>
 		    <ul class="sidebar-menu" id="nav-accordion">
 		        <li class="sub-menu dcjq-parent-li">
 		            <a @if(section == 0){class="active"} href="@routes.LessonController.editLesson(lesson.id)">
 		                <i class="fa fa-dashboard"></i>
-		                <span>基本信息</span>
+		                <span>Basic Info</span>
+		                <b>*</b>
 		            </a>
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
 		            <a @if(section == 1){class="active"} href="@routes.LessonController.editLessonImages(lesson.id)">
 		                <i class="fa fa-picture-o"></i>
-		                <span>课程图片</span>
+		                <span>Images</span>
 		            	<span class="dcjq-icon"></span>
+		            	<b>*</b>
 		            </a>
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
 		            <a @if(section == 2){class="active"} href="@routes.LessonController.lessonSession(lesson.id, 0)">
 		                <i class="fa fa-clock-o"></i>
-		                <span>课时管理</span>
+		                <span>Sessions</span>
 		            	<span class="dcjq-icon"></span>
+		            	<b>*</b>
 		            </a>
 		        </li>
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
+		            <a href="@routes.HomeController.comingSoon()">
 		                <i class="fa fa-video-camera"></i>
-		                <span>录播管理</span>
+		                <span>Backups</span>
 		            <span class="dcjq-icon"></span></a>
 		        </li>
 		        <li class="sub-menu dcjq-parent-li">
 		            <a @if(section == 4){class="active"} href="@routes.FileController.fileManagement(lesson.id)">
 		                <i class="fa fa-file-o"></i>
-		                <span>文件管理</span>
+		                <span>Files</span>
 		            <span class="dcjq-icon"></span></a>
 		        </li>
 		    </ul>
 		    
-		    <p class="main-title">课程设置</p>
+		    <p class="main-title">Settings</p>
 		    <ul class="sidebar-menu" id="nav-accordion">
 		        <li class="sub-menu dcjq-parent-li">
 		            <a @if(section == 5){class="active"} href="@routes.LessonController.lessonPrice(lesson.id)">
 		                <i class="fa fa-money"></i>
-		                <span>价格设置</span>
+		                <span>Pricing</span>
+		                <b>*</b>
 		            </a>
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
+		            <a href="@routes.HomeController.comingSoon()" >
 		                <i class="fa fa-users"></i>
-		                <span>老师设置</span>
+		                <span>Teachers</span>
 		            	<span class="dcjq-icon"></span></a>
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
+		            <a @if(section == 7){class="active"} href="@routes.LessonController.studentsOfLesson(lesson.id, 0)">
 		                <i class="fa fa-graduation-cap"></i>
-		                <span>学员管理</span>
+		                <span>Students</span>
 		            <span class="dcjq-icon"></span></a>
 		        </li>
 		    </ul>
 		    
-		    <p class="main-title">题库管理</p>
+		    <p class="main-title">Question Management</p>
 		    <ul class="sidebar-menu" id="nav-accordion">
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="index.html">
+		            <a @if(section == 8){class="active"} href="@routes.QuestionController.lessonQuestions(lesson.id, 0)">
 		                <i class="fa fa-dashboard"></i>
-		                <span>题目管理</span>
+		                <span>Questions</span>
 		            </a>
 		        </li>
 		
 		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
-		                <i class="fa fa-desktop"></i>
-		                <span>试卷管理</span>
-		            	<span class="dcjq-icon"></span></a>
-		        </li>
-		
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
+		            <a href="@routes.HomeController.comingSoon()">
 		                <i class="fa fa-cogs"></i>
-		                <span>试卷批阅</span>
+		                <span>Exams</span>
 		            <span class="dcjq-icon"></span></a>
 		        </li>
 		    </ul>

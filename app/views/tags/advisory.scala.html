@@ -1,0 +1,109 @@
+@(account: Account, lesson: Lesson)
+
+<div class="modal fade" id="advisory-model" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-block">
+			<a class="link-img" style='background-image:url("@routes.LessonController.showLessonCover(lesson.id, true)")'></a>
+			<div class="lesson-brief">
+				<p class="bold-style les-tt">@lesson.title</p>
+				<p>
+					<span class="lbl-key">Tutor：</span>
+					<span class="lbl-value">@lesson.teacher.realName</span>
+				</p>
+			</div>
+		</div>
+      </div>
+      <form id="advisory-form">
+		<div class="modal-body">
+      		<input name="lessonId" value="@lesson.id" type="hidden"/>
+      		<input name="userId" value="@if(account != null){@account.id}" type="hidden">
+      		@if(account == null){
+      			<div class="form-group">
+			    	<label>Your name</label>
+			      	<input class="form-control" name="name" placeholder="What should we call you?" value=""> 
+				</div>
+				
+				<div class="form-group"> 
+					<label>Phone</label> 
+					<div class="form-group">
+						<input class="form-control" name="phone" placeholder="We will make a phone call by this number later." value=""> 
+					</div> 
+				</div>
+      		}
+      		<div class="form-group">
+		    	<label>Email</label>
+		      	<input class="form-control" type="text" name="email" placeholder="We will respond your advisory by this email."/>
+			</div>
+			<div class="form-group">
+		    	<label>Write down your question</label>
+		      	<textarea class="form-control" rows="5" name="content" placeholder="Write down your question here..."></textarea>
+			</div>
+		</div>
+		<div class="modal-footer">
+      		<div class="form-group">
+	        	<input id="submit-adv-btn" type="submit" class="btn btn-success" value="Submit">
+	        </div>
+      	</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$("#advisory-form").validate({
+	        rules: {
+	        	email:{
+	            	email: true,
+	            	required:true
+	            },
+	        	content:{
+	            	minlength: 5,
+	                maxlength: 200,
+	            	required:true
+	            }
+	        },
+	        highlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+	        },
+	        unhighlight: function (element) {
+	            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+	        },
+	        submitHandler: function(form) {
+	        	var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+	        	$('#submit-adv-btn').after(spinner);
+	        	$('#submit-adv-btn').val('');
+	        	$('#submit-adv-btn').attr("disabled", true);
+	        	
+	        	$.ajax({
+	                url: "@routes.LessonController.advisoryLesson()",
+	                type: "POST",
+	                data: $(form).serialize(),
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	if(data.code != 0){
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		showAlertToast(data.message, "alert-success");
+	                	}
+	                	spinner.remove();
+	                	$('#submit-adv-btn').attr("disabled", false);
+	                	$('#submit-adv-btn').val("Submit");
+	                	$('#advisory-model').modal('hide');
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	spinner.remove();
+	                	$('#submit-adv-btn').attr("disabled", false);
+	                	$('#submit-adv-btn').val("Submit");
+	                	$('#advisory-model').modal('hide');
+	                }
+	            });
+	        }
+	    });
+		
+   	});
+</script>

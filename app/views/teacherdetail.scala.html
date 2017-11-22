@@ -24,13 +24,7 @@
 			    		ppLesView += '<a target="_blank" href="/lesson?lessonId=@account.user.teacherLessons(index).id">@account.user.teacherLessons(index).title</a>';
 			    		ppLesView += '</p>';
 			    		ppLesView += '<p class="bm-menu-info-bottom">';
-			    		
-			    		@if(account.user.teacherLessons(index).offerPrice > 0 && (account.user.teacherLessons(index).offerStartDate == null || account.user.teacherLessons(index).offerEndDate == null) || (account.user.teacherLessons(index).offerPrice > 0 && !account.user.teacherLessons(index).offerStartDate.before(now) && !account.user.teacherLessons(index).offerEndDate.after(now))){
-			    			ppLesView += '<span class="bm-menu-price">$@account.user.teacherLessons(index).offerPrice.intValue()</span>';
-						}else{
-							ppLesView += '<span class="bm-menu-price">$@account.user.teacherLessons(index).price.intValue()</span>';
-						}
-			    		
+						ppLesView += '<span class="bm-menu-price">S$@account.user.teacherLessons(index).price.intValue()</span>';
 			    		ppLesView += '<span>@account.user.teacherLessons(index).userLessons.size()<span> </span>students</span>';
 			    		ppLesView += '</p></div><div class="clear"></div></div></li>';
 					    
@@ -41,7 +35,7 @@
 	</script>
 }
  
-@main(scripts) {
+@main(scripts, "线上教学平台——Ekoo教育") {
 	@topbar(account)
 	<section class="teacher-banner">
 		<div class="inner-center clearfix">
@@ -62,7 +56,7 @@
 					<ul class="treeres">
 					    <li class="treeres-item">
 					      <div class="treeres-num">@if(account.user.teacherLessons != null){@account.user.teacherLessons.size()}else{0}</div>
-					      <div class="treeres-cat">课程</div>
+					      <div class="treeres-cat">Lesson</div>
 					    </li>
 				  	</ul>
 				</div>
@@ -76,7 +70,7 @@
 				<div class="r-side-cont">
 					<div class="ls-bd sm-bm-style">
 						<div class="bm-menu mt20 mrl15">
-							<h2 class="bm-menu-hd" style="margin-bottom:0;">最受欢迎课程</h2>
+							<h2 class="bm-menu-hd" style="margin-bottom:0;">Most Popular Lessons</h2>
 							<ul class="bm-menu-bd teacher-course-popular">
 								
 							</ul>
@@ -102,12 +96,8 @@
 							<div class="post-footer">
 								<div class="post-desc">A Level Chinese</div>
 								<div>
-									<a class="detail-btn" target="_blank" href="/lesson?lessonId=@lesson.id">查看详情</a>
-									@if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
-										<span class="cate-info-price">@lesson.offerPrice.intValue()</span>
-									}else{
-										<span class="cate-info-price">@lesson.price.intValue()</span>
-									}
+									<a class="detail-btn" target="_blank" href="/lesson?lessonId=@lesson.id">More Details</a>
+									<span class="cate-info-price">S$@lesson.price.intValue()</span>
 								</div>
 							</div>
 						</article>
@@ -117,6 +107,8 @@
 		}
 		
 	</section>
+	
+	@modalcreatelesson()
 }
 
 

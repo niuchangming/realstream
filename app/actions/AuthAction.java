@@ -14,7 +14,6 @@ import tools.Utils;
 
 public class AuthAction extends Action.Simple{
 	public static final String LOGGED_KEY = "logged";
-	
 	@Inject
 	private JPAApi jpaApi;
 	

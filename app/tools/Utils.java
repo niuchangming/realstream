@@ -1,8 +1,12 @@
 package tools;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,14 +16,23 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import com.auth0.jwt.JWTSigner;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +92,15 @@ public class Utils {
 		return UUID.randomUUID().toString();
 	}
 	
+	public static String gen(int length) {
+	    StringBuffer sb = new StringBuffer();
+	    for (int i = length; i > 0; i -= 12) {
+	      int n = Math.min(12, Math.abs(i));
+	      sb.append(StringUtils.leftPad(Long.toString(Math.round(Math.random() * Math.pow(36, n)), 36), n, '0'));
+	    }
+	    return sb.toString();
+	}
+	
 	public static String getJWTString(int mins){
 		final long iat = System.currentTimeMillis() / 1000L - 180;
 		final long exp = iat + mins * 60L;
@@ -97,27 +119,89 @@ public class Utils {
 	public static String sendSMS(String mobile, String msg){
 		String response = "";
 		try{
-			String url = "http://gateway.onewaysms.sg:10002/api.aspx?apiusername=APIKWEEZCI355&apipassword=APIKWEEZCI355KWEEZ&mobileno=" 
-					+ URLEncoder.encode(mobile, "UTF-8") + "&senderid=AppName" + "&message=" + URLEncoder.encode(msg, "UTF-8") + "&languagetype=1";
+//			Use one way sms gateway http://www.onewaysms.sg/
+//			String url = "http://gateway.onewaysms.sg:10002/api.aspx?apiusername=APIKWEEZCI355&apipassword=APIKWEEZCI355KWEEZ&mobileno=" 
+//					+ URLEncoder.encode(mobile, "UTF-8") + "&senderid=EkooEdu" + "&message=" + URLEncoder.encode(msg, "UTF-8") + "&languagetype=1";
+			
+			String url = "https://rest.nexmo.com/sms/json";
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-			con.setRequestMethod("GET");
+			con.setRequestMethod("POST");
+			con.setDoInput(true);
+			con.setDoOutput(true);
 			
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer sb = new StringBuffer();
-	 
-			while ((inputLine = in.readLine()) != null) {
-				sb.append(inputLine);
-			}
-			in.close();
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("api_key", "9096afb9"));
+			params.add(new BasicNameValuePair("api_secret", "6608c8e97884dad4"));
+			params.add(new BasicNameValuePair("to", mobile));
+			params.add(new BasicNameValuePair("from", "EkooEdu"));
+			params.add(new BasicNameValuePair("text", msg));
 			
-			response = sb.toString();
+			OutputStream os = con.getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+			writer.write(getQuery(params));
+			writer.flush();
+			writer.close();
+			os.close();
+			
+			int responseCode=con.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    			String inputLine;
+    			StringBuffer sb = new StringBuffer();
+    	 
+    			while ((inputLine = in.readLine()) != null) {
+    				sb.append(inputLine);
+    			}
+    			in.close();
+    			
+    			response = sb.toString();
+            }
 		} catch(IOException e){
 			e.printStackTrace();
 		}
 		return response; 
 	}
+	
+	public static void main(String[] args){
+		System.out.println("-------> " + sendSMS("6582045325", "Thank you for joining ekooedu. We are happy to inform you that your application has been approved. We endeavour to match carefully each student and tutor to foster academic excellence. Stay tuned and appreciate your support and trust that we will all have a fruitful experience."));
+	}
+	
+	private static String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException{
+	    StringBuilder result = new StringBuilder();
+	    boolean first = true;
+
+	    for (NameValuePair pair : params){
+	        if (first)
+	            first = false;
+	        else
+	            result.append("&");
+
+	        result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+	        result.append("=");
+	        result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+	    }
+
+	    return result.toString();
+	}
+	
+	public static String createLinkString(Map<String, String> params, String privateKey) {
+		List<String> keys = new ArrayList<String>(params.keySet());
+        Collections.sort(keys);
+
+        String prestr = "";
+        for (int i = 0; i < keys.size(); i++) {
+            String key = (String) keys.get(i);
+            String value = (String) params.get(key);
+
+            if (i == keys.size() - 1) {
+                prestr = prestr + key + "=" + value;
+            } else {
+                prestr = prestr + key + "=" + value + "&";
+            }
+        }
+        return prestr + privateKey;
+    }
 	
 	public static int genernateActiveCode(){
 		Random r = new Random();
@@ -148,7 +232,7 @@ public class Utils {
 
 	public static String formatDateTime(String format, Date date) {
 		if (format == null) {
-			format = "yyyy-MM-dd HH:mm:ss";
+			format = "yyyy-MM-dd HH:mm";
 		}
 		String time = new java.text.SimpleDateFormat(format).format(date);
 		return time;
@@ -314,7 +398,7 @@ public class Utils {
 		calendar.setTimeInMillis(milliseconds);
 		return calendar.getTime();
 	}
-	
+		
 	public static String upperFirst(String s) {
 		return s.replaceFirst(s.substring(0, 1), s.substring(0, 1)
 				.toUpperCase());

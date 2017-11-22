@@ -1,6 +1,6 @@
 name := """RealStream"""
 
-version := "1.13"
+version := "2.74"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   javaJpa,
+  filters,
   "mysql" % "mysql-connector-java" % "5.1.38",
   "org.hibernate" % "hibernate-entitymanager" % "5.1.0.Final",
   "com.tokbox" % "opentok-server-sdk" % "2.3.2",

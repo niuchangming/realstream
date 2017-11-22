@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
@@ -19,6 +20,7 @@ import models.Lesson;
 import models.LessonSession;
 import models.MediaFile;
 import models.ResponseData;
+import play.Application;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.db.jpa.JPAApi;
@@ -27,15 +29,18 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import tools.Constants;
 import tools.Utils;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import views.html.errorpage;
 import views.html.filemanagement;
+import views.html.fileviewer;
 
 public class FileController extends Controller{
 	@Inject private FormFactory formFactory;
 	@Inject private JPAApi jpaApi;
+	@Inject private Provider<Application> application;
 	
 	@With(AuthAction.class)
 	@Transactional
@@ -52,13 +57,13 @@ public class FileController extends Controller{
 		int totalAmount = ((Long)jpaApi.em()
 				.createQuery("select count(*) from MediaFile mf where mf.lesson = :lesson")
 				.setParameter("lesson", lesson).getSingleResult()).intValue();
-		int pageIndex = (int) Math.ceil(offset / MediaFile.PAGE_SIZE) + 1;
+		int pageIndex = (int) Math.ceil(offset / Constants.MEDIA_PAGE_SIZE) + 1;
 		
 		List<MediaFile> mediaFiles = jpaApi.em()
 				.createQuery("from MediaFile mf where mf.lesson = :lesson ", MediaFile.class)
 				.setParameter("lesson", lesson)
 				.setFirstResult(offset)
-				.setMaxResults(LessonSession.PAGE_SIZE)
+				.setMaxResults(Constants.MEDIA_PAGE_SIZE)
 				.getResultList();
 		return ok(filemanagement.render(lesson, mediaFiles, pageIndex, totalAmount));
 	}
@@ -175,6 +180,17 @@ public class FileController extends Controller{
 	    	responseData.code = 4000;
     	}
     	return ok(Json.toJson(responseData));
+	}
+	
+	@Transactional
+	public Result fileViewer(){
+    	return ok(fileviewer.render());
+	}
+	
+	@Transactional
+	public Result siteMap(){
+		InputStream siteMapFile = application.get().classloader().getResourceAsStream("public/sitemap.xml");
+		return ok(siteMapFile);
 	}
 }
 

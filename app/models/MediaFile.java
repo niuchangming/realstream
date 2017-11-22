@@ -26,8 +26,6 @@ import tools.Utils;
 @Entity
 @Table(name = "media_file")
 public class MediaFile {
-	public final static int PAGE_SIZE = 10;
-	
 	@Id
 	@GeneratedValue
 	public long id;
@@ -42,7 +40,7 @@ public class MediaFile {
 	public String uuid;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="creation_datetime")
+	@Column(name="uploaded_datetime")
 	public Date uploadedDatetime;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

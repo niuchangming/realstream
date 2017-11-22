@@ -1,0 +1,103 @@
+@import tags._
+@import tools.Constants
+
+@(account: Account)
+ 
+@scripts = {
+	<style>
+		body {background-color: #f5f7fa;}
+	</style>
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=@Constants.BAIDU_MAP_KEY"></script>
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	<div class="about page-content"> 
+		<div class="inner-content row">
+			<section class="section-about">
+				<h1 class="txt-center txt-space">- @messages.at("about.misson_title") -</h1>
+				<h3 class="txt-center txt-space">@messages.at("about.mission_content")</h3>
+				<div class="txt-justify about-desc">
+					<p class="bottom-space">@messages.at("about.about_us_1")</p><br>
+					<p class="bottom-space">@messages.at("about.about_us_2")</p><br>
+					<p class="bottom-space">@messages.at("about.about_us_3")</p><br>
+				</div>
+			</section>	
+			
+			<section class="section-leader">
+				<h1 class="txt-center">- @messages.at("about.adv") -</h1>
+				<div class="super-list row">
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">01</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_team_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_team")</p>
+				   </div>
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">02</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_smallgroup_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_smallgroup")</p>
+				   </div>
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">03</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_livecast_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_livecast")</p>
+				   </div>
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">04</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_english_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_english")</p>
+				   </div>
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">05</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_replay_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_replay")</p>
+				   </div>
+				   <div class="col col-sm-4 super-item">
+				   		<p class="order-blk">06</p>
+				   		<h3 class="txt-center bottom-space">@messages.at("about.adv_guarantee_title")</h3>
+				      	<p class="adv-content">@messages.at("about.adv_guarantee")</p>
+				   </div>
+				</div>
+			</section>
+			
+			<section class="section-loc" >
+				<h2 class="txt-center">联系我们</h2>
+				<div class="txt-space row">
+					<div class="col col-md-4">
+						<p>
+							<span class="txt-bold">EKOO LAB LTE. LTD.</span>
+						</p>
+						<br><br>
+						<address>
+							<p>
+								<i class="fa fa-map-marker"></i>East Court
+							</p>
+							<p>87B, Moon Seng Road, East Court</p>
+							<p>Singapore, 427028</p>
+						</address>
+						<br>
+						<div>
+							<p class="txt-bold"><i class="fa fa-handshake-o"></i>@messages.at("about.adv_contact_us")</p>
+							<p>@messages.at("about.adv_singapore"): +65 8204 5325</p>
+							<p>@messages.at("about.adv_china"): +86 132 3408 8586</p>
+							<p>@messages.at("about.adv_email"): marketing@@ekoolab.com</p>
+						</div>
+					</div>
+					<div class="col-loc col col-md-8">
+						<div id="allmap"></div>
+					</div>
+				</div>
+			</section>
+	    </div>
+    </div>
+    @entry(account)
+    @modalcreatelesson()
+    <script type="text/javascript">
+		var map = new BMap.Map("allmap");
+		map.centerAndZoom(new BMap.Point(103.787244, 1.299588), 15);
+		map.addControl(new BMap.MapTypeControl());
+		map.setCurrentCity("新加坡");
+		map.enableScrollWheelZoom(true);
+	</script>
+}

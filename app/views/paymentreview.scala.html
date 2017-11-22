@@ -4,8 +4,9 @@
 
 @scripts = {
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<script src="@routes.Assets.versioned("javascripts/moment.js")" type="text/javascript"></script>
     <script type="text/javascript">
-		$(function(){
+    	$(function(){
 			spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
 			
 			@if(flash.containsKey("success")) {
@@ -17,209 +18,136 @@
 				
 				$('li.selected').removeClass('selected');
 	       		$(this).addClass('selected');
-	       		$('#card-form').find('input[name="cardType"]').val(payMethod);
+	       		$('#pay-form').find('input[name="payMethod"]').val(payMethod);
 	       		
 	       		if(payMethod === 'paypal'){
-	       			$('.credit-block').addClass('hide');
+	       			$('.alipay-block').addClass('hide');
 	       			$('.paypal-block').removeClass('hide');
 	       		}else{
-	       			$('.credit-block').removeClass('hide');
+	       			$('.alipay-block').removeClass('hide');
 	       			$('.paypal-block').addClass('hide');
 	       		}
 	       	});
 			
-			$("#card-form").validate({
-		        rules: {
-		        	firstname:{
-		            	minlength: 2,
-		                maxlength: 100,
-		            	required:true
-		            },
-		            lastname:{	
-		            	minlength: 2,
-		                maxlength: 100,
-	            		required:true
-		            },
-		            cardNumber:{
-		            	number: true,
-		            	required:true
-		            },
-		            expMonth:{
-		            	number: true,
-		            	required:true
-		            },
-		            expYear:{
-		            	number: true,
-		            	required:true
-		            },
-		            cvv:{
-		            	number: true,
-		            	required:true
-		            }
-		        },
-		        highlight: function (element) {
-		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-		        },
-		        unhighlight: function (element) {
-		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-		        },
-		        messages:{
-		        	expMonth: 'Required',
-		        	expYear: 'Required',
-		        	cvv: 'Required'
-		        },
-		        submitHandler: function(form) {
-		        	$('#pay-btn').after(spinner);
-		        	$('#pay-btn').attr("disabled", true);
-		        	$('#pay-btn').val("");
-		        	
-		        	$.ajax({
-		                url: "@routes.PaymentController.submitCardInfo()",
-		                type: "POST",
-		                data: $(form).serialize(),
-		                success: function(response, status) {
-		                	var data = $.parseJSON(JSON.stringify(response));
-		                	
-		                	if(data.code != 0){
-		                		showAlertToast(data.message, "alert-danger");
-		                	}else if(data.code == 5000){
-		                		showAlertToast(data.message, "alert-warning");
-		                	}else{
-		                		$('#success-model').modal('show');
-		                	}
-		                	
-		                	spinner.remove();
-		                	$('#pay-btn').attr("disabled", false);
-		                	$('#pay-btn').val("Submit Payment");
-		                },
-		                error: function(request, status, err){
-		                	alert();
-		                	showAlertToast(err, "alert-danger");
-		                	$('#pay-btn').attr("disabled", false);
-		                	$('#pay-btn').val("Submit Payment");
-		                }
-		            });
-		        }
-		    });
+			var localStart = toClientDatetime($('.start .value').text(), 'll');
+			$('.start .value').text(localStart);
+			
+			@if(lesson.offers.size > 0){
+				if((@lesson.offers(0).offerPrice > 0 && ('@lesson.offers(0).offerStartDate' === '' || '@lesson.offers(0).offerEndDate' === ''))
+						|| (@lesson.offers(0).offerPrice > 0 && toLocal(new Date('@lesson.offers(0).offerStartDate')) < new Date() && toLocal(new Date('@lesson.offers(0).offerEndDate')) > new Date())){
+					$('#total-price .price').text(@lesson.offers(0).offerPrice);
+				}else{
+					$('#total-price .price').text(@lesson.price);		
+				}
+			}else{
+				$('#total-price .price').text(@lesson.price);	
+			}
+			
+			$('.alipay-block > a.btn').on('click', function(){
+				$(this).after(spinner);
+				$(this).attr("disabled", true);
+				$(this).val("");
+	        	
+	        	$.ajax({
+	                url: "@routes.PaymentController.requestAlipay()",
+	                type: "GET",
+	                data: {
+	                	lessonId: @lesson.id
+	                },
+	                success: function(response, status) {
+	                	var data = $.parseJSON(JSON.stringify(response));
+	                	
+	                	if(data.code != 0){
+	                		showAlertToast(data.message, "alert-danger");
+	                	}else{
+	                		window.location.href = data.data;
+	                	}
+	                	
+	                	spinner.remove();
+	                	$(this).attr("disabled", false);
+	                	$(this).val("Submit Payment");
+	                },
+	                error: function(request, status, err){
+	                	showAlertToast(err, "alert-danger");
+	                	$(this).attr("disabled", false);
+	                	$(this).val("Submit Payment");
+	                }
+	            });
+			});
+			
 		});
+    	
+		function toClientDatetime(serverDatetimeStr, format){
+			var date = serverDatetimeStr,
+			    values = date.split(/[^0-9]/),
+			    year = parseInt(values[0], 10),
+			    month = parseInt(values[1], 10) - 1, // Month is zero based, so subtract 1
+			    day = parseInt(values[2], 10),
+			    hours = parseInt(values[3], 10),
+			    minutes = parseInt(values[4], 10),
+			    seconds = parseInt(values[5], 10);
+		
+			date = toLocal(new Date(year, month, day, hours, minutes, seconds));
+			return moment(date).format(format);
+		}
 	</script>
 }
 
-@main(scripts){
+@main(scripts, "线上教学平台——Ekoo教育"){
 	<div id="pay-content" class="dash-bg">
 		<div id="lesson-summary" class="dash-block">
 			<a class="link-img" style="background-image:url('@routes.LessonController.showLessonCover(lesson.id, false)')"></a>
 			<div class="right-block">
 				<div class="block-item">
-					<span class="label">TITLE</span>
+					<span class="label">@messages.at("payment.title")</span>
 					<p class="value">@lesson.title</p>
 				</div>
 				
 				<div class="block-item">
 					<div class="start">
-						<span class="label">START FROM</span>
-						<p class="value">@lesson.startDatetime.format("dd MMM yyyy")</p>
+						<span class="label">@messages.at("payment.start")</span>
+						<p class="value">@lesson.startDatetime</p>
 					</div>
 					<div class="amount txt-center">
-						<span class="label">LESSON AMOUNT</span>
+						<span class="label">@messages.at("payment.amount")</span>
 						<p class="value">@lesson.lessonSessions.size()</p>
 					</div>
 					<div style="clear: both;"></div>
 				</div>
 			</div>
 			<div id="total-price">
-				<span class="prefix">TOTAL <span class="currency">$</span></span>
-				<span>
-					@if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
-						@lesson.offerPrice.intValue()
-					}else{
-						@lesson.price.intValue()
-					}
-				</span>
+				<span class="prefix">@messages.at("payment.total") <span class="currency">S$</span></span>
+				<span class="price"></span>
 			</div>
 			
-			<form id="card-form" action="@routes.PaymentController.submitCardInfo()" method="post">
-				<input name="cardType" type="hidden" value="visa" />
+			<form id="pay-form" method="post">
+				<input name="payMethod" type="hidden" value="alipay" />
 				<input name="lessonId" type="hidden" value="@lesson.id">
 				<div>
 					<label>
-			    		<span>PATMENT METHOD</span><span> </span><span class="required red">*</span>
+			    		<span>@messages.at("payment.payment_method")</span><span> </span><span class="required red">*</span>
 				    </label>
 					<ul class="pay-method-list">  
-						<li class="selected" data-type="visa"> 
-							<i class="ep-icon fa fa-cc-visa"></i> 
-							<span class="ep-pay-method-name">VISA</span>
+						<li class="selected" data-type="alipay"> 
+							<img id="alipay-ico" src="@routes.Assets.versioned("images/alipay.png")"/>
+							<span class="ep-pay-method-name">@messages.at("payment.alipay")</span>
 							<i class="icon-check"></i>
 						</li>  
-						<li class="" data-type="mastercard"> 
-							<i class="ep-icon fa fa-cc-mastercard"></i>
-							<span class="ep-pay-method-name">MASTER</span> 
-							<i class="icon-check"></i> 
-						</li>
-						<li class="" data-type="amex"> 
-							<i class="ep-icon fa fa-cc-amex"></i>
-							<span class="ep-pay-method-name">AMEX</span> 
-							<i class="icon-check"></i> 
-						</li>
 						<li class="" data-type="paypal"> 
 							<i class="ep-icon fa fa-cc-paypal"></i> 
-							<span class="ep-pay-method-name">PAYPAL</span> 
+							<span class="ep-pay-method-name">@messages.at("payment.paypal")</span> 
 							<i class="icon-check"></i> 
 						</li>  
 					</ul>
 					<div style="clear:both;"></div>	
 				</div>
-				<div class="credit-block">
-					<div class="left">
-						<div class="form-group name-group">
-							<label>
-						    	<span>FIRST NAME</span><span> </span><span class="required red">*</span>
-						    </label>
-						    <input class="form-control" type="text" name="firstname" required />
-						</div>
-						<div class="form-group name-group">
-							<label>
-						    	<span>LAST NAME</span><span> </span><span class="required red">*</span>
-						    </label>
-						    <input class="form-control" type="text" name="lastname" required />
-						</div>
-					</div>
-					
-					<div class="right">
-						<div class="form-group">
-							<label>
-						    	<span>CREDIT/DEBIT CARD NUMBER</span><span> </span><span class="required red">*</span>
-						    </label>
-						    <input id="card-num" class="form-control" type="text" name="cardNumber" value="" autocomplete="off" required />
-						</div>
-					  	<div class="form-group exp-group">
-						    <label>
-								<span>EXPIRED DATE (MM/YYYY)</span><span> </span><span class="required red">*</span>
-						    </label>
-						    <div id="exp-month">
-						    	<input class="form-control" type="text" name="expMonth" size="2" required />
-						    </div>
-					    	<span class="splitor"> / </span>
-					    	<div id="exp-year">
-					    		<input class="form-control" type="text" name="expYear" size="4" required />
-					    	</div>
-					  	</div>
-					  	<div class="form-group cvv-group">
-						    <label>
-								<span>CVC</span><span> </span><span class="required red">*</span>
-						    </label>
-						    <input id="cvv" class="form-control" type="text" name="cvv" value="" autocomplete="off" required />
-					  	</div>
-					  	<div class="form-group">
-					  		<input id="pay-btn" type="submit" class="btn btn-success" value="Submit Payment"/>
-					  		<div style="clear: both;"></div>
-					  	</div>				
-					</div>
-					<div style="clear: both;"></div>
-				</div>
 				<div class="paypal-block hide">
-					<p class="note">By using PAYPAL, Please press 'Payment via Paypal' button below to enter your PAYPAL account information and compete the payment.</p>
-					<a class="btn btn-success" href="@routes.PaymentController.requestPaypal(lesson.id)">Payment via Paypal</a>
+					<p class="note">@messages.at("payment.paypal_note")</p>
+					<a class="btn btn-success" href="@routes.PaymentController.requestPaypal(lesson.id)">@messages.at("payment.pay_btn")</a>
+				</div>
+				<div class="alipay-block">
+					<p class="note">@messages.at("payment.alipay_note")</p>
+					<a class="btn btn-success">@messages.at("payment.pay_btn")</a>
 				</div>
 			</form>
 		</div>
@@ -230,15 +158,15 @@
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="title">Complete Payment</h4>
+	        <h4 class="title">@messages.at("payment.compete_pay")</h4>
 	      </div>
 	     	<div class="modal-body">
-	     		<h4>Thanks for Your Payment</h4>
-	     		<p class="message">We will send out invoice by your registered mobile phone number within 2 hours.</p>
+	     		<h4>@messages.at("payment.thank_message")</h4>
+	     		<p class="message">@messages.at("payment.invoice_note")</p>
 	      	</div>
 	      	<div class="modal-footer">
 	      		<div class="form-group">
-	        		<a class="btn btn-info" href="@routes.HomeController.index()">BACK HOME</a>
+	        		<a class="btn btn-info" href="@routes.HomeController.index()">@messages.at("payment.back_home")</a>
 	        	</div>
 	      </div>
 	    </div>

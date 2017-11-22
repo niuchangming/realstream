@@ -10,7 +10,7 @@
 			<div class="lesson-brief">
 				<p class="bold-style les-tt">A Level Chinese</p>
 				<p>
-					<span class="lbl-key">教师：</span>
+					<span class="lbl-key">Tutor：</span>
 					<span class="lbl-value">changming</span>
 				</p>
 			</div>
@@ -21,7 +21,7 @@
       		<input name="lessonId" value="" type="hidden"/>
       		<input name="point" value="5" type="hidden">
       		<div class="f-item"> 
-      			<label class="f-label">课程评分</label> 
+      			<label class="f-label">Rating:</label> 
       			<div class="f-field"> 
       				<div class="star-list"> 
       					<i data-index="1" class="fa fa-star"></i> 
@@ -31,17 +31,17 @@
       					<i data-index="5" class="fa fa-star active"></i> 
     				</div> 
     				<div class="star-list-intro"> 
-    					<span class="star-num">5星</span> 
-    					<span class="star-text">五星好评！课程非常棒，点赞！</span> 
+    					<span class="star-num">5 Star</span> 
+    					<span class="star-text">5 Star, Excellent class!</span> 
    					</div> 
 				</div> 
 			</div>
 			<div class="f-item"> 
-				<label class="f-label">学习感受</label> 
+				<label class="f-label">Experience:</label> 
 				<div class="f-field"> 
 					<div class="form-group comment-textarea"> 
-						<textarea class="form-control" rows="5" name="comment" placeholder="课程怎么样？快来说说学习感受吧"></textarea> 
-						<p class="comment-tips">请写下您不满意的地方，机构将努力改进！</p> 
+						<textarea class="form-control" rows="5" name="comment" placeholder="How is your experience？Tell us how you feel."></textarea> 
+						<p class="comment-tips">Tell us how we're doing and let us improve. We're here with you every step of the way！</p> 
 					</div> 
 				 </div>
 			</div>
@@ -64,40 +64,40 @@
 			$(this).addClass('active');
 			var index = $(this).attr('data-index');
 			if(index == 1){
-				$('.star-num').text('1星');
-				$('.star-text').text('差评！课程太差了，我要吐槽！');
+				$('.star-num').text('1 Star');
+				$('.star-text').text('Poor experiences！I am not satisfied！');
 			}else if(index == 2){
-				$('.star-num').text('2星');
-				$('.star-text').text('勉强中评！课程不满意！');
+				$('.star-num').text('2 Star');
+				$('.star-text').text('Class experences need to be improved！');
 			}else if(index == 3){
-				$('.star-num').text('3星');
-				$('.star-text').text('中评！课程一般！');
+				$('.star-num').text('3 Star');
+				$('.star-text').text('Good！');
 			}else if(index == 4){
-				$('.star-num').text('4星');
-				$('.star-text').text('好评！课程还不错，继续保持！');
+				$('.star-num').text('4 Star');
+				$('.star-text').text('Great！I am very satisfied！');
 			}else{
-				$('.star-num').text('5星');
-				$('.star-text').text('五星好评！课程非常好，继续保持！');
+				$('.star-num').text('5 Star');
+				$('.star-text').text('Give 5 Star, Excellent class!');
 			}
 		}, function(){
 			$('.fa-star.active').removeClass('active');
 			var selStar = $('.star-list i[data-index='+point+']');
 			selStar.addClass('active');
 			if(point == 1){
-				$('.star-num').text('1星');
-				$('.star-text').text('差评！课程太差了，我要吐槽！');
+				$('.star-num').text('1 Star');
+				$('.star-text').text('Poor experiences！I am not satisfied！');
 			}else if(point == 2){
-				$('.star-num').text('2星');
-				$('.star-text').text('勉强中评！课程不满意！');
+				$('.star-num').text('2 Star');
+				$('.star-text').text('Class experences need to be improved！');
 			}else if(point == 3){
-				$('.star-num').text('3星');
-				$('.star-text').text('中评！课程一般！');
+				$('.star-num').text('3 Star');
+				$('.star-text').text('Good！');
 			}else if(point == 4){
-				$('.star-num').text('4星');
-				$('.star-text').text('好评！课程还不错，继续保持！');
+				$('.star-num').text('4 Star');
+				$('.star-text').text('Great！I am very satisfied！');
 			}else{
-				$('.star-num').text('5星');
-				$('.star-text').text('五星好评！课程非常好，继续保持！');
+				$('.star-num').text('5 Star');
+				$('.star-text').text('Give 5 Star, Excellent class!');
 			}
 		});
 		

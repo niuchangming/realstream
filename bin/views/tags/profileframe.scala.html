@@ -1,10 +1,19 @@
-@(user: User, section: Integer)(content: Html)
+@(user: User, achievementVO: modelVOs.AchievementVO, section: Integer)(content: Html)
 
 @scripts = {
 	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
 }
 
-@main(scripts){
+@main(scripts, "线上教学平台——Ekoo教育"){
+	<div class="dash-header">
+		<nav class="bread-crumb inner-center bottom-border">
+		    <a class="bread-crumb-item" href="@routes.HomeController.index()">@messages.at("bread.home")</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item" href="@routes.LessonController.publishedLessons(0, 0, null)">@messages.at("bread.all_lesson")</a>
+		    <i class="fa fa-angle-right"></i>
+		    <a class="bread-crumb-item item-current">@messages.at("bread.profile")</a>
+		</nav>
+	</div>
 	<div id="dash-content" class="dash-bg">
 		<div class="dash-block">
 			<div id="user-avatar-wrap">
@@ -22,134 +31,126 @@
 						<p class="grey"><span>@user.bestInstitution</span></p>
 					}else{
 						<p class="bold-style">
-							if(tools.Utils.isBlank(@user.username)){
-								You
+							@if(tools.Utils.isBlank(user.username)){
+								@messages.at("")
 							}else{
 								@user.username
 							}
 						</p>
-						<p class="grey"><span>Learning point:<span> </span>@user.point</span></p>
+						<p class="grey"><span>Grade:<span> </span>@user.credit</span></p>
 					}
 				</div>
 			</div>
 			<div class="achieve-wrap">
-				<div>
-					<p class="achieve-key orange">直播课时</p>
-					<p class="achieve-val orange">35</p>
-				</div>
-				<div>
-					<p class="achieve-key purple">全部资料</p>	
-					<p class="achieve-val purple">350</p>
-				</div>
-				<div>
-					<p class="achieve-key blue">学员</p>	
-					<p class="achieve-val blue">1350</p>
-				</div>
-				<div>
-					<p class="achieve-key pink">试题</p>	
-					<p class="achieve-val pink">350</p>
-				</div>
-				
-				<div class="hidden">
-					<p class="achieve-key orange">学习时长</p>	
-					<p class="achieve-val orange">310</p>
-				</div>
-				<div class="hidden">
-					<p class="achieve-key purple">收藏</p>	
-					<p class="achieve-val purple">3</p>
-				</div>
-				<div class="hidden">
-					<p class="achieve-key blue">学分</p>	
-					<p class="achieve-val blue">3500</p>
-				</div>
-				<div class="hidden">
-					<p class="achieve-key pink">完成试题</p>	
-					<p class="achieve-val pink">50</p>
-				</div>
+				@if(user.role.equals(Role.TEACHER)){
+					<div>
+						<p class="achieve-key orange">@messages.at("profile.lessons")</p>
+						<p class="achieve-val orange">@achievementVO.lessonCount</p>
+					</div>
+					<div>
+						<p class="achieve-key purple">@messages.at("profile.file")</p>	
+						<p class="achieve-val purple">@achievementVO.fileCount</p>
+					</div>
+					<div>
+						<p class="achieve-key blue">@messages.at("profile.student")</p>	
+						<p class="achieve-val blue">@achievementVO.studentCount</p>
+					</div>
+				}else{
+					<div>
+						<p class="achieve-key orange">@messages.at("profile.lessons")</p>	
+						<p class="achieve-val orange">@achievementVO.lessonCount</p>
+					</div>
+					<div>
+						<p class="achieve-key purple">@messages.at("profile.favorite")</p>
+						<p class="achieve-val purple">@achievementVO.favLessonCount</p>
+					</div>
+					<div>
+						<p class="achieve-key blue">@messages.at("profile.credit")</p>	
+						<p class="achieve-val blue">@achievementVO.credit</p>
+					</div>
+				}
 			</div>
 		</div>
 		
 		<div id="sidebar" class="dash-block">
-		   	<p>资料信息</p>
+		   	<p>@messages.at("profile.my_profile")</p>
 		    <ul class="sidebar-menu">
-		        <li class="sub-menu dcjq-parent-li">
+		        <li class="sub-menu">
 		            <a @if(section == 0){class="active"} href="@routes.ProfileController.personalProfile()">
 		                <i class="fa fa-dashboard"></i>
-		                <span>个人信息</span>
+		                <span>@messages.at("profile.basic_info")</span>
 		            </a>
 		        </li>
 		        
-		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 1){class="active"} href="@routes.ProfileController.personalMain()">
-		                <i class="fa fa-picture-o"></i>
-		                <span>主页管理</span>
-		            	<span class="dcjq-icon"></span>
-		            </a>
-		        </li>
+		        @if(user.role.equals(Role.TEACHER)){
+		        	<li class="sub-menu">
+			            <a @if(section == 1){class="active"} href="@routes.ProfileController.personalMain()">
+			                <i class="fa fa-picture-o"></i>
+			                <span>@messages.at("profile.tutor_detail")</span>
+			            </a>
+			        </li>
+				}
 		
-		        <li class="sub-menu dcjq-parent-li">
+		        <li class="sub-menu">
 		            <a @if(section == 2){class="active"} href="@routes.ProfileController.myRegisteredLessons()">
 		                <i class="fa fa-clock-o"></i>
-		                <span>学习进度</span>
-		            	<span class="dcjq-icon"></span>
-		            </a>
-		        </li>
-		    </ul>
-		    
-		    <p class="main-title">课程管理</p>
-		    <ul class="sidebar-menu" id="nav-accordion">
-		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 3){class="active"} href="@routes.ProfileController.myLessons(0)">
-		                <i class="fa fa-list-alt"></i>
-		                <span>课程列表</span>
+		                <span>@messages.at("profile.timetable")</span>
+		            </span>
 		            </a>
 		        </li>
 		        
-		        <li class="sub-menu dcjq-parent-li">
-		            <a @if(section == 4){class="active"} href="@routes.ProfileController.myFavoriteLessons(0)">
+		        <li class="sub-menu">
+		            <a @if(section == 3){class="active"} href="@routes.ProfileController.myFavoriteLessons(0)">
 		                <i class="fa fa-list-alt"></i>
-		                <span>我的收藏</span>
+		                <span>@messages.at("profile.favorite")</span>
 		            </a>
-		        </li>
-		
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
-		                <i class="fa fa-history"></i>
-		                <span>直播备份</span>
-		            	<span class="dcjq-icon"></span></a>
-		        </li>
-		
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
-		                <i class="fa fa-file-text-o"></i>
-		                <span>习题管理</span>
-		            <span class="dcjq-icon"></span></a>
-		        </li>
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
-		                <i class="fa fa-folder-open-o"></i>
-		                <span>资料管理</span>
-		            <span class="dcjq-icon"></span></a>
 		        </li>
 		    </ul>
 		    
-		    <p class="main-title">学员管理</p>
-		    <ul class="sidebar-menu" id="nav-accordion">
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="index.html">
-		                <i class="fa fa-users"></i>
-		                <span>学员列表</span>
-		            </a>
-		        </li>
-		
-		        <li class="sub-menu dcjq-parent-li">
-		            <a href="javascript:;" class="dcjq-parent">
-		                <i class="fa fa-money"></i>
-		                <span>订单查询</span>
-		            	<span class="dcjq-icon"></span>
-		            </a>
-		        </li>
-		    </ul>
+		    @if(user.role.equals(Role.TEACHER)){
+		    	<p class="main-title">@messages.at("profile.lesson_management")</p>
+			    <ul class="sidebar-menu" id="nav-accordion">
+				    <li class="sub-menu">
+						<a @if(section == 4){class="active"} href="@routes.ProfileController.myLessons(0)">
+			                <i class="fa fa-list-alt"></i>
+			                <span>@messages.at("profile.lessons")</span>
+			            </a>
+			        </li>
+			
+			        <li class="sub-menu">
+			            <a href="@routes.HomeController.comingSoon()">
+			                <i class="fa fa-history"></i>
+			                <span>@messages.at("profile.backup")</span>
+			            </a>
+			        </li>
+			
+			        <li class="sub-menu">
+			            <a href="@routes.HomeController.comingSoon()">
+			                <i class="fa fa-file-text-o"></i>
+			                <span>@messages.at("profile.question")</span>
+			            </a>
+			        </li>
+			    </ul>
+		    }
+			    
+			    <p class="main-title">@messages.at("profile.student_management")</p>
+			    <ul class="sidebar-menu" id="nav-accordion">
+			   		@if(user.role.equals(Role.TEACHER)){
+				        <li class="sub-menu">
+				            <a @if(section == 7){class="active"} href="@routes.ProfileController.myStudents(0)">
+				                <i class="fa fa-users"></i>
+				                <span>@messages.at("profile.student")</span>
+				            </a>
+				        </li>
+			        }
+			        
+			        <li class="sub-menu">
+			            <a @if(section == 8){class="active"} href="@routes.ProfileController.paymentHistory(0)">
+			                <i class="fa fa-money"></i>
+			                <span>@messages.at("profile.pay_history")</span>
+			            </a>
+			        </li>
+			    </ul>
 		</div>
 	
 		<div id="dash-detail-wrap" class="profile-dash">

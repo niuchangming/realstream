@@ -1,38 +1,85 @@
-@(scripts: Html = Html(""))(content: Html)
+@import tools.Constants
+@(scripts: Html = Html(""), title: String)(content: Html)
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        @* Here's where we render the page title `String`. *@
-        <title>EkooEdu</title>
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+        <title>@title</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta name="Keywords" content="Ekoo教育，EkooEdu, EkooLab, 网络教学，教育培训，课程购买，课程销售，课程市场，升学，出国，留学，A Level，IB，AP，IGCSE，ACT, SAT, 升学考试，教育创业">
+        <meta name="description" itemprop="description" content="Ekoo教育-EkooLab推出专业的在线教育平台，聚合大量海内外优质教育机构和名师，专注于A-Level，IB, IGCSE, AP, ACT, SAT等众多在线学习精品课程，打造海外优质老师在线上课教学，与中国学生及时互动学习的课堂。教育无国界，世界零距离！">
+        <meta name="baidu-site-verification" content="E06LkgkEbd" />
+        <meta property="og:image" content="@routes.Assets.versioned("images/ekooedu_logo.jpg")" />
+        <link rel="icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/bootstrap.min.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <script src="@routes.Assets.versioned("javascripts/jquery-1.12.4.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.versioned("javascripts/bootstrap.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.versioned("javascripts/jquery.validate.min.js")" type="text/javascript"></script>
-        @scripts	
+        <script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		  ga('create', 'UA-101628682-1', 'auto');
+		  ga('send', 'pageview');
+		</script>
+        @scripts
     </head>
     <body>
     	<div id="alert-bar" class="alert alert-danger" role="alert"></div>
         @content
+        <footer>
+        	<div class="content">
+        		<div class="upper-blk">
+        			<a class="footer-link" href="@routes.HomeController.externalLinks()">@messages.at("home.external_link")</a>
+        			<a href="http://www.gdck100.com/">广东自考网</a><span class="external-splitor">|</span>
+        			<a href="http://www.d8gs.com/">第八公社</a><span class="external-splitor">|</span>
+        			<a href="http://www.tianlaidao.com">天籁岛</a>
+	        		<div class="link-group">
+	        			<a class="footer-link" href="@routes.HomeController.about()">@messages.at("home.about_contact")</a><span>|</span>
+	        			<a class="footer-link" href="@routes.HomeController.becomeTutor()">@messages.at("topbar.become_tutor")</a><span>|</span>
+	        			<!-- <a class="footer-link" href="@routes.HomeController.tutors()">@messages.at("topbar.tutor")</a> <span>|</span>-->
+	        			<a class="footer-link" href="@routes.HomeController.privacy()">@messages.at("home.privacy")</a><span>|</span>
+	        			<a class="footer-link" href="@routes.HomeController.termOfUse()">@messages.at("home.term")</a><span>|</span>
+	        			<a class="footer-link" href="@routes.HomeController.helpTutorRes()">@messages.at("topbar.help")</a>
+	        		</div>	
+        		</div>
+        		<div class="lower-blk">
+        			<p class="copy-right">© 2017 EKOO LAB SINGAPORE PTE. LTD. All Rights Reserved.</p>
+        		</div>
+        	</div>
+        </footer>
+        <script>
+		  (function (w,i,d,g,e,t,s) {w[d] = w[d]||[];t= i.createElement(g);
+		    t.async=1;t.src=e;s=i.getElementsByTagName(g)[0];s.parentNode.insertBefore(t, s);
+		  })(window, document, '_gscq','script','//widgets.getsitecontrol.com/85352/script.js');
+		</script>
     </body>
-    
     <script type="text/javascript"> 
-    	$(function(){
-    		@if(flash.containsKey("error")) {
-    			showAlertToast('@flash.get("error")', 'alert-danger');
-			}else{
-				@if(flash.containsKey("warning")){
-					showAlertToast('@flash.get("warning")', 'alert-warning');
+	    try{
+			(function (k){
+				@if(flash.containsKey("error")) {
+					showAlertToast('@flash.get("error")', 'alert-danger');
 				}else{
-					@if(flash.containsKey("success")){
-						showAlertToast('@flash.get("success")', 'alert-success');
+					@if(flash.containsKey("warning")){
+						showAlertToast('@flash.get("warning")', 'alert-warning');
+					}else{
+						@if(flash.containsKey("success")){
+							showAlertToast('@flash.get("success")', 'alert-success');
+						}
 					}
 				}
-			}
-    		
-    	});
+				
+				localStorage.FEK=k;
+				t=document.getElementById('fr-fek');
+				t.parentNode.removeChild(t);
+			})('@(Constants.FROALA_LICENSE)')
+		}catch(e){
+			
+		}
+		
     	function showAlertToast(msg, clz){
 			var alertToast = $('#alert-bar');
 			alertToast.html(msg);
@@ -49,6 +96,16 @@
 	    	 			alertToast.removeClass('appear');
 				});
 			});
+		}
+    	
+    	function toUTC(date) {
+    		var utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+		    return utc;
+		}
+    	
+    	function toLocal(date) {
+    		var local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+		    return local;
 		}
 	</script>
 </html>

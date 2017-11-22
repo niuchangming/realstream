@@ -1,0 +1,43 @@
+@import tags._
+@import java.lang
+@(account: Account, tuiwen: TuiWen)
+
+@description = @{
+	tuiwen.content.substring(tuiwen.content.indexOf("<p>") + 3, tuiwen.content.indexOf("</p>"));
+}
+
+@scripts = {
+	<style>
+		body {background-color: #f5f7fa;}
+	</style>
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/share.min.css")">
+	<script src="@routes.Assets.versioned("javascripts/jquery.share.min.js")" type="text/javascript"></script>
+	<script>
+		$(function() {
+			var startIdx = '@Html(tuiwen.content)'.indexOf("<p>");
+			var endIdx = '@Html(tuiwen.content)'.indexOf("</p>");
+			$('.share-component').attr('data-description', '@Html(tuiwen.content)'.substring(startIdx + 3, endIdx));
+		});
+	</script>
+}
+
+@main(scripts, tuiwen.title) {
+	@topbar(account)
+	<div class="about w80p"> 
+		<div class="inner-content row">
+			<section class="ses-tuiwen">
+				<div class="line-item item-share">
+	            	<i class="fa fa-share-alt"></i>
+           	        <div class="tips-share">
+						<div class="share-component" data-disabled="diandian,tencent,google" data-title="@tuiwen.title" data-description="@Html(description)"></div>
+                    </div>
+                </div>
+				<p class="tui-title news-title txt-center">@tuiwen.title</p>
+				@Html(tuiwen.content)
+			</section>			
+	    </div>
+    </div>
+    @entry(account)
+    @modalcreatelesson()
+}

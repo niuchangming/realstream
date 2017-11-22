@@ -1,0 +1,31 @@
+<div class="modal fade" id="ls-ses-modal" role="dialog">
+  	<div class="modal-dialog" role="document">
+    	<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">@messages.at("ls_sess.content")</h4>
+			</div>
+	     	<div class="modal-body">
+	     		
+	      	</div>
+	      	<div class="modal-footer">
+	      		<div class="form-group">
+		        	<button class="btn btn-success" data-dismiss="modal" aria-label="Close">@messages.at("advisory.ok")</button>
+		        </div>
+	      	</div>
+    	</div>
+  	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('#ls-ses-modal').on('show.bs.modal', function(e) {
+	        var title = $(e.relatedTarget).data('title');
+	        var brief = $(e.relatedTarget).data('brief');
+	        
+	        var briefElement = $('#ls-ses-modal').find('.modal-body');
+	        briefElement.empty();
+	        briefElement.append(brief);
+	    });
+   	});
+</script>

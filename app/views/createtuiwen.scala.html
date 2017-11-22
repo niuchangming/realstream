@@ -1,0 +1,147 @@
+@import tags._
+
+@(account: Account)
+
+@adminframe(0){
+	<script>
+	   	$(function() {
+	   		$('#ta-tuiwen').froalaEditor({
+				toolbarInline: false,
+				height: $('#sidebar').height() - 265
+			});	
+	   		
+	   		$.get('@routes.TuiwenController.getImage()', {}).done(function( data ) {
+			    $('#ta-tuiwen').froalaEditor({
+			        fileUploadToS3: data
+			    });
+			});
+	   		
+	   		$('input.category').on('click', function(){
+				$('.category-lbl.selected').removeClass('selected');
+	       		$(this).parent().addClass('selected');
+	       	});
+	   		
+	   		$('#tuiwen-save').on('click', function(){
+				$('#tuiwen-form').submit();
+			});
+	   		
+	   		$("#tuiwen-form").validate({
+	   			rules: {
+		        	title:{
+		            	required:true
+		            }
+		        },
+		        highlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+		        },
+		        unhighlight: function (element) {
+		            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+		        },
+		        submitHandler: function(form, event) {
+		        	event.preventDefault();
+		        	
+		        	if($('#ta-tuiwen').froalaEditor('html.get').length > 0){
+		        		var spinner = $('<i class="glyphicon glyphicon-refresh glyphicon-spinner spinner"></i>');
+			        	var saveBtn = $('#tuiwen-form input[type=submit]');
+			        	
+			        	saveBtn.after(spinner);
+			        	saveBtn.attr("disabled", true);
+			        	saveBtn.val("");
+			        	
+			        	$.ajax({
+			                url: "@routes.TuiwenController.saveTuiwen()",
+			                type: "POST",
+			                data: $(form).serialize(),
+			                success: function(response, status) {
+			                	var data = $.parseJSON(JSON.stringify(response));
+			                	
+			                	if(data.code != 0){
+			                		showAlertToast(data.message, "alert-danger");
+			                	}else{
+			                		showAlertToast(data.message, "alert-success");
+			                	}
+			                	
+			                	spinner.remove();
+			                	saveBtn.attr("disabled", false);
+			                	saveBtn.val("Submit");
+			                },
+			                error: function(request, status, err){
+			                	showAlertToast(err, "alert-danger");
+			                	spinner.remove();
+			                	saveBtn.attr("disabled", false);
+			                	saveBtn.val("Submit");
+			                }
+			            });
+		        	}else{
+		        		showAlertToast("Content cannot be empty.", "alert-danger");
+		        	}
+		        }
+		    });
+	   		
+	   	});
+	</script>
+	<div class="dash-detail-header">
+		<p class="lesson-sec-title">Create Article</p>
+		<a id="tuiwen-save" class="btn btn-success">Submit</a>
+	</div>
+	<form id="tuiwen-form">
+		<div class="form-group">
+			<div class="form-input">
+				<input type="text" class="form-control" name="title" placeholder="Title">
+			</div>
+		</div>
+		<textarea id="ta-tuiwen" name="content"></textarea>
+		<div id="tuiwen-type" class="form-input">
+			<label class="category-lbl selected">
+				<input type="radio" name="type" class="form-control category" value="0">
+				<a class="radio-box">相关资讯
+					<i class="icon-check"></i>
+				</a>
+			</label>
+			<label class="category-lbl">
+				<input type="radio" name="type" class="form-control category" value="1">
+				<a class="radio-box">留学趣闻
+					<i class="icon-check"></i>
+				</a>
+			</label>
+			<label class="category-lbl">
+				<input type="radio" name="type" class="form-control category" value="2">
+				<a class="radio-box">学习资源
+					<i class="icon-check"></i>
+				</a>
+			</label>
+			<label class="category-lbl">
+				<input type="radio" name="type" class="form-control category" value="3">
+				<a class="radio-box">考试培训
+					<i class="icon-check"></i>
+				</a>
+			</label>				  
+		</div>
+		<div style="clear:both;"></div>
+	</form>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

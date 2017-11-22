@@ -1,11 +1,16 @@
 package controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -44,6 +49,7 @@ import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import tools.MD5;
 import tools.Utils;
 import views.html.errorpage;
 import views.html.paymentreview;
@@ -120,9 +126,9 @@ public class PaymentController extends Controller{
 					.setParameter("user", user).getSingleResult()).intValue();
 			
 			if(count == 0){
-				CompletionStage<WSResponse> responsePromise = ws.url("https://api.sandbox.paypal.com/v1/oauth2/token")
+				CompletionStage<WSResponse> responsePromise = ws.url(Constants.REST_LIVE_ENDPOINT + "v1/oauth2/token")
 						.setContentType("application/x-www-form-urlencoded")
-						.setAuth(Payment.CLIENT_ID , Payment.SECRET, WSAuthScheme.BASIC)
+						.setAuth(Payment.PAYPAL_CLIENT_ID , Payment.PAYPAL_SECRET, WSAuthScheme.BASIC)
 						.setQueryParameter("grant_type", "client_credentials")
 						.post("");
 				
@@ -132,18 +138,10 @@ public class PaymentController extends Controller{
 					if(!Utils.isBlank(accessToken)){
 						com.paypal.api.payments.Payment paymentResult = submitCard(accessToken, requestData, lesson);
 						if(paymentResult != null){
-							Payment paymentObj = new Payment(user);
+							Payment paymentObj = new Payment(user, lesson);
 							
-							CreditCard creditCard = paymentResult.getPayer().getFundingInstruments().get(0).getCreditCard();
 							Transaction transcation = paymentResult.getTransactions().get(0);
 							paymentObj.transactionId = paymentResult.getId();
-							paymentObj.firstName = creditCard.getFirstName();
-							paymentObj.lastName = creditCard.getLastName();
-							paymentObj.state = paymentResult.getState();
-							paymentObj.cardType = creditCard.getType();
-							paymentObj.cardNumber = creditCard.getNumber();
-							paymentObj.expMonth = creditCard.getExpireMonth();
-							paymentObj.expYear = creditCard.getExpireYear();
 							paymentObj.amount = transcation.getAmount().getTotal();
 							paymentObj.currency = transcation.getAmount().getCurrency();
 							jpaApi.em().persist(paymentObj);
@@ -193,10 +191,15 @@ public class PaymentController extends Controller{
 		
 		DecimalFormat df = new DecimalFormat("#.00");  
 		Date now = new Date();
-		if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
-			amount.setTotal(df.format(lesson.offerPrice));
-		}else{
-			amount.setTotal(df.format(lesson.price));
+		if(lesson.offers.size() > 0){
+			if(lesson.offers.get(0).offerPrice > 0 
+					&& (lesson.offers.get(0).offerStartDate == null 
+					|| lesson.offers.get(0) == null) 
+					|| (lesson.offers.get(0).offerPrice > 0 && !lesson.offers.get(0).offerStartDate.before(now) && !lesson.offers.get(0).offerEndDate.after(now))){
+				amount.setTotal(df.format(lesson.offers.get(0).offerPrice));
+			}else{
+				amount.setTotal(df.format(lesson.price));
+			}
 		}
 		
 		Transaction transaction = new Transaction();
@@ -225,7 +228,7 @@ public class PaymentController extends Controller{
 		payment.setTransactions(transactions);
 		com.paypal.api.payments.Payment createdPayment = null;
 		
-		APIContext apiContext = new APIContext(Payment.CLIENT_ID, Payment.SECRET, Constants.SANDBOX);
+		APIContext apiContext = new APIContext(Payment.PAYPAL_CLIENT_ID, Payment.PAYPAL_SECRET, Constants.LIVE);
 		createdPayment = payment.create(apiContext);
 		
 		if(createdPayment.getState().equals("approved")){
@@ -242,15 +245,20 @@ public class PaymentController extends Controller{
 		
 		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
 		if(lesson != null){
+			DecimalFormat df = new DecimalFormat("#.00");  
+			
 			Amount amount = new Amount();
 			amount.setCurrency("USD");
+			amount.setTotal(df.format(lesson.price));
 			
-			DecimalFormat df = new DecimalFormat("#.00");  
 			Date now = new Date();
-			if(lesson.offerPrice > 0 && (lesson.offerStartDate == null || lesson.offerEndDate == null) || (lesson.offerPrice > 0 && !lesson.offerStartDate.before(now) && !lesson.offerEndDate.after(now))){
-				amount.setTotal(df.format(lesson.offerPrice));
-			}else{
-				amount.setTotal(df.format(lesson.price));
+			if(lesson.offers.size() > 0){
+				if(lesson.offers.get(0).offerPrice > 0 
+						&& (lesson.offers.get(0).offerStartDate == null 
+						|| lesson.offers.get(0).offerEndDate == null) 
+						|| (lesson.offers.get(0).offerPrice > 0 && !lesson.offers.get(0).offerStartDate.before(now) && !lesson.offers.get(0).offerEndDate.after(now))){
+					amount.setTotal(df.format(lesson.offers.get(0).offerPrice));
+				}
 			}
 			
 			Item item = new Item();
@@ -264,7 +272,7 @@ public class PaymentController extends Controller{
 			transaction.setAmount(amount);
 			transaction.setItemList(itemList);
 			transaction.setDescription("Above is the lesson transaction description.");
-
+			
 			List<Transaction> transactions = new ArrayList<Transaction>();
 			transactions.add(transaction);
 			
@@ -273,8 +281,8 @@ public class PaymentController extends Controller{
 			
 			Account account = (Account) ctx().args.get("account");
 			RedirectUrls redirectUrls = new RedirectUrls();
-			redirectUrls.setCancelUrl("http://localhost:9000/");
-			redirectUrls.setReturnUrl("http://localhost:9000/payment/execute?userId=" + account.id + "&lessonId=" + lessonId);
+			redirectUrls.setCancelUrl("https://ekooedu.com/");
+			redirectUrls.setReturnUrl("https://ekooedu.com/payment/execute/paypal?userId=" + account.id + "&lessonId=" + lessonId);
 
 			com.paypal.api.payments.Payment payment = new com.paypal.api.payments.Payment();
 			payment.setIntent("sale");
@@ -282,7 +290,7 @@ public class PaymentController extends Controller{
 			payment.setTransactions(transactions);
 			payment.setRedirectUrls(redirectUrls);
 			
-			APIContext apiContext = new APIContext(Payment.CLIENT_ID, Payment.SECRET, Constants.SANDBOX);
+			APIContext apiContext = new APIContext(Payment.PAYPAL_CLIENT_ID, Payment.PAYPAL_SECRET, Constants.LIVE);
 			com.paypal.api.payments.Payment createdPayment = payment.create(apiContext);
 			if(createdPayment.getState().equals("created")){
 				Iterator<Links> links = createdPayment.getLinks().iterator();
@@ -319,7 +327,7 @@ public class PaymentController extends Controller{
 		paymentExecution.setPayerId(PayerID);
 		
 		try {
-			APIContext apiContext = new APIContext(Payment.CLIENT_ID, Payment.SECRET, Constants.SANDBOX);
+			APIContext apiContext = new APIContext(Payment.PAYPAL_CLIENT_ID, Payment.PAYPAL_SECRET, Constants.LIVE);
 			com.paypal.api.payments.Payment createdPayment = payment.execute(apiContext, paymentExecution);
 			
 			if(createdPayment.getState().equals("approved")){
@@ -333,12 +341,10 @@ public class PaymentController extends Controller{
 					responseData.code = 4000;
 					responseData.message = "Lesson does not exist.";
 				}else{
-					Payment paymentObj = new Payment(user);
-					
+					Payment paymentObj = new Payment(user, lesson);
 					paymentObj.transactionId = createdPayment.getId();
-					paymentObj.firstName = createdPayment.getPayer().getPayerInfo().getFirstName();
-					paymentObj.lastName = createdPayment.getPayer().getPayerInfo().getLastName();
-					paymentObj.state = createdPayment.getState();
+					paymentObj.method = "PayPal";
+					paymentObj.status = createdPayment.getState();
 					paymentObj.amount = createdPayment.getTransactions().get(0).getAmount().getTotal();
 					paymentObj.currency = createdPayment.getTransactions().get(0).getAmount().getCurrency();
 					jpaApi.em().persist(paymentObj);
@@ -347,7 +353,7 @@ public class PaymentController extends Controller{
 					jpaApi.em().persist(userLesson);
 					
 					flash("success", "Payment completed successfully.");
-					return redirect(routes.PaymentController.paymentReview(lessonId));
+					return redirect(routes.LessonController.lessonDetail(lessonId));
 				}
 			}else{
 				responseData.code = 4000;
@@ -361,7 +367,127 @@ public class PaymentController extends Controller{
 		return notFound(errorpage.render(responseData));
 	}
 	
+	@With(AuthAction.class)
+	@Transactional
+	public Result requestAlipay(long lessonId){
+		ResponseData responseData = new ResponseData();
+		
+		Lesson lesson = jpaApi.em().find(Lesson.class, lessonId);
+		if(lesson != null){
+			DecimalFormat df = new DecimalFormat("#.00"); 
+			String transactionId = "PAY-" + Utils.gen(24);
+
+			String totalFee = df.format(lesson.price);
+			Date now = new Date();
+			if(lesson.offers.size() > 0){
+				if(lesson.offers.get(0).offerPrice > 0 
+						&& (lesson.offers.get(0).offerStartDate == null 
+						|| lesson.offers.get(0).offerEndDate == null) 
+						|| (lesson.offers.get(0).offerPrice > 0 && !lesson.offers.get(0).offerStartDate.before(now) && !lesson.offers.get(0).offerEndDate.after(now))){
+					totalFee = df.format(lesson.offers.get(0).offerPrice);
+				}
+			}
+			
+			Map<String, String> reqParams = new HashMap<String, String>();
+			try {
+				reqParams.put("subject", lesson.title);
+				reqParams.put("out_trade_no", transactionId);
+				reqParams.put("currency", "SGD");
+				reqParams.put("total_fee", totalFee);
+				reqParams.put("partner", Payment.ALIPAY_PARTNER_ID);
+				reqParams.put("notify_url", "https://ekooedu.com/payment/execute/alipay");
+				reqParams.put("return_url", "https://ekooedu.com/lesson?lessonId=" + lesson.id);
+				reqParams.put("sendFormat", "normal");
+				reqParams.put("_input_charset", "UTF-8");
+				reqParams.put("service", "create_forex_trade");
+				
+		        String sign = MD5.md5(Utils.createLinkString(reqParams, Payment.ALIPAY_CODE));
+				
+		        String alipayLink = Payment.ALIPAY_GATEWAY_NEW;
+		        List<String> keys = new ArrayList<String>(reqParams.keySet());
+		        for (int i = 0; i < keys.size(); i++) {
+		            alipayLink = alipayLink + keys.get(i) + "=" + URLEncoder.encode((String) reqParams.get(keys.get(i)), "utf-8") + "&";
+		        }
+		        alipayLink = alipayLink + "sign=" + sign + "&sign_type=MD5";
+		        responseData.data = alipayLink;
+		        
+		        Account account = (Account) ctx().args.get("account");
+				TypedQuery<User> query = jpaApi.em()
+						.createQuery("from User u where u.accountId = :accountId", User.class)
+						.setParameter("accountId", account.id);
+				User user = query.getSingleResult();
+				
+		        Payment paymentObj = new Payment(user, lesson);
+				paymentObj.transactionId = transactionId;
+				paymentObj.method = "AliPay";
+				paymentObj.status = "Pending";
+				paymentObj.amount = totalFee;
+				paymentObj.currency = "SGD";
+				jpaApi.em().persist(paymentObj);
+				
+		        return ok(Json.toJson(responseData));
+			} catch (UnsupportedEncodingException | NoResultException e) {
+				responseData.code = 4001;
+				responseData.message = e.getLocalizedMessage();
+			}
+		}else{
+			responseData.code = 4000;
+			responseData.message = "The lesson does not exist.";
+		}
+		return notFound(errorpage.render(responseData));
+	}
+	
+	@Transactional
+	public Result executeAlipay(){
+		ResponseData responseData = new ResponseData(); 
+		
+		DynamicForm requestData = formFactory.form().bindFromRequest();
+		String transactionId = requestData.get("out_trade_no");
+		String tradeStatus = requestData.get("trade_status");
+		
+		try {
+			Payment paymentObj = jpaApi.em().createQuery("FROM Payment py WHERE py.transactionId=:transactionId", Payment.class)
+					.setParameter("transactionId", transactionId).getSingleResult();
+			paymentObj.notifyId = requestData.get("notify_id");
+			paymentObj.status = tradeStatus;
+			jpaApi.em().persist(paymentObj);
+			
+			UserLesson userLesson = new UserLesson(paymentObj.user, paymentObj.lesson);
+			jpaApi.em().persist(userLesson);
+			
+			CompletionStage<WSResponse> responsePromise = ws.url(Payment.ALIPAY_GATEWAY_NEW)
+					.setQueryParameter("partner", Payment.ALIPAY_PARTNER_ID)
+					.setQueryParameter("notify_id", paymentObj.notifyId)
+					.setQueryParameter("service", "notify_verify")
+					.get();
+			
+			JsonNode jsonResult = responsePromise.thenApply(WSResponse::asJson).toCompletableFuture().get();
+			System.out.println("--------> " + jsonResult.toString());
+		} catch (InterruptedException | NoResultException | ExecutionException e) {
+			responseData.code = 4001;
+			responseData.message = e.getLocalizedMessage();
+		}
+		
+		return ok(Json.toJson(responseData));
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

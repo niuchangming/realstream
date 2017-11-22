@@ -16,11 +16,27 @@ GET     /login                     						controllers.HomeController.login(dialCo
 GET     /signup           								controllers.HomeController.signup(dialCode: Integer ?= 0, mobile: String ?= "", password: String ?= "")
 GET     /verify                    						controllers.HomeController.verifyMobile(dialCode: Integer ?= 0, mobile: String ?= "", verifyCode: Integer ?= 0)
 GET     /logout                     					controllers.HomeController.logout
+GET     /privacy                     					controllers.HomeController.privacy
+GET 	/comingsoon										controllers.HomeController.comingSoon
+GET 	/termofuse										controllers.HomeController.termOfUse
+GET 	/about											controllers.HomeController.about
+GET 	/tutors											controllers.HomeController.tutors
+GET 	/become/tutor									controllers.HomeController.becomeTutor
+GET		/language										controllers.HomeController.changeLanguage(lang: String ?= "")
+GET 	/external/links									controllers.HomeController.externalLinks
+GET 	/help/tutor/reg									controllers.HomeController.helpTutorRes
+GET 	/help/createpublish/lesson						controllers.HomeController.helpCreatePublishLesson
+GET 	/help/start/session								controllers.HomeController.helpStartSession
+GET 	/help/register									controllers.HomeController.helpRegister
+GET     /admin/login                     				controllers.HomeController.adminLogin()
+POST    /admin/login/submit                   			controllers.HomeController.adminLoginSubmit()
 
-GET     /broadcast/lesson/session                		controllers.LessonController.broadcastLessonSession(lessonSessionId: Long ?= 0)
-POST    /broadcast/info               					controllers.LessonController.getBroadcastInfo
-GET     /broadcast/lessonSession/join                	controllers.LessonController.joinLessonSession(lessonSessionId: Long ?= 0)
-POST    /broadcast/lesson/archive						controllers.LessonController.openTokCallback
+GET     /broadcast/lesson/session                		controllers.StreamController.broadcastLessonSession(lessonSessionId: Long ?= 0)
+POST    /broadcast/info               					controllers.StreamController.getBroadcastInfo
+GET     /broadcast/lessonSession/join                	controllers.StreamController.joinLessonSession(lessonSessionId: Long ?= 0)
+POST    /broadcast/lesson/archive						controllers.StreamController.openTokCallback
+POST    /save/chatmessage								controllers.StreamController.saveMessage
+
 POST    /create                							controllers.LessonController.createLesson
 GET     /edit                							controllers.LessonController.editLesson(lessonId: Long ?= 0)
 POST    /lesson/basic/save                				controllers.LessonController.saveLessonBasicInfo
@@ -32,17 +48,24 @@ POST    /lesson/delete/image                			controllers.LessonController.dele
 POST    /lesson/update/image/info                		controllers.LessonController.updateLessonImageInfo
 GET     /lesson/session                					controllers.LessonController.lessonSession(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST    /lesson/session/save                			controllers.LessonController.saveLessonSession
+POST    /lesson/session/edit               				controllers.LessonController.editLessonSession
 POST	/lesson/sessions								controllers.LessonController.lessonSessions
 GET     /lesson                							controllers.LessonController.lessonDetail(lessonId: Long ?= 0)
-POST 	/lesson/publish/category						controllers.LessonController.pubishedLessonsByCategory
+GET 	/lesson/publish/lessons							controllers.LessonController.publishedLessons(offset: Integer ?= 0, categoryId: Long ?= 0, lessonKeys: String ?= "")
 GET     /lesson/price                					controllers.LessonController.lessonPrice(lessonId: Long ?= 0)
 POST    /lesson/price/save                				controllers.LessonController.saveLessonPrice
 POST    /lesson/publish              					controllers.LessonController.publishLesson
+POST    /lesson/advisory              					controllers.LessonController.advisoryLesson
+GET    	/lesson/students              					controllers.LessonController.studentsOfLesson(lessonId: Long ?= 0, offset: Integer ?= 0)
+POST    /lesson/create/chapter              			controllers.LessonController.createChapter
+
 
 GET 	/lesson/file/management							controllers.FileController.fileManagement(lessonId: Long ?= 0, offset: Integer ?= 0)
 POST 	/lesson/file/upload								controllers.FileController.uploadMediaFile
 GET     /lesson/file/download                			controllers.FileController.downloadFile(mediaFileUUID: String ?= "")
+GET     /file/viewer                					controllers.FileController.fileViewer()
 POST    /lesson/file/delete                				controllers.FileController.deleteFile
+GET     /sitemap.xml               						controllers.FileController.siteMap()
 
 
 GET     /profile/personal                				controllers.ProfileController.personalProfile
@@ -62,20 +85,67 @@ GET     /profile/lesson/list                			controllers.ProfileController.myL
 GET		/profile/register/lesson/list					controllers.ProfileController.myRegisteredLessons
 GET		/profile/favorite/lesson						controllers.ProfileController.myFavoriteLessons(offset: Integer ?= 0)
 POST	/profile/remove/favorite/						controllers.ProfileController.removeFavoriteLesson
+GET		/profile/students								controllers.ProfileController.myStudents(offset: Integer ?= 0)
+GET		/profile/payments								controllers.ProfileController.paymentHistory(offset: Integer ?= 0)
+POST	/profile/close/video							controllers.ProfileController.closingBroadcastVideo
 
 
 GET		/payment/review									controllers.PaymentController.paymentReview(lessonId: Long ?= 0)
 POST	/payment/submit									controllers.PaymentController.submitCardInfo
 GET 	/payment/request/paypal							controllers.PaymentController.requestPaypal(lessonId: Long ?= 0)
-GET 	/payment/execute								controllers.PaymentController.executePaypal(userId: Long ?= 0, lessonId: Long ?= 0)
+GET 	/payment/request/alipay							controllers.PaymentController.requestAlipay(lessonId: Long ?= 0)
+GET 	/payment/execute/paypal							controllers.PaymentController.executePaypal(userId: Long ?= 0, lessonId: Long ?= 0)
+POST 	/payment/execute/alipay							controllers.PaymentController.executeAlipay()
 
 
 POST 	/comment/create									controllers.CommentController.createComment
 POST 	/lesson/comments								controllers.CommentController.commentsByLesson()
 
+GET  	/lesson/questions								controllers.QuestionController.lessonQuestions(lessonId: Long ?= 0, offset: Integer ?= 0)
+POST 	/question/create								controllers.QuestionController.createQuestion()
+POST 	/question/edit									controllers.QuestionController.editQuestion()
+POST 	/question/remove								controllers.QuestionController.removeQuestion()
+GET		/question/image									controllers.QuestionController.showQuestionImage(uuid: String ?= "")
+GET		/choice/image									controllers.QuestionController.showChoiceImage(uuid: String ?= "")
+POST 	/question/add/answer							controllers.QuestionController.addExplanation()
+POST 	/question/answer								controllers.QuestionController.getAnswer()
 
 
-GET     /api/joinLesson             					controllers.api.LessonController.joinLesson
+GET  	/tuiwen/create									controllers.TuiwenController.createTuiwen()
+GET  	/tuiwen											controllers.TuiwenController.viewTuiwen(tuiwenId: Long ?= 0)
+GET  	/tuiwen/image									controllers.TuiwenController.getImage()
+GET  	/tuiwens										controllers.TuiwenController.tuiwens(type: Integer ?= -1)
+POST  	/tuiwen/save									controllers.TuiwenController.saveTuiwen()
+
+GET  	/event/create									controllers.EventController.creatEvent()
+POST  	/event/save										controllers.EventController.saveEvent()
+
+
+POST  	/api/auth/login									controllers.api.AuthenticationController.login
+POST 	/api/auth/signup								controllers.api.AuthenticationController.signup
+POST  	/api/auth/verify								controllers.api.AuthenticationController.verifyMobile
+POST  	/api/auth/resend								controllers.api.AuthenticationController.resendVerifyCode
+POST  	/api/user/profile								controllers.api.AuthenticationController.userProfile
+POST    /api/lessons             						controllers.api.LessonController.lessons
+POST 	/api/category/lessons							controllers.api.LessonController.lessonsByCategory
+POST  	/api/favorite/lessons							controllers.api.LessonController.favoriteLessons
+POST    /api/lesson/sessions             				controllers.api.LessonController.lessonSessions
+POST 	/api/lesson/enroll/status						controllers.api.LessonController.lessonEnrollStatus
+POST 	/api/lesson/timetable							controllers.api.LessonController.timetable
+POST    /api/lesson/comment             				controllers.api.CommentController.commentsByLesson
+POST    /api/create/comment             				controllers.api.CommentController.createComment
+POST  	/api/lesson/join/session						controllers.api.StreamController.joinLessonSession
+POST  	/api/save/chatmessage							controllers.api.StreamController.saveMessage
+POST  	/api/chatmessages								controllers.api.StreamController.lessonSessionChatMessages
+GET  	/api/download/file								controllers.api.FileController.downloadFile(uuid: String ?= "", isDownload: Boolean ?= false)
+POST  	/api/lesson/file								controllers.api.FileController.lessonFiles
+POST  	/api/lesson/session/file						controllers.api.FileController.lessonSessionFiles
+POST 	/api/update/name								controllers.api.ProfileController.updateName
+POST 	/api/update/mobile								controllers.api.ProfileController.updateMobile
+POST 	/api/verify/mobile								controllers.api.ProfileController.verifyMobile
+POST 	/api/payment/history							controllers.api.ProfileController.paymentHistory
+
+
 
 
 

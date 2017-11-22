@@ -1,10 +1,11 @@
 @import tags._
+@import tools.Constants
 
 @(lesson: Lesson)
 
 @createlessonframe(lesson, 1){
 	<div class="dash-detail-header">
-		<p>课程图片</p>
+		<p>Lesson Images</p>
 	</div>
 	<div class="image-wrap">
 		@for(lessonImage <- lesson.lessonImages){
@@ -70,9 +71,9 @@
 	</div>
 	<div class="alert alert-info img-upload-info" role="alert">
 		<ul>
-			<li>支持jpg, png, jpeg格式的图片文件，每张图片大小不超过5M，上传的图片不超过15张。</li>
-			<li>系统会将第一张图片默认设置成封面图片。</li>
-			<li>图片将上传到云端服务器，上传后会生成另外的一张小图，所以会需要一点时间，请耐心等待。</li>
+			<li>Support image files in format of jpg, png, or jpeg. File size of each image cannot exceed 5M. Upload no more than 15 images.</li>
+			<li>The first image will be set as cover image by default.</li>
+			<li>It might take a while to generate the image. Please be patient. </li>
 		</ul>
 	</div>
 	
@@ -83,19 +84,19 @@
 	      	<form id="img-info-form">
 	      		<input id="img-uuid" name="uuid" type="hidden"/>
 		    	<div class="form-group">
-		    		<label for="img-title">图片标题</label>
-		      		<input id="img-title" class="form-control" type="text" name="title" placeholder="图片标题"/>
+		    		<label for="img-title">Caption</label>
+		      		<input id="img-title" class="form-control" type="text" name="title" placeholder="Caption"/>
 		      	</div>
 		      	<div class="form-group">
-		      		<label for="img-caption">图片描述</label>	
-		      		<textarea id="img-caption" class="form-control" name="caption" rows="2" placeholder="您需要描述一下图片的具体内容"></textarea>
+		      		<label for="img-caption">Description</label>	
+		      		<textarea id="img-caption" class="form-control" name="caption" rows="2" placeholder="Description of  the image"></textarea>
 		      	</div>
 		      	<div class="form-group right">
-					<input id="upload-img-info" type="submit" class="btn btn-success" value="上传"/>
+					<input id="upload-img-info" type="submit" class="btn btn-success" value="Upload"/>
 				</div>
 				<div class="checkbox left">
 				    <label>
-				      <input id="cover-img" type="checkbox" > 设置为封面图片
+				      <input id="cover-img" type="checkbox" > Set as cover page
 				      <input id="img-cover" type="hidden" name="isCover" value="0">
 				    </label>
 				</div>
@@ -116,7 +117,9 @@
 		        $(this).next('input[name="isCover"]').val(v);
 		    });
 			
-			$('#img-caption').editable({inlineMode: true});
+			$('#img-caption').froalaEditor({
+				toolbarInline: true
+			});			
 			
 			$('.uploader input[type=file]').each(function(index) {
 				$(this).fileupload({
@@ -224,9 +227,7 @@
 			imgModal.modal('show');
 			imgModal.find('input[type=text]').val(t);
 			imgModal.find('input[name=uuid]').val(u);
-			$('#img-caption').text(c);
-			$('#img-caption').editable("setHTML", c, true);
-			$('#img-caption').editable('sync');
+			$('#img-caption').froalaEditor('html.set', c);
 			
 			var cbx = imgModal.find('input[type=checkbox]');
 			if(b == 'true'){

@@ -32,7 +32,6 @@ public class StartingJobs {
 			if(count == 0){
 				InputStream in = app.get().classloader().getResourceAsStream("category.json");
 				List<Category> categories = Category.initCategoryByJson(in);
-				
 				for(Category category : categories){
 			    	if(category.children != null){
 			    		for(Category childCate : category.children){

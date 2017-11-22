@@ -1,0 +1,158 @@
+@import tags._
+@import tools.Constants;
+
+@(account: Account, lessons: List[Lesson], categories: List[Category], pageIndex: Integer, totalAmount: Integer, categoryId: Long, lessonKeys: String)
+
+@scripts = {
+	<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/froala/font-awesome.min.css")">
+	<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/simplePagination.css")">
+	<script src="@routes.Assets.versioned("javascripts/jquery.simplePagination.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+		$(function(){
+			$('dd[data-index=@categoryId]').addClass('curr-cate');
+			
+			var lessonKeys = '@lessonKeys';
+			for (var i=0; i < lessonKeys.length; i++) {
+				if(lessonKeys.charAt(i) > 0){
+					$('input[data-index=' + lessonKeys.charAt(i) + ']').prop("checked", true);
+				}
+			}
+			
+			$('input[type=checkbox]').change(function(){
+				var keyStr = '';
+				$('input[type=checkbox]').each(function(){
+					if($(this).is(":checked")){
+						keyStr += $(this).attr('data-index');
+					}else{
+						keyStr += '0';
+					}
+				});
+				window.location.href = "/lesson/publish/lessons?categoryId=@categoryId&lessonKeys=" + keyStr;
+			});
+			
+			var pageParts = $(".paginate");
+		    var numPages = pageParts.length;
+		    var perPage = @Constants.ALL_LESSON_PAGE_SIZE;
+		    
+		    pageParts.slice(perPage).hide();
+		    $("#page-nav").pagination({
+		        items: @totalAmount,
+		        itemsOnPage: perPage,
+		        currentPage: @pageIndex,
+		        cssStyle: "light-theme",
+		        onPageClick: function(pageNum) {
+		            var start = perPage * (pageNum - 1);
+		            var end = start + perPage;
+		            
+		            $('#page-offset').val(start);
+		            $('form#page-form').submit();
+		        }
+		    });
+			
+	   	});
+	</script>
+}
+ 
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	<nav class="bread-crumb inner-center">
+	   	<a class="bread-crumb-item" href="@routes.HomeController.index()">@messages.at("bread.home")</a>
+	    <i class="fa fa-angle-right"></i>
+	    <a class="bread-crumb-item item-current">@messages.at("bread.all_lesson")</a>
+	    <i class="fa fa-angle-right"></i>
+	</nav>
+	
+	<div class="sort-menu-con" id="auto-test-1" auto-test="mod_menu_filter">
+	   <div class="sort-menu-border1">
+	      <dl class="sort-menu sort-menu1 clearfix">
+	         <dt>Categories:</dt>
+	         <dd data-index="0">
+	            <label></label>
+	            <a href="@routes.LessonController.publishedLessons(0, 0, null)">
+	               <h2>@messages.at("category.all")</h2>
+	            </a>
+	         </dd>
+	         @for(category <- categories){
+	         	<dd data-index="@category.id">
+		            <a href="@routes.LessonController.publishedLessons(0, category.id, null)">
+		               <h2>@category.name</h2>
+		            </a>
+		         </dd>
+	         }
+	      </dl>
+	   </div>
+	   <div class="sort-menu-border2">
+	      <div class="label-row">
+	         <dl class="sort-menu sort-menu2 clearfix">
+	            <dt>Lesson tag:</dt>
+	            <dd>
+	            	<a class="sub-menu">
+	            		<input type="checkbox" data-index="@models.LessonKey.NEW.getIndex()">@messages.at("home." + models.LessonKey.NEW.getName())
+	            	</a>
+	            </dd>
+	            <dd>
+	            	<a class="sub-menu">
+	            		<input type="checkbox" data-index="@models.LessonKey.OFFER.getIndex()">@messages.at("home." + models.LessonKey.OFFER.getName())
+	            	</a>
+	            </dd>
+	            <dd>
+	            	<a class="sub-menu">
+	            		<input type="checkbox" data-index="@models.LessonKey.HOT.getIndex()">@messages.at("home." + models.LessonKey.HOT.getName())
+	            	</a>
+	            </dd>
+	            <dd>
+	            	<a class="sub-menu">
+	            		<input type="checkbox" data-index="@models.LessonKey.TRIAL.getIndex()">@messages.at("home." + models.LessonKey.TRIAL.getName())
+	            	</a>
+	            </dd>
+	         </dl>
+	      </div>
+	   </div>
+	</div>
+	
+	<div class="page-content clearfix">
+		<div class="inner-content">
+			@for(index <- 0 until lessons.size){
+				<div class="grid-outer col-lg-3 col-md-4 col-sm-6 col-xs-12">
+					<article class="post-wrap">
+						<div class="post-thumb">
+							<a class="link-img" style="background-image:url(/lesson/show/cover?lessonId=@lessons(index).id)" href="@routes.LessonController.lessonDetail(lessons(index).id)"></a>
+							<a class="img-mask bg-@(index % 8)" href="@routes.LessonController.lessonDetail(lessons(index).id)"></a>
+							<span class="cate-text-first">@messages.at("home." + lessons(index).lessonKey.getName())</span>
+						</div>
+						<div class="post-footer">
+							<div class="post-desc">@lessons(index).title</div>
+							<div>
+								<a class="detail-btn" target="_blank" href="@routes.LessonController.lessonDetail(lessons(index).id)">@messages.at("home.more_detail")</a>
+								<span class="cate-info-price">S$@lessons(index).price</span>
+							</div>
+						</div>
+					</article>
+				</div>
+			}
+		</div>
+	</div>
+	
+	<div class="pagination-wrap">
+		<div id="page-nav"></div>
+		<form id="page-form" class="hidden" action="@routes.LessonController.publishedLessons()" method="get">
+			<input type="hidden" name="categoryId" value="@categoryId"/>
+			<input type="hidden" name="lessonKeys" value="@lessonKeys"/>
+			<input id="page-offset" type="hidden" name="offset" value="0"/>
+		</form>
+	</div>
+	
+	@entry(account)
+	@modalcreatelesson()
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -12,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.LazyToOne;
 import org.hibernate.annotations.LazyToOneOption;
@@ -24,6 +25,14 @@ import tools.Utils;
 @Entity
 @Table(name="account")
 public class Account{
+	@Transient
+	@JsonIgnore
+	public static final String MOBILE_PREFIX = "MOB_";
+	
+	@Transient
+	@JsonIgnore
+	public static final String PASSWORD_PREFIX = "PWD_";
+	
 	@Id
 	@GeneratedValue	
 	@JsonIgnore
@@ -42,9 +51,6 @@ public class Account{
 	
 	public String token;
 	
-	@Column(columnDefinition = "boolean default false")
-	public boolean active;
-	
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "account", cascade = CascadeType.ALL)
 	@LazyToOne(LazyToOneOption.NO_PROXY)
 	public User user;
@@ -57,7 +63,6 @@ public class Account{
 		this.password = Utils.md5(password);
 		this.creationDateTime = new Date();
 		this.token = Utils.genernateAcessToken(this.creationDateTime, this.mobile);
-		this.active = false;
 	}
 	
 	public static Account findByToken(String token){
@@ -65,5 +70,4 @@ public class Account{
 		.setParameter("token", token).getSingleResult();
 		return account;
 	}
-
 }

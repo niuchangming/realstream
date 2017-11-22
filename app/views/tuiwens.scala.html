@@ -1,0 +1,84 @@
+@import tags._
+@(account: Account, tuiWens: List[TuiWen], tuiWenType: Integer)
+
+@scripts = {
+	<script src="@routes.Assets.versioned("javascripts/responsiveslides.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.versioned("javascripts/moment.js")" type="text/javascript"></script>
+	<script>
+    	$(function() {
+    		$("#rslides").responsiveSlides();
+    		
+    		$('.post-date').each(function(){
+				var local = toClientDatetime($(this).text(), 'MMM DD, YYYY');
+				$(this).text(local);
+			});
+    	});
+    	
+    	function toClientDatetime(serverDatetimeStr, format){
+			var date = serverDatetimeStr,
+			    values = date.split(/[^0-9]/),
+			    year = parseInt(values[0], 10),
+			    month = parseInt(values[1], 10) - 1,
+			    day = parseInt(values[2], 10),
+			    hours = parseInt(values[3], 10),
+			    minutes = parseInt(values[4], 10),
+			    seconds = parseInt(values[5], 10);
+			
+			date = toLocal(new Date(year, month, day, hours, minutes, seconds));
+			return moment(date).format(format);
+		}
+  	</script>
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	<ul id="rslides">
+     	<li><img src="@routes.Assets.versioned("images/news_banner.jpg")"></li>
+	</ul>
+	<div class="body900 w80p">
+		<div id="tabbar">
+			<ul>
+				<li>
+					<a @if(tuiWenType == -1){class="current"} href="@routes.TuiwenController.tuiwens()">全部</a>
+				</li>
+				<li>
+					<a @if(tuiWenType == 0){class="current"} href="@routes.TuiwenController.tuiwens(0)">相关资讯</a>
+				</li>
+				<li>
+					<a @if(tuiWenType == 1){class="current"} href="@routes.TuiwenController.tuiwens(1)">留学趣闻</a>
+				</li>
+				<li>
+					<a @if(tuiWenType == 2){class="current"} href="@routes.TuiwenController.tuiwens(2)">学习资源</a>
+				</li>
+				<li>
+					<a @if(tuiWenType == 3){class="current"} href="@routes.TuiwenController.tuiwens(3)">考试培训</a>
+				</li>
+			</ul>
+		</div>
+		<div id="news-list">
+			@for(tuiwen <- tuiWens){
+				<a class="news-item" href="@routes.TuiwenController.viewTuiwen(tuiwen.id)">
+					<span class="post-bar">
+						<span class="news-title">@tuiwen.title</span>
+						<span class="post-date">@tuiwen.uploadedDateTime</span>
+					</span>
+					<span class="tui-content">
+						@Html(tuiwen.content)
+					</span>
+				</a>
+			}
+		</div>
+	</div>
+    @entry(account)
+    @modalcreatelesson()
+}
+
+
+
+
+
+
+
+
+
+

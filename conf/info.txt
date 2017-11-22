@@ -1,0 +1,13 @@
+Import local database to AWS(RDS): 
+mysqldump -u root -pfx1021665 --databases realstream --single-transaction --compress --order-by-primary | mysql -u Changming --port=3306 --host=ekooedu.cs5q9ptjrlz8.ap-southeast-1.rds.amazonaws.com -pfx1021665;
+
+
+Import RDS to local:
+mysqldump -u Changming --databases realstream -h ekooedu.cs5q9ptjrlz8.ap-southeast-1.rds.amazonaws.com --port=3306 --single-transaction --compress --order-by-primary --default-character-set=utf8 -pfx1021665 | mysql -u root -pfx1021665 realstream;
+
+
+
+
+SET FOREIGN_KEY_CHECKS = 0; 
+删除完成后设置 
+SET FOREIGN_KEY_CHECKS = 1; 

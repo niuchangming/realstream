@@ -1,0 +1,40 @@
+@import tags._
+
+@(account: Account)
+
+@scripts = {
+    <script type="text/javascript">
+		$(function(){
+			$('.link-content').height( ($(document).height() - 270 ) );
+		});
+	</script>
+}
+
+@main(scripts, "线上教学平台——Ekoo教育") {
+	@topbar(account)
+	<div class="page-content">
+	    <div class="link-con">
+	    	<div class="link-title">
+	    		<h3>友情链接</h3>
+	    		<p>欢迎交换链接：marketing@@ekoolab.com</p>
+	    	</div>
+	        <div class="link-content">
+	            <a href="http://ekoolab.sg/" target="_blank">EkooLab</a>
+	            <a href="http://bbs.sgcn.com/" target="_blank">华人狮城</a>
+	            <a href="https://cn.student.com/" target="_blank">学旅家</a>
+	            <a href="http://iqq.com.au/" target="_blank">澳Q网</a>
+	            <a href="http://eduone.edu.sg/" target="_blank">EduOne</a>
+	            <a href="https://powerapple.com/" target="_blank">超级苹果</a>
+	            <a href="http://huarenjie.net/" target="_blank">华人街</a>
+	            <a href="http://liuxue86.com/" target="_blank">出国留学</a>
+	            <a href="http://www.huaren.sg/" target="_blank">新加坡华人网</a>
+	            <a href="http://www.tianlaidao.com">天籁岛</a>
+	            <a href="http://www.d8gs.com/">第八公社</a>
+	            <a href="http://www.gdck100.com/">广东自考网</a> 
+	        </div>
+	    </div>
+	</div>
+	@entry(account)
+}
+
+

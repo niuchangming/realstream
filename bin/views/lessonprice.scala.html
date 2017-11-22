@@ -10,11 +10,11 @@
 	<script type="text/javascript">
 		$(function(){
 			$('#start-datepicker').datetimepicker({
-				@if(lesson.offerStartDate != null) {defaultDate: '@lesson.offerStartDate.format("yyyy-MM-dd")'}
+				@if(lesson.offers.size > 0 && lesson.offers(0).offerStartDate != null) {defaultDate: '@lesson.offers(0).offerStartDate.format("yyyy-MM-dd")'}
 			});		
 			
 			$('#end-datepicker').datetimepicker({
-				@if(lesson.offerEndDate != null){defaultDate: '@lesson.offerEndDate.format("yyyy-MM-dd")'}
+				@if(lesson.offers.size > 0 && lesson.offers(0).offerEndDate != null){defaultDate: '@lesson.offers(0).offerEndDate.format("yyyy-MM-dd")'}
 			});
 			
 			$('.expand-cell-header').on('click', function(){
@@ -31,11 +31,23 @@
 				expandWrap.toggleClass('expend');	
 			});
 			
+			@if(lesson.offers.size > 0 && lesson.offers(0).offerPrice > 0){
+				$('.price-cell').addClass('expend');
+				$('.price-cell i.fa').removeClass('fa-angle-down');
+				$('.price-cell i.fa').addClass('fa-angle-up');
+			}
+			
+			if($('#sel-session option:selected').length > 0){
+				$('.trial-cell').addClass('expend');
+				$('.trial-cell i.fa').removeClass('fa-angle-down');
+				$('.trial-cell i.fa').addClass('fa-angle-up');
+			}
+			
 			$('#sel-session').multiSelect({
 				afterSelect: function(values){
 					var amount = $('.ms-selection').find('li.ms-selected').length;
 				    if(amount > 3){
-				    	showAlertToast("试听课时不可以超过3节！", "alert-warning");
+				    	showAlertToast("Trial lesson cannot be more than 3！", "alert-warning");
 				    	$('#sel-session').multiSelect('deselect', values);
 				    }
 				}
@@ -64,6 +76,10 @@
 	            return Date.parse(startDate) <= Date.parse(value) || value == "";
 	        }, "End date must be after start date");
 			
+			$.validator.addMethod('smallerThanOriginal', function (value, element, param) {
+		        return $('input[name="offerPrice"]').val() < + $('input[name="price"]').val();
+		    });
+			
 			$("#lesson-price-form").validate({
 		        rules: {
 		        	price:{
@@ -71,11 +87,15 @@
 		            	required:true
 		            },
 		            offerPrice:{
-		            	number: true
+		            	number: true,
+		            	smallerThanOriginal: true
 		            },
 		            offerEndDate:{
 		            	largerThanStartDate: true
 		            }
+		        },
+		        messages: {
+		        	offerPrice: "Must be less than @lesson.price.intValue()"
 		        },
 		        highlight: function (element) {
 		            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
@@ -90,6 +110,15 @@
 		        	$('#save-lesson-btn').after(spinner);
 		        	$('#save-lesson-btn').attr("disabled", true);
 		        	$('#save-lesson-btn').text("");
+		        	
+		        	var startDatePicker = $('#start-datepicker');
+		        	var endDatePicker = $('#end-datepicker');
+		        	
+		        	var utcStartDate = toUTC(new Date(startDatePicker.val()));
+		        	var utcEndDate = toUTC(new Date(endDatePicker.val()));
+		        	
+		        	startDatePicker.val(moment(utcStartDate).format('YYYY-MM-DD'));
+		        	endDatePicker.val(moment(utcEndDate).format('YYYY-MM-DD'));
 		        	
 		        	$.ajax({
 		                url: "@routes.LessonController.saveLessonPrice()",
@@ -106,13 +135,13 @@
 		                	
 		                	spinner.remove();
 		                	$('#save-lesson-btn').attr("disabled", false);
-		                	$('#save-lesson-btn').text("修改保存");
+		                	$('#save-lesson-btn').text("Save");
 		                },
 		                error: function(request, status, err){
 		                	showAlertToast(err, "alert-danger");
 		                	spinner.remove();
 		                	$('#save-lesson-btn').attr("disabled", false);
-		                	$('#save-lesson-btn').text("修改保存");
+		                	$('#save-lesson-btn').text("Save");
 		                }
 		            });
 		        }
@@ -120,61 +149,70 @@
 	   	});
 	</script>
 	<div class="dash-detail-header">
-		<p class="lesson-sec-title">价格设置</p>
+		<p class="lesson-sec-title">Pricing</p>
 	</div>
 	<form id="lesson-price-form">
 		<input type="hidden" name="lessonId" value="@lesson.id">
 		<div class="form-group">
 			<div class="form-label">
-				<label>课程总价:</label>
+				<label>Total price:</label>
 			</div>
 			<div class="form-input">
-				<input type="text" class="form-control" name="price" placeholder="课程总价" value="@lesson.price.intValue()">
+				<input type="text" class="form-control" name="price" placeholder="Total price" value="@lesson.price.intValue()">
 			</div>
-			<span class="currency">RMB</span>
+			<span class="currency">SGD</span>
 		</div>
 		
-		<div class="expand-cell-wrap">
+		<div class="price-cell expand-cell-wrap">
 		   <div class="expand-cell-header">
 		      <div class="icon">
-		         <i class="fa fa-angle-down"></i>
+		         <i class="fa fa-angle-up"></i>
 		      </div>
-		      <p class="section-title">设置优惠价格</p>
+		      <p class="section-title">Offer Price</p>
 		   </div>
 		   <div class="expand-cell-detail">
 		     <div class="form-group">
 				<div class="form-label">
-					<label>优惠价格:</label>
+					<label>Offer Price:</label>
 				</div>
 				<div class="form-input">
-					<input type="text" class="form-control" name="offerPrice" placeholder="优惠价格 (例如: 100)" value="@lesson.offerPrice.intValue()">
+					<input type="text" class="form-control" name="offerPrice" placeholder="Offer price (eg: 100)" value="@if(lesson.offers.size > 0){@lesson.offers(0).offerPrice.intValue()}else{0}">
 				</div>
-				<span class="currency">RMB</span>
+				<span class="currency">SGD</span>
 			 </div>
 			 <div class="form-group">
 			 	<div class="form-label">
-					<label for="start-datepicker">开始日期:</label>
+					<label for="start-datepicker">Start from:</label>
 				</div>
 				<div class="form-input">
-					<input type="text" id="start-datepicker" class="form-control" name="offerStartDate" placeholder="开始日期" data-date-format="YYYY-MM-DD">
+					<input type="text" id="start-datepicker" class="form-control" name="offerStartDate" placeholder="Start date" data-date-format="YYYY-MM-DD">
 				</div>
-				<span class="splitor">到</span>
+				<span class="splitor">To</span>
 				<div class="form-input">
-					<input type="text" id="end-datepicker" class="form-control" name="offerEndDate" placeholder="结束日期" data-date-format="YYYY-MM-DD">
+					<input type="text" id="end-datepicker" class="form-control" name="offerEndDate" placeholder="End Date" data-date-format="YYYY-MM-DD">
+				</div>
+			</div>
+			
+			<div class="form-group">
+			 	<div class="form-label">
+					<label for="reason">Reason:</label>
+				</div>
+				<div class="form-input">
+					<input type="text" id="reason" class="form-control" name="reason" placeholder="Your offer reason" value="@if(lesson.offers.size > 0){@lesson.offers(0).reason}">
 				</div>
 			</div>
 		   </div>
 		</div>
 		
-		<div class="expand-cell-wrap">
+		<div class="trial-cell expand-cell-wrap">
 		   <div class="expand-cell-header">
 		      <div class="icon">
-		         <i class="fa fa-angle-down"></i>
+		         <i class="fa fa-angle-up"></i>
 		      </div>
-		      <p class="section-title">设置试听课时</p>
+		      <p class="section-title">Trial Lessons</p>
 		   </div>
 		   <div class="expand-cell-detail">
-		   		<a class="add-more-btn">+添加免费课时</a>
+		   		<a class="add-more-btn">+Add Trial Lesson Session</a>
 		   </div>
 		   
 		   <div class="popover-select hide">
@@ -189,6 +227,12 @@
 			</div>
 		</div>
 	</form>
+	
+	<div class="alert alert-info img-upload-info" role="alert">
+		<ul>
+			<li>You can set up no more than 3 trial sessions.</li>
+		</ul>
+	</div>
 	
 }
 
